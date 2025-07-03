@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import { MapPin, Phone, Mail, Facebook, Instagram, ArrowRight } from 'lucide-react';
+import Image from 'next/image';
 
 export const Footer: React.FC = () => {
   return (
@@ -11,9 +12,11 @@ export const Footer: React.FC = () => {
           <div className="col-span-1 md:col-span-2 space-y-6">
             <div>
               <div className="mb-4">
-                <img
+                <Image
                   src="/SportHub-Logo.png"
                   alt="SportHub Logo"
+                  width={160}
+                  height={64}
                   className="h-16 brightness-0 invert"
                 />
               </div>

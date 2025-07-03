@@ -1,7 +1,7 @@
 // src/stores/authStore.ts
 
 import { create } from 'zustand';
-import { AuthStore, LoginCredentials, RegisterData, AuthUser, AuthActions } from "@/types/auth";
+import { AuthStore, LoginCredentials, RegisterData, AuthUser } from "@/types/auth";
 import { authService } from "@/services/authService";
 
 export const useAuthStore = create<AuthStore & { users: AuthUser[]; fetchAllUsers: () => Promise<void>; updateProfile: (profileData: Partial<AuthUser>) => Promise<void>; changePassword: (params: { currentPassword: string; newPassword: string }) => Promise<void>; }>((set) => ({
@@ -42,7 +42,7 @@ export const useAuthStore = create<AuthStore & { users: AuthUser[]; fetchAllUser
       user: state.user ? { ...state.user, ...profileData } : null
     }));
   },
-
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   changePassword: async ({ currentPassword, newPassword }: { currentPassword: string; newPassword: string }) => {
     // Giả lập xác thực mật khẩu hiện tại (vì không có backend)
     set((state) => {

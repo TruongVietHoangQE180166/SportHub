@@ -27,6 +27,7 @@ import {
 import { useAuthStore } from "../../stores/authStore";
 import { useFieldStore } from "../../stores/fieldStore";
 import { useRouter } from "next/navigation";
+import Image from 'next/image';
 
 export const HomePage: React.FC = () => {
   const { isAuthenticated } = useAuthStore();
@@ -94,16 +95,6 @@ export const HomePage: React.FC = () => {
     return fields;
   };
 
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % popularFields.length);
-  };
-
-  const prevSlide = () => {
-    setCurrentSlide(
-      (prev) => (prev - 1 + popularFields.length) % popularFields.length
-    );
-  };
-
   const handleBookNow = () => {
     if (isAuthenticated) {
       router.push("/booking");
@@ -123,15 +114,6 @@ export const HomePage: React.FC = () => {
     return () => clearInterval(timer);
   }, [sportsImages.length]);
 
-  const nextSlideSports = () => {
-    setCurrentSlide((prev) => (prev + 1) % sportsImages.length);
-  };
-
-  const prevSlideSports = () => {
-    setCurrentSlide(
-      (prev) => (prev - 1 + sportsImages.length) % sportsImages.length
-    );
-  };
   const getVisibleTestimonials = () => {
     if (testimonials.length === 0) return [];
     const visibleTestimonials = [];
@@ -154,10 +136,14 @@ export const HomePage: React.FC = () => {
                 index === currentSlide ? "opacity-30" : "opacity-0"
               }`}
             >
-              <img
+              <Image
                 src={image}
                 alt={`Sports ${index + 1}`}
+                fill
                 className="w-full h-full object-cover"
+                style={{ objectFit: 'cover' }}
+                sizes="100vw"
+                priority={index === currentSlide}
               />
             </div>
           ))}
@@ -169,14 +155,14 @@ export const HomePage: React.FC = () => {
 
         {/* Carousel Controls */}
         <button
-          onClick={nextSlideSports}
+          onClick={() => setCurrentSlide((prev) => (prev + 1) % sportsImages.length)}
           className="absolute left-6 top-1/2 -translate-y-1/2 z-10 bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-full p-3 transition-all duration-300 group"
         >
           <ChevronLeft className="w-6 h-6 group-hover:scale-110 transition-transform" />
         </button>
 
         <button
-          onClick={prevSlideSports}
+          onClick={() => setCurrentSlide((prev) => (prev - 1 + sportsImages.length) % sportsImages.length)}
           className="absolute right-6 top-1/2 -translate-y-1/2 z-10 bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-full p-3 transition-all duration-300 group"
         >
           <ChevronRight className="w-6 h-6 group-hover:scale-110 transition-transform" />
@@ -533,9 +519,11 @@ export const HomePage: React.FC = () => {
             </div>
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-br from-green-400 to-emerald-600 rounded-3xl transform rotate-3"></div>
-              <img
+              <Image
                 src="https://images.pexels.com/photos/163452/basketball-dunk-blue-game-163452.jpeg?auto=compress&cs=tinysrgb&w=600"
                 alt="Hệ thống thể thao"
+                width={800}
+                height={384}
                 className="relative w-full h-96 object-cover rounded-3xl shadow-2xl"
               />
             </div>
@@ -640,9 +628,11 @@ export const HomePage: React.FC = () => {
               {/* Main Image */}
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-green-400/20 to-emerald-600/20 rounded-3xl transform rotate-3"></div>
-                <img
+                <Image
                   src="https://images.pexels.com/photos/7688336/pexels-photo-7688336.jpeg?auto=compress&cs=tinysrgb&w=600"
                   alt="Quản lý sân thể thao"
+                  width={800}
+                  height={384}
                   className="relative w-full h-96 object-cover rounded-3xl shadow-2xl"
                 />
               </div>
@@ -798,9 +788,11 @@ export const HomePage: React.FC = () => {
                       className="bg-white rounded-3xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border border-gray-100"
                     >
                       <div className="relative h-50">
-                        <img
+                        <Image
                           src={field.image}
                           alt={field.name}
+                          width={400}
+                          height={200}
                           className="w-full h-full object-cover"
                         />
                         <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 flex items-center space-x-1 border border-green-100 shadow">
@@ -928,9 +920,11 @@ export const HomePage: React.FC = () => {
               >
                 {/* Author Info - Moved to top */}
                 <div className="flex items-center space-x-4 mb-6">
-                  <img
+                  <Image
                     src={testimonial.avatar}
                     alt={testimonial.name}
+                    width={64}
+                    height={64}
                     className="w-16 h-16 rounded-full object-cover shadow-lg"
                   />
                   <div className="text-left">
@@ -956,7 +950,7 @@ export const HomePage: React.FC = () => {
                 {/* Content */}
                 <div className="flex-grow">
                   <p className="text-gray-700 text-base leading-relaxed italic">
-                    "{testimonial.content}"
+                    &quot;{testimonial.content}&quot;
                   </p>
                 </div>
               </div>

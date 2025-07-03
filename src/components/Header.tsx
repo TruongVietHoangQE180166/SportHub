@@ -15,6 +15,7 @@ import {
   ClipboardListIcon,
   BookOpenTextIcon
 } from 'lucide-react';
+import Image from 'next/image';
 import { useAuthStore } from '../stores/authStore';
 
 export const Header: React.FC = () => {
@@ -128,10 +129,12 @@ export const Header: React.FC = () => {
             {/* Logo - Cải thiện kích thước và hiệu ứng */}
             <Link href="/" className="flex items-center group">
               <div className="relative">
-                <img 
+                <Image 
                   src="/SportHub-Logo.png" 
                   alt="Logo" 
-                  className={`transition-all duration-500 drop-shadow-lg
+                  width={100}
+                  height={100}
+                  className={`transition-all duration-500 drop-shadow-lg object-contain
                     ${scrolled ? 'h-24 group-hover:h-24' : 'h-24 group-hover:h-24'}
                   `}
                 />
@@ -163,9 +166,11 @@ export const Header: React.FC = () => {
                     <div className="w-11 h-11 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 p-0.5 shadow-lg shadow-green-500/30 group-hover:shadow-xl group-hover:shadow-green-500/40 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
                       <div className="w-full h-full rounded-full bg-white p-0.5">
                         {user.avatar ? (
-                          <img 
+                          <Image 
                             src={user.avatar} 
                             alt={user.name} 
+                            width={40}
+                            height={40}
                             className="w-full h-full rounded-full object-cover"
                           />
                         ) : (
@@ -187,9 +192,11 @@ export const Header: React.FC = () => {
                           <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 p-0.5">
                             <div className="w-full h-full rounded-full bg-white p-0.5">
                               {user.avatar ? (
-                                <img 
+                                <Image 
                                   src={user.avatar} 
                                   alt={user.name} 
+                                  width={40}
+                                  height={40}
                                   className="w-full h-full rounded-full object-cover"
                                 />
                               ) : (
@@ -296,9 +303,11 @@ export const Header: React.FC = () => {
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 p-0.5">
                       <div className="w-full h-full rounded-full bg-white p-0.5">
                         {user.avatar ? (
-                          <img 
+                          <Image 
                             src={user.avatar} 
                             alt={user.name} 
+                            width={40}
+                            height={40}
                             className="w-full h-full rounded-full object-cover"
                           />
                         ) : (

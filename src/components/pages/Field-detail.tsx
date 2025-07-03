@@ -3,11 +3,13 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFieldStore } from '../../stores/fieldStore';
 import { MapPin, Clock, DollarSign, Info, Star, Phone, Mail, Calendar, Users, LayoutGrid, ChevronDown } from 'lucide-react';
+import Image from 'next/image';
 
-const FieldDetailPage: React.FC<{ fieldId: string | number }> = ({ fieldId }) => {
+
+const FieldDetailPage: React.FC<{ fieldId: string }> = ({ fieldId }) => {
   const router = useRouter();
   const {
-    allFields, owner, reviews, subCourts, loading, error,
+    allFields, owner, reviews, loading, error,
     fetchAllFields, fetchOwnerByField, fetchReviewsByField, fetchSubCourts
   } = useFieldStore();
 
@@ -38,7 +40,7 @@ const FieldDetailPage: React.FC<{ fieldId: string | number }> = ({ fieldId }) =>
       fetchReviewsByField(idNum);
       fetchSubCourts(idNum);
     }
-  }, [idNum, allFields.length]);
+  }, [idNum, allFields.length, fetchAllFields, fetchOwnerByField, fetchReviewsByField, fetchSubCourts]);
 
   if (loading) {
     return (
@@ -96,9 +98,11 @@ const FieldDetailPage: React.FC<{ fieldId: string | number }> = ({ fieldId }) =>
           
           <div className="relative">
             <div className="overflow-hidden rounded-t-[2rem]">
-              <img 
-                src={field.image} 
-                alt={field.name} 
+              <Image
+                src={field.image}
+                alt={field.name}
+                width={1200}
+                height={450}
                 className="w-full h-[450px] object-cover rounded-t-[2rem] transform group-hover:scale-105 transition-transform duration-700"
               />
             </div>
@@ -208,9 +212,11 @@ const FieldDetailPage: React.FC<{ fieldId: string | number }> = ({ fieldId }) =>
                   <div className="flex items-center gap-5 p-5 bg-white rounded-xl border border-gray-200 shadow-inner">
                     <div className="relative">
                       <div className="absolute inset-0 bg-gradient-to-br from-green-400 to-green-600 rounded-2xl blur-lg opacity-20"></div>
-                      <img 
-                        src={owner.avatar} 
-                        alt={owner.name} 
+                      <Image
+                        src={owner.avatar || '/default-avatar.png'}
+                        alt={owner.name}
+                        width={64}
+                        height={64}
                         className="relative w-16 h-16 rounded-2xl border-2 border-white shadow-xl object-cover"
                       />
                       <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-green-500 rounded-full border-2 border-white shadow-xl flex items-center justify-center">
@@ -272,7 +278,7 @@ const FieldDetailPage: React.FC<{ fieldId: string | number }> = ({ fieldId }) =>
                                 sortType === option.value ? 'bg-green-100 text-green-700 font-medium' : 'text-gray-700'
                               }`}
                               onClick={() => {
-                                setSortType(option.value as any);
+                                setSortType(option.value as typeof sortType);
                                 setDropdownOpen(false);
                               }}
                             >
@@ -311,9 +317,11 @@ const FieldDetailPage: React.FC<{ fieldId: string | number }> = ({ fieldId }) =>
                       >
                         <div className="flex items-start gap-3">
                           <div className="relative">
-                            <img 
-                              src={review.userAvatar} 
-                              alt={review.userName} 
+                            <Image
+                              src={review.userAvatar || '/default-avatar.png'}
+                              alt={review.userName}
+                              width={32}
+                              height={32}
                               className="w-8 h-8 rounded-xl border-2 border-white shadow-xl object-cover flex-shrink-0 group-hover/review:scale-110 transition-transform duration-300"
                             />
                             <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border border-white"></div>

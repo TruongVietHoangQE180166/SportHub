@@ -1,7 +1,6 @@
 'use client';
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Mail, Check, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
 
@@ -12,7 +11,6 @@ export default function ForgotPasswordPage() {
   const [success, setSuccess] = useState<string>('');
   const [fieldError, setFieldError] = useState<string>('');
   const [touched, setTouched] = useState<boolean>(false);
-  const router = useRouter();
 
   const validateEmail = (value: string): string => {
     if (!value.trim()) return 'Vui lòng nhập email';
@@ -48,7 +46,7 @@ export default function ForgotPasswordPage() {
       setSuccess('Yêu cầu đã được gửi! Vui lòng kiểm tra email để đặt lại mật khẩu.');
       setEmail('');
       setTouched(false);
-    } catch (err) {
+    } catch {
       setError('Có lỗi xảy ra. Vui lòng thử lại sau.');
     } finally {
       setIsLoading(false);

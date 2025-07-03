@@ -12,7 +12,8 @@ export const authService = {
     if (!user || user.password !== credentials.password) {
       throw new Error('Email hoặc mật khẩu không đúng');
     }
-    const { password, ...safeUser } = user;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _unused, ...safeUser } = user;
     return safeUser;
   },
   
@@ -30,8 +31,23 @@ export const authService = {
     };
     return newUser;
   },
-
   fetchAllUsers: async (): Promise<AuthUser[]> => {
-    return MOCK_USERS.map(({ password, ...user }) => user);
+    return MOCK_USERS.map(u => ({
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      avatar: u.avatar,
+      loyaltyPoints: u.loyaltyPoints,
+      phone: u.phone,
+      bio: u.bio,
+      country: u.country,
+      cityState: u.cityState,
+      postalCode: u.postalCode,
+      taxId: u.taxId,
+      facebook: u.facebook,
+      twitter: u.twitter,
+      linkedin: u.linkedin,
+      instagram: u.instagram
+    }));
   }
 };

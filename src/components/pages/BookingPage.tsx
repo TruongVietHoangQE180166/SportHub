@@ -1,9 +1,10 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, MapPin, Star, Check, ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Search, Activity, Building, Target, CheckCircle, Home } from 'lucide-react';
+import { Clock, MapPin, Star, Check, ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Search, Activity, Building, Target, CheckCircle, Home } from 'lucide-react';
 import { useFieldStore } from '../../stores/fieldStore';
 import { Field, SubCourt, TimeSlot } from '../../types/field';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Image from 'next/image';
 
 export const BookingPage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -59,45 +60,31 @@ export const BookingPage: React.FC = () => {
 
   useEffect(() => {
     fetchMainSports();
-  }, []);
+  }, [fetchMainSports]);
 
   useEffect(() => {
     if (selectedSport) {
       fetchFieldsBySport(selectedSport);
     }
-  }, [selectedSport]);
+  }, [selectedSport, fetchFieldsBySport]);
 
   useEffect(() => {
     if (selectedField) {
       fetchSubCourts(selectedField.id);
     }
-  }, [selectedField]);
+  }, [selectedField, fetchSubCourts]);
 
   useEffect(() => {
     if (selectedField && selectedSubCourt && selectedDate) {
       fetchTimeSlots(selectedField.id, selectedSubCourt.id);
     }
-  }, [selectedField, selectedSubCourt, selectedDate]);
+  }, [selectedField, selectedSubCourt, selectedDate, fetchTimeSlots]);
 
   useEffect(() => {
     if (selectedSubCourt && selectedField) {
       fetchTimeSlots(selectedField.id, selectedSubCourt.id);
     }
-  }, [selectedSubCourt, selectedField]);
-
-  const getFirstSlotDate = (slots: TimeSlot[]) => {
-    if (slots.length > 0) {
-      return slots[0].date;
-    }
-    return formatDate(today);
-  };
-
-  useEffect(() => {
-    if (timeSlots.length > 0) {
-      const [y, m, d] = timeSlots[0].date.split('-');
-      setCurrentWeekStart(new Date(Number(y), Number(m) - 1, Number(d)));
-    }
-  }, [timeSlots]);
+  }, [selectedSubCourt, selectedField, fetchTimeSlots]);
 
   const generateWeekDays = () => {
     const days = [];
@@ -421,10 +408,13 @@ export const BookingPage: React.FC = () => {
                           </div>
                         )}
                         <div className="relative flex-shrink-0">
-                          <img
+                          <Image
                             src={field.image}
                             alt={field.name}
-                            className="w-28 h-28 rounded-xl object-cover shadow"
+                            width={200}
+                            height={120}
+                            style={{ objectFit: 'cover', borderRadius: '1rem' }}
+                            className="w-[200px] h-[120px] object-cover rounded-xl"
                           />
                         </div>
                         <div className="flex-1 flex flex-col justify-between h-full min-w-0">
@@ -755,7 +745,7 @@ export const BookingPage: React.FC = () => {
 
                     {/* QR code image */}
                     <div className="mb-4">
-                      <img src="/qr.jpg" alt="QR chuyển khoản" className="w-48 h-48 object-contain rounded-xl border border-gray-200 shadow-sm bg-white" />
+                      <Image src="/qr.jpg" alt="QR chuyển khoản" width={192} height={192} className="w-48 h-48 object-contain rounded-xl border border-gray-200 shadow-sm bg-white" />
                     </div>
 
                     <div className="mb-4 w-full">
@@ -768,7 +758,7 @@ export const BookingPage: React.FC = () => {
 
                     <div className="mb-4 w-full">
                       <div className="text-sm text-gray-600 font-medium bg-gray-50 border border-gray-200 rounded-lg p-3">
-                        Sau khi chuyển khoản thành công, bạn hãy nhấn "Xác nhận đặt sân" để hoàn tất.
+                        Sau khi chuyển khoản thành công, bạn hãy nhấn &quotXác nhận đặt sân&quot để hoàn tất.
                       </div>
                     </div>
                   </div>

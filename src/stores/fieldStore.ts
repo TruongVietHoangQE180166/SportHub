@@ -50,7 +50,7 @@ export const useFieldStore = create<FieldState>((set) => ({
     try {
       const fields = await getPopularFields();
       set({ popularFields: fields, loading: false });
-    } catch (err) {
+    } catch {
       set({
         popularFields: [],
         error: 'Failed to fetch popular fields',
@@ -64,7 +64,7 @@ export const useFieldStore = create<FieldState>((set) => ({
     try {
       const fields = await getAllFields();
       set({ allFields: fields, loading: false });
-    } catch (err) {
+    } catch {
       set({
         allFields: [],
         error: 'Failed to fetch all fields',
@@ -78,7 +78,7 @@ export const useFieldStore = create<FieldState>((set) => ({
     try {
       const sports = await getMainSports();
       set({ mainSports: sports, loading: false });
-    } catch (err) {
+    } catch {
       set({
         mainSports: [],
         error: 'Failed to fetch main sports',
@@ -92,7 +92,7 @@ export const useFieldStore = create<FieldState>((set) => ({
     try {
       const fields = await getFieldsBySport(sport);
       set({ fieldsBySport: fields, loading: false });
-    } catch (err) {
+    } catch {
       set({
         fieldsBySport: [],
         error: `Failed to fetch ${sport} fields`,
@@ -106,7 +106,7 @@ export const useFieldStore = create<FieldState>((set) => ({
     try {
       const subCourts = await getSubCourts(fieldId);
       set({ subCourts, loading: false });
-    } catch (err) {
+    } catch {
       set({
         subCourts: [],
         error: 'Failed to fetch sub courts',
@@ -120,7 +120,7 @@ export const useFieldStore = create<FieldState>((set) => ({
     try {
       const timeSlots = await getTimeSlots(fieldId, subCourtId);
       set({ timeSlots, loading: false });
-    } catch (err) {
+    } catch {
       set({
         timeSlots: [],
         error: 'Failed to fetch time slots',
@@ -134,7 +134,7 @@ export const useFieldStore = create<FieldState>((set) => ({
     try {
       const owner = await getOwnerByField(fieldId);
       set({ owner: owner || null, loading: false });
-    } catch (err) {
+    } catch {
       set({ owner: null, error: 'Failed to fetch owner', loading: false });
     }
   },
@@ -144,7 +144,7 @@ export const useFieldStore = create<FieldState>((set) => ({
     try {
       const reviews = await getReviewsByField(fieldId);
       set({ reviews, loading: false });
-    } catch (err) {
+    } catch {
       set({ reviews: [], error: 'Failed to fetch reviews', loading: false });
     }
   }

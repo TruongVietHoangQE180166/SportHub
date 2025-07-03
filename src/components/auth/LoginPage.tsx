@@ -67,7 +67,7 @@ export default function LoginPage() {
       const credentials: LoginCredentials = { email, password };
       await login(credentials);
       router.push('/');
-    } catch (err) {
+    } catch {
       setError('Email hoặc mật khẩu không đúng');
     } finally {
       setIsLoading(false);

@@ -15,15 +15,14 @@ import {
   Instagram, 
   Camera, 
   Shield, 
-  Calendar,
   Phone,
   Mail,
   Globe,
   Hash,
   FileText,
-  Check,
   AlertCircle
 } from 'lucide-react';
+import Image from 'next/image';
 import { useAuthStore } from "@/stores/authStore";
 
 interface InlineInputProps {
@@ -242,13 +241,11 @@ export default function ProfilePage() {
 
   // Avatar states
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
   // Handle avatar file selection
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setAvatarFile(file);
       setAvatarPreview(URL.createObjectURL(file));
       // Nếu muốn cập nhật avatar lên store, có thể gọi updateProfile({ avatar: ... }) ở đây
     }
@@ -278,8 +275,12 @@ export default function ProfilePage() {
         newPassword: "",
         confirmPassword: ""
       });
-    } catch (error: any) {
-      alert(error.message || "Password change failed");
+    } catch (error: unknown) {
+      if (typeof error === 'object' && error && 'message' in error) {
+        alert((error as { message?: string }).message || "Password change failed");
+      } else {
+        alert("Password change failed");
+      }
     }
   };
 
@@ -313,9 +314,9 @@ export default function ProfilePage() {
                 <div className="relative inline-block">
                   <div className="w-36 h-36 overflow-hidden border-4 border-gray-100 rounded-full bg-white flex items-center justify-center shadow-lg">
                     {avatarPreview ? (
-                      <img src={avatarPreview} alt="avatar" className="w-full h-full object-cover" />
+                      <Image src={avatarPreview} alt="avatar" width={144} height={144} className="w-full h-full object-cover" />
                     ) : user.avatar ? (
-                      <img src={user.avatar} alt="avatar" className="w-full h-full object-cover" />
+                      <Image src={user.avatar} alt="avatar" width={144} height={144} className="w-full h-full object-cover" />
                     ) : (
                       <User className="w-18 h-18 text-gray-400" />
                     )}

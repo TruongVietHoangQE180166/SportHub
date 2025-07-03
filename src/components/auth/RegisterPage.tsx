@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, Mail, Lock, User, Phone, Calendar, Check, Trophy, Zap, Target, AlertCircle } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User,Trophy, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { RegisterData } from '@/types/auth';
 import Image from 'next/image';
@@ -117,7 +117,7 @@ export default function RegisterPage() {
       };
       await register(registerData);
       router.push('/login'); 
-    } catch (err) {
+    } catch {
       setError('Đã có lỗi xảy ra. Vui lòng thử lại.');
     } finally {
       setIsLoading(false);

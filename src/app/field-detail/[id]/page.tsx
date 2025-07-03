@@ -1,5 +1,9 @@
+// app/field-detail/[id]/page.tsx
 import FieldDetailPage from '../../../components/pages/Field-detail';
 
-export default function FieldDetailRoute({ params }: { params: { id: string } }) {
-  return <FieldDetailPage fieldId={params.id} />;
+type ParamsType = { id: string };
+
+export default async function FieldDetailRoute({ params }: { params: Promise<ParamsType> }) {
+  const { id } = await params;
+  return <FieldDetailPage fieldId={id} />;
 }

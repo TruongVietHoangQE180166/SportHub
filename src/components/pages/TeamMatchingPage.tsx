@@ -1,15 +1,14 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Users, Calendar, Clock, MapPin, Filter, Search, Star, MessageCircle, Share2, ChevronDown, X, Eye, Edit, Trash2, Trophy, Target, Zap, Shield } from 'lucide-react';
+import { Plus, Users, Calendar, Clock, MapPin, Search, Star, MessageCircle, ChevronDown, X, Eye, Trash2, Trophy, Target, Zap, Shield } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useMatchStore } from '@/stores/matchStore';
-import { Match } from '@/types/match';
+import { Match, SkillLevel } from '@/types/match';
+import Image from 'next/image';
 
 export const TeamMatchingPage = () => {
   const [activeTab, setActiveTab] = useState<'discover' | 'my-matches' | 'create'>('discover');
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterSport, setFilterSport] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<number | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newMatch, setNewMatch] = useState({
@@ -126,16 +125,16 @@ export const TeamMatchingPage = () => {
     }
   };
 
-  const getSportIcon = (sport: string) => {
-    switch (sport) {
-      case 'Bóng đá': return () => <span className="text-2xl">⚽</span>;
-      case 'Cầu lông': return () => <span className="text-2xl">🏸</span>;
-      case 'Pickle Ball': return () => <span className="text-2xl">🎾</span>;
-      default: return () => <span className="text-2xl">🏅</span>;
+  const getSportIcon = (sportName: string) => {
+    switch (sportName) {
+      case 'Bóng đá': return function FootballIcon() { return <span className="text-2xl">⚽</span>; };
+      case 'Cầu lông': return function BadmintonIcon() { return <span className="text-2xl">🏸</span>; };
+      case 'Pickle Ball': return function PickleIcon() { return <span className="text-2xl">🎾</span>; };
+      default: return function DefaultIcon() { return <span className="text-2xl">🏅</span>; };
     }
   };
 
-  const getSportGradient = (sport: string) => {
+  const getSportGradient = () => {
     return 'from-green-500 to-emerald-600';
   };
 
@@ -174,7 +173,7 @@ export const TeamMatchingPage = () => {
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">
               <div className="flex items-center space-x-3 mb-2">
-                <div className={`w-10 h-10 rounded-xl bg-gradient-to-r ${getSportGradient(match.sport)} flex items-center justify-center text-white shadow-sm`}>
+                <div className={`w-10 h-10 rounded-xl bg-gradient-to-r ${getSportGradient()} flex items-center justify-center text-white shadow-sm`}>
                   {React.createElement(SportIcon)}
                 </div>
                 <div>
@@ -185,9 +184,12 @@ export const TeamMatchingPage = () => {
                 </div>
               </div>
               <div className="flex items-center space-x-2 mb-2">
-                <img
-                  src={match.organizerAvatar}
+                {(() => { console.log('organizerUser.avatar', organizerUser?.avatar, 'for', match.organizer); return null; })()}
+                <Image
+                  src={organizerUser?.avatar && organizerUser.avatar.startsWith('http') ? organizerUser.avatar : (organizerUser?.avatar ? `/` + organizerUser.avatar.replace(/^\/+/, '') : '/default-avatar.png')}
                   alt={match.organizer}
+                  width={28}
+                  height={28}
                   className="w-7 h-7 rounded-full border-2 border-white shadow-sm"
                 />
                 <div>
@@ -296,7 +298,14 @@ export const TeamMatchingPage = () => {
                       return (
                         <div key={idx} className="bg-white rounded-xl p-3 shadow-sm border border-gray-100 flex items-center justify-between">
                           <div className="flex items-center space-x-3">
-                            <img src={memberUser?.avatar || '/default-avatar.png'} alt={req.user} className="w-8 h-8 rounded-full border-2 border-gray-100 shadow-sm" />
+                            {(() => { console.log('memberUser.avatar', memberUser?.avatar, 'for', req.user); return null; })()}
+                            <Image 
+                              src={memberUser?.avatar && memberUser.avatar.startsWith('http') ? memberUser.avatar : (memberUser?.avatar ? `/` + memberUser.avatar.replace(/^\/+/, '') : '/default-avatar.png')} 
+                              alt={req.user} 
+                              width={32} 
+                              height={32} 
+                              className="w-8 h-8 rounded-full border-2 border-gray-100 shadow-sm" 
+                            />
                             <div>
                               <span className="font-semibold text-gray-900 text-sm">{req.user}</span>
                               <div className={`text-xs font-medium ${req.status === 'pending' ? 'text-yellow-600' : 'text-green-600'}`}> 
@@ -357,7 +366,8 @@ export const TeamMatchingPage = () => {
                   </h4>
                   <div className="space-y-2">
                     <div className="bg-white rounded-xl p-3 shadow-sm border border-gray-100 flex items-center">
-                      <img src={organizerUser?.avatar || '/default-avatar.png'} alt={match.organizer} className="w-8 h-8 rounded-full border-2 border-gray-100 shadow-sm mr-3" />
+                      {(() => { console.log('organizerUser.avatar', organizerUser?.avatar, 'for', match.organizer); return null; })()}
+                      <Image src={organizerUser?.avatar && organizerUser.avatar.startsWith('http') ? organizerUser.avatar : (organizerUser?.avatar ? `/` + organizerUser.avatar.replace(/^\/+/, '') : '/default-avatar.png')} alt={match.organizer} width={28} height={28} className="w-8 h-8 rounded-full border-2 border-gray-100 shadow-sm mr-3" />
                       <div>
                         <span className="font-bold text-gray-900 text-sm">{match.organizer}</span>
                         <p className="text-xs text-orange-600 font-medium flex items-center space-x-1">
@@ -370,7 +380,14 @@ export const TeamMatchingPage = () => {
                       const memberUser = findUserByName(users, req.user);
                       return (
                         <div key={idx} className="bg-white rounded-xl p-3 shadow-sm border border-gray-100 flex items-center">
-                          <img src={memberUser?.avatar || '/default-avatar.png'} alt={req.user} className="w-8 h-8 rounded-full border-2 border-gray-100 shadow-sm mr-3" />
+                          {(() => { console.log('memberUser.avatar', memberUser?.avatar, 'for', req.user); return null; })()}
+                          <Image 
+                            src={memberUser?.avatar && memberUser.avatar.startsWith('http') ? memberUser.avatar : (memberUser?.avatar ? `/` + memberUser.avatar.replace(/^\/+/, '') : '/default-avatar.png')} 
+                            alt={req.user} 
+                            width={32} 
+                            height={32} 
+                            className="w-8 h-8 rounded-full border-2 border-gray-100 shadow-sm mr-3" 
+                          />
                           <div>
                             <span className="font-semibold text-gray-900 text-sm">{req.user}</span>
                             <div className="text-xs font-medium text-green-600">
@@ -391,7 +408,8 @@ export const TeamMatchingPage = () => {
                     </h5>
                     <p className="text-xs text-gray-600 mb-2">Liên hệ người tổ chức để nắm rõ thông tin về trận đấu.</p>
                     <div className="flex items-center space-x-2 mb-2">
-                      <img src={organizerUser?.avatar || '/default-avatar.png'} alt={match.organizer} className="w-7 h-7 rounded-full border-2 border-gray-100 shadow-sm" />
+                      {(() => { console.log('organizerUser.avatar', organizerUser?.avatar, 'for', match.organizer); return null; })()}
+                      <Image src={organizerUser?.avatar && organizerUser.avatar.startsWith('http') ? organizerUser.avatar : (organizerUser?.avatar ? `/` + organizerUser.avatar.replace(/^\/+/, '') : '/default-avatar.png')} alt={match.organizer} width={28} height={28} className="w-7 h-7 rounded-full border-2 border-gray-100 shadow-sm" />
                       <span className="font-semibold text-gray-900 text-sm">{match.organizer}</span>
                     </div>
                     <div className="text-xs text-gray-700 mb-1">Số điện thoại: <span className="font-medium">{match.phone}</span></div>
@@ -436,6 +454,7 @@ export const TeamMatchingPage = () => {
       </div>
     );
   };
+  MatchCard.displayName = 'MatchCard';
 
   const handleCreateMatch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -452,7 +471,7 @@ export const TeamMatchingPage = () => {
       location: newMatch.location,
       address: newMatch.address,
       maxParticipants: Number(newMatch.maxParticipants),
-      skillLevel: newMatch.skillLevel as any,
+      skillLevel: newMatch.skillLevel as SkillLevel,
       description: newMatch.description,
       status: 'open',
       phone: '0123456789',
@@ -489,7 +508,7 @@ export const TeamMatchingPage = () => {
     options: string[];
     onSelect: (val: string) => void;
     onClose: () => void;
-  }> = ({ value, options, onSelect, onClose }) => {
+  }> = function TimeDropdown({ value, options, onSelect, onClose }) {
     const ref = useRef<HTMLDivElement>(null);
     useEffect(() => {
       const handleClick = (e: MouseEvent) => {
@@ -525,6 +544,7 @@ export const TeamMatchingPage = () => {
       </div>
     );
   };
+  TimeDropdown.displayName = 'TimeDropdown';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -960,7 +980,7 @@ export const TeamMatchingPage = () => {
                           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4">
                             <div className="flex-1">
                               <div className="flex items-center space-x-3 mb-2">
-                                <div className={`w-10 h-10 rounded-xl bg-gradient-to-r ${getSportGradient(match.sport)} flex items-center justify-center text-white shadow-sm`}>
+                                <div className={`w-10 h-10 rounded-xl bg-gradient-to-r ${getSportGradient()} flex items-center justify-center text-white shadow-sm`}>
                                   {React.createElement(getSportIcon(match.sport))}
                                 </div>
                                 <div>
@@ -1327,7 +1347,7 @@ export const TeamMatchingPage = () => {
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Plus className="w-8 h-8 text-green-600" />
                 </div>
-                <p className="text-gray-600 font-medium">Chuyển sang tab "Tạo trận đấu" để tạo trận đấu mới</p>
+                <p className="text-gray-600 font-medium">Chuyển sang tab &quot;Tạo trận đấu&quot; để tạo trận đấu mới</p>
               </div>
             </div>
           </div>

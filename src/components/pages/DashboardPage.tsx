@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, MapPin, Trophy, Activity, Target, Circle, Search, ChevronDown, ChevronLeft, ChevronRight, User, Phone, Mail, Star, Filter, X, Eye, XCircle, Pencil, Trash2 } from 'lucide-react';
+import { Calendar, Clock, Trophy, Activity, Target, Circle, Search, ChevronDown, ChevronLeft, ChevronRight, User, Phone, Mail, Star, Filter, X, Eye, XCircle, Pencil, Trash2 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore'; 
+import Image from 'next/image';
 
 type Booking = {
   id: number;
@@ -21,17 +22,6 @@ type Booking = {
 
 export default function App() {
   const { user } = useAuthStore();
-
-  
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900">Vui lòng đăng nhập</h1>
-        </div>
-      </div>
-    );
-  }
 
   // Dữ liệu lịch sử đặt sân
   const [bookingHistory, setBookingHistory] = useState<Booking[]>([
@@ -170,6 +160,16 @@ export default function App() {
     setCurrentPage(1);
   }, [filterStatus, filterSport, filterDate, activeSearch]);
 
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900">Vui lòng đăng nhập</h1>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Athletic Header */}
@@ -180,7 +180,7 @@ export default function App() {
               <div className="flex items-center space-x-6">
                 <div className="w-20 h-20 rounded-full bg-green-500 flex items-center justify-center border-4 border-green-400 shadow-lg">
                   {user.avatar ? (
-                    <img src={user.avatar} alt={user.name} className="w-20 h-20 rounded-full object-cover" />
+                    <Image src={user.avatar} alt={user.name} width={80} height={80} className="w-20 h-20 rounded-full object-cover" />
                   ) : (
                     <span className="text-2xl font-bold text-white">{user.name.charAt(0)}</span>
                   )}
@@ -394,7 +394,6 @@ export default function App() {
                 const matchDate = !filterDate || booking.date === filterDate;
                 return matchSearch && matchStatus && matchSport && matchDate;
               });
-              const totalPages = Math.ceil(filtered.length / ORDERS_PER_PAGE);
               const startIndex = (currentPage - 1) * ORDERS_PER_PAGE;
               const paginated = filtered.slice(startIndex, startIndex + ORDERS_PER_PAGE);
               

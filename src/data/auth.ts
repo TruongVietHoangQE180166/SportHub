@@ -1,6 +1,6 @@
 // src/data/auth.ts
 
-import { AuthUser, RegisterData } from "@/types/auth";
+import { AuthUser } from "@/types/auth";
 export const MOCK_USERS: (AuthUser & { password: string })[] = [
   {
     id: '1',

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Star, StarHalf, Clock, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import { useFieldStore } from '../../stores/fieldStore';
 import { useSearchParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 export const FieldDiscoveryPage: React.FC = () => {
   const { allFields, loading, error, fetchAllFields } = useFieldStore();
@@ -14,9 +15,8 @@ export const FieldDiscoveryPage: React.FC = () => {
     rating: '',
   });
   const [chipDropdown, setChipDropdown] = useState<string | null>(null);
-  const chipRef = React.useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
-  const router = useRouter();
+  const router = useRouter(); 
 
   const FIELDS_PER_PAGE = 8;
 
@@ -37,14 +37,6 @@ export const FieldDiscoveryPage: React.FC = () => {
       setFilters(f => ({ ...f, sport: sportValue }));
     }
   }, [searchParams]);
-
-  const formatPrice = (priceString: string) => {
-    const price = parseInt(priceString.replace(/[^\d]/g, ''));
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND'
-    }).format(price);
-  };
 
   const filteredFields = allFields.filter(field => {
     const matchesSearch = field.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -181,10 +173,14 @@ export const FieldDiscoveryPage: React.FC = () => {
         <div className="relative h-96 mb-12 rounded-3xl overflow-hidden shadow-2xl">
           {/* Background Image with Overlay */}
           <div className="absolute inset-0">
-            <img
+            <Image
               src="https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg?auto=compress&cs=tinysrgb&w=1200"
               alt="Sân thể thao"
+              fill
               className="w-full h-full object-cover"
+              style={{ objectFit: 'cover' }}
+              sizes="100vw"
+              priority
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30"></div>
           </div>
@@ -378,9 +374,11 @@ export const FieldDiscoveryPage: React.FC = () => {
           {paginatedFields.map((field) => (
             <div key={field.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl hover:scale-105 transition-all duration-300 border border-gray-100">
               <div className="relative h-36">
-                <img
+                <Image
                   src={field.image}
                   alt={field.name}
+                  width={400}
+                  height={144}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 flex items-center space-x-1 border border-green-100 shadow">
@@ -462,8 +460,8 @@ export const FieldDiscoveryPage: React.FC = () => {
 
               <div className="flex items-center gap-2">
                 {(() => {
-                  let start = Math.max(1, currentPage - 2);
-                  let end = Math.min(totalPages, currentPage + 2);
+                  const start = Math.max(1, currentPage - 2);
+                  const end = Math.min(totalPages, currentPage + 2);
                   const pages = [];
                   for (let i = start; i <= end; i++) {
                     pages.push(i);
