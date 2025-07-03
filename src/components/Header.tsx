@@ -132,11 +132,9 @@ export const Header: React.FC = () => {
                 <Image 
                   src="/SportHub-Logo.png" 
                   alt="Logo" 
-                  width={100}
-                  height={100}
-                  className={`transition-all duration-500 drop-shadow-lg object-contain
-                    ${scrolled ? 'h-24 group-hover:h-24' : 'h-24 group-hover:h-24'}
-                  `}
+                  width={150}
+                  height={80}
+                  className={`transition-all duration-300 drop-shadow-lg object-contain h-24 group-hover:h-28 group-hover:scale-110`}
                 />
               </div>
             </Link>

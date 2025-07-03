@@ -17,7 +17,7 @@ export const Footer: React.FC = () => {
                   alt="SportHub Logo"
                   width={160}
                   height={64}
-                  className="h-16 brightness-0 invert"
+                  className="w-auto h-16"
                 />
               </div>
               <p className="text-gray-300 text-base leading-relaxed max-w-md">
