@@ -1,9 +1,8 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Search, Users, ChevronDown, Target, Zap, Shield, Plus, Calendar, Clock, MapPin, Trophy } from 'lucide-react';
+import { Search, Users, ChevronDown, Target, Zap, Shield, Plus, Calendar, Clock, MapPin } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useMatchStore } from '@/stores/matchStore';
-import { MatchCard } from './shared/MatchCard';
 import { MatchNavigation } from './shared/MatchNavigation';
 import { getSportIcon, getSportGradient } from './shared/matchUtils';
 import { useRouter } from 'next/navigation';

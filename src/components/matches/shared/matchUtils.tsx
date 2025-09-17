@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, Calendar, Clock, MapPin, Search, Star, MessageCircle, ChevronDown, X, Eye, Trash2, Trophy, Target, Zap, Shield } from 'lucide-react';
+import { Star, X, Zap, Shield } from 'lucide-react';
 
 export const getSkillLevelColor = (level: string) => {
   switch (level) {

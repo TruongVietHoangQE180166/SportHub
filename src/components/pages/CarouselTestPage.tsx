@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Navigation, Search } from "lucide-react";
+import { Navigation } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
@@ -13,10 +13,6 @@ export const CarouselTestPage: React.FC = () => {
 
   const handleBookNow = () => {
     router.push("/booking");
-  };
-
-  const handleFindTeam = () => {
-    router.push("/teams");
   };
 
   return (
