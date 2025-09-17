@@ -17,6 +17,8 @@ export const BookingPage: React.FC = () => {
   const [currentFieldPage, setCurrentFieldPage] = useState(1);
   const FIELDS_PER_PAGE = 3;
   const [isBookingSuccess, setIsBookingSuccess] = useState(false);
+  const [stepLoading, setStepLoading] = useState(false);
+  const prevStepRef = React.useRef(currentStep);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -216,6 +218,15 @@ export const BookingPage: React.FC = () => {
     }
   }, [searchParams, fieldsBySport]);
 
+  useEffect(() => {
+    if (prevStepRef.current !== currentStep) {
+      setStepLoading(true);
+      const timeout = setTimeout(() => setStepLoading(false), 1000);
+      prevStepRef.current = currentStep;
+      return () => clearTimeout(timeout);
+    }
+  }, [currentStep]);
+
   const steps = [
     { step: 1, label: "Chọn môn", icon: Activity },
     { step: 2, label: "Chọn sân lớn", icon: Building },
@@ -282,7 +293,7 @@ export const BookingPage: React.FC = () => {
           </div>
 
           <div className="relative z-10 p-8">
-            {loading && (
+            {(loading || stepLoading) && (
               <div className="text-center py-16">
                 <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-full shadow-xl">
                   <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -292,7 +303,7 @@ export const BookingPage: React.FC = () => {
             )}
 
             {/* Step 1: Sport Selection */}
-            {currentStep === 1 && !loading && (
+            {currentStep === 1 && !loading && !stepLoading && (
               <div>
                 <div className="text-center mb-10">
                   <h2 className="text-3xl font-bold text-gray-900 mb-3">Chọn môn thể thao</h2>
@@ -355,7 +366,7 @@ export const BookingPage: React.FC = () => {
             )}
 
             {/* Step 2: Field Selection */}
-            {currentStep === 2 && !loading && (
+            {currentStep === 2 && !loading && !stepLoading && (
               <div>
                 <div className="text-center mb-10">
                   <h2 className="text-3xl font-bold text-gray-900 mb-3">Chọn sân thể thao</h2>
@@ -508,7 +519,7 @@ export const BookingPage: React.FC = () => {
             )}
 
             {/* Step 3: Sub Court Selection */}
-            {currentStep === 3 && !loading && (
+            {currentStep === 3 && !loading && !stepLoading && (
               <div>
                 <div className="text-center mb-10">
                   <h2 className="text-3xl font-bold text-gray-900 mb-3">Chọn sân nhỏ</h2>
@@ -541,7 +552,7 @@ export const BookingPage: React.FC = () => {
             )}
 
             {/* Step 4: Time Selection */}
-            {currentStep === 4 && !loading && (
+            {currentStep === 4 && !loading && !stepLoading && (
               <div>
                 <div className="text-center mb-10">
                   <h2 className="text-3xl font-bold text-gray-900 mb-3">Chọn thời gian đặt sân</h2>
@@ -655,7 +666,7 @@ export const BookingPage: React.FC = () => {
             )}
 
             {/* Step 5: Confirmation */}
-            {currentStep === 5 && !isBookingSuccess && (
+            {currentStep === 5 && !isBookingSuccess && !loading && !stepLoading && (
               <div>
                 <div className="text-center mb-10">
                   <h2 className="text-3xl font-bold text-gray-800 mb-3">Xác nhận đặt sân</h2>
@@ -767,7 +778,7 @@ export const BookingPage: React.FC = () => {
             )}
 
             {/* Success Screen - Hiển thị khi isBookingSuccess = true */}
-            {currentStep === 5 && isBookingSuccess && (
+            {currentStep === 5 && isBookingSuccess && !loading && !stepLoading && (
               <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 p-4">
                 <div className="w-full max-w-2xl relative">
                   {/* Background decorative elements */}
@@ -827,7 +838,7 @@ export const BookingPage: React.FC = () => {
             )}
 
             {/* Navigation Buttons - Chỉ hiển thị khi không phải màn hình success */}
-            {!isBookingSuccess && (
+            {!isBookingSuccess && !stepLoading && (
               <div className="flex justify-between mt-8">
                 <button
                   onClick={prevStep}

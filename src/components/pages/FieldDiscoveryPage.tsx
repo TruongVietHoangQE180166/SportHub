@@ -170,9 +170,9 @@ export const FieldDiscoveryPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* Hero Search Section */}
-        <div className="relative h-96 mb-12 rounded-3xl overflow-hidden shadow-2xl">
+        <div className="relative h-96 mb-12 rounded-3xl shadow-2xl">
           {/* Background Image with Overlay */}
-          <div className="absolute inset-0">
+          <div className="absolute inset-0 overflow-hidden">
             <Image
               src="https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg?auto=compress&cs=tinysrgb&w=1200"
               alt="Sân thể thao"

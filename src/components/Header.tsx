@@ -60,7 +60,7 @@ export const Header: React.FC = () => {
   const navigation = [
     { name: 'Trang chủ', href: '/', icon: Home },
     { name: 'Đặt sân', href: '/booking', icon: Calendar },
-    { name: 'Tìm đội', href: '/teams', icon: Users },
+    { name: 'Tìm đội', href: '/matches/discover', icon: Users },
     { name: 'Khám phá', href: '/fields', icon: Search },
     { name: 'Dành cho chủ sân', href: '/about', icon: BookOpenTextIcon },
   ];

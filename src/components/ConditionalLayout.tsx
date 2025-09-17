@@ -1,8 +1,9 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { Header } from './Header';
 import { Footer } from './Footer';
+import { GlobalLoading } from './GlobalLoading';
 
 interface ConditionalLayoutProps {
   children: React.ReactNode;
@@ -10,26 +11,36 @@ interface ConditionalLayoutProps {
 
 export const ConditionalLayout: React.FC<ConditionalLayoutProps> = ({ children }) => {
   const pathname = usePathname();
-  
+  const [loading, setLoading] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const firstRender = useRef(true);
+
+  useEffect(() => {
+    // Không show loading ở lần render đầu tiên
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    setLoading(true);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => setLoading(false), 1000);
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, [pathname]);
+
   // Define routes that should not have Header and Footer
-  const authRoutes = ['/login', '/register', '/forgot-password'];
+  const authRoutes = ['/login', '/register', '/forgot-password', '/carousel-test'];
   const isAuthRoute = authRoutes.includes(pathname);
 
-  if (isAuthRoute) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-sky-50 to-emerald-50">
-        {children}
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
+    <div className={isAuthRoute ? "min-h-screen bg-gradient-to-br from-sky-50 to-emerald-50" : "min-h-screen bg-gray-50"}>
+      {loading && <GlobalLoading />}
+      {!isAuthRoute && <Header />}
       <main>
         {children}
       </main>
-      <Footer />
+      {!isAuthRoute && <Footer />}
     </div>
   );
 };

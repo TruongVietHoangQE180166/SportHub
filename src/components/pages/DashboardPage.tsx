@@ -94,7 +94,7 @@ export default function App() {
   const [filterDate, setFilterDate] = useState('');
   const [activeSearch, setActiveSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const ORDERS_PER_PAGE = 3;
+  const ORDERS_PER_PAGE = 10;
   const [confirmCancelRequestId, setConfirmCancelRequestId] = useState<number|null>(null);
   const [feedbacks, setFeedbacks] = useState<{ [id: number]: { content: string, rating: number } }>({});
   const [feedbackModal, setFeedbackModal] = useState<{ id: number, content: string, rating: number }|null>(null);
@@ -174,7 +174,7 @@ export default function App() {
     <div className="min-h-screen bg-gray-100">
       {/* Athletic Header */}
       <div className="bg-black text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8">
           <div className="py-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-6">
@@ -213,7 +213,7 @@ export default function App() {
 
       {/* Mobile Stats */}
       <div className="lg:hidden bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4">
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center p-4 bg-gray-50 rounded-xl">
               <Trophy className="w-6 h-6 mx-auto mb-2 text-green-500" />
@@ -234,7 +234,7 @@ export default function App() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-6 lg:py-8">
         {/* Filter Section */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 mb-8">
           <div className="p-6 border-b border-gray-100">
@@ -243,14 +243,14 @@ export default function App() {
               <h2 className="text-xl font-bold text-black">BỘ LỌC & TÌM KIẾM</h2>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Status Filter */}
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Trạng thái</label>
                 <div className="relative">
                   <button
                     type="button"
-                    className="w-full px-4 py-3 text-left bg-gray-50 border-2 border-gray-200 rounded-xl hover:border-green-500 focus:border-green-500 focus:outline-none transition-all flex items-center justify-between text-sm font-medium"
+                    className="w-full px-3 lg:px-4 py-3 text-left bg-gray-50 border-2 border-gray-200 rounded-xl hover:border-green-500 focus:border-green-500 focus:outline-none transition-all flex items-center justify-between text-sm font-medium"
                     onClick={() => setShowStatusDropdown(v => !v)}
                   >
                     <span className="text-gray-800 truncate">
@@ -267,7 +267,7 @@ export default function App() {
                       {['', 'confirmed', 'pending', 'completed', 'cancelled'].map(option => (
                         <button
                           key={option}
-                          className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-all text-sm first:rounded-t-xl last:rounded-b-xl ${filterStatus === option ? 'bg-green-50 text-green-700 font-bold' : 'text-gray-700'}`}
+                          className={`w-full text-left px-3 lg:px-4 py-3 hover:bg-gray-50 transition-all text-sm first:rounded-t-xl last:rounded-b-xl ${filterStatus === option ? 'bg-green-50 text-green-700 font-bold' : 'text-gray-700'}`}
                           onClick={() => { setFilterStatus(option); setShowStatusDropdown(false); }}
                         >
                           {option === '' ? 'Tất cả trạng thái' :
@@ -288,7 +288,7 @@ export default function App() {
                 <div className="relative">
                   <button
                     type="button"
-                    className="w-full px-4 py-3 text-left bg-gray-50 border-2 border-gray-200 rounded-xl hover:border-green-500 focus:border-green-500 focus:outline-none transition-all flex items-center justify-between text-sm font-medium"
+                    className="w-full px-3 lg:px-4 py-3 text-left bg-gray-50 border-2 border-gray-200 rounded-xl hover:border-green-500 focus:border-green-500 focus:outline-none transition-all flex items-center justify-between text-sm font-medium"
                     onClick={() => setShowSportDropdown(v => !v)}
                   >
                     <span className="text-gray-800 truncate">
@@ -301,7 +301,7 @@ export default function App() {
                       {['', 'Bóng đá', 'Cầu lông', 'Pickle Ball'].map(option => (
                         <button
                           key={option}
-                          className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-all text-sm first:rounded-t-xl last:rounded-b-xl ${filterSport === option ? 'bg-green-50 text-green-700 font-bold' : 'text-gray-700'}`}
+                          className={`w-full text-left px-3 lg:px-4 py-3 hover:bg-gray-50 transition-all text-sm first:rounded-t-xl last:rounded-b-xl ${filterSport === option ? 'bg-green-50 text-green-700 font-bold' : 'text-gray-700'}`}
                           onClick={() => { setFilterSport(option); setShowSportDropdown(false); }}
                         >
                           {option === '' ? 'Tất cả môn thể thao' : option}
@@ -320,7 +320,7 @@ export default function App() {
                     type="date"
                     value={filterDate}
                     onChange={e => setFilterDate(e.target.value)}
-                    className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-all text-sm text-gray-800 font-medium"
+                    className="w-full px-3 lg:px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-all text-sm text-gray-800 font-medium"
                   />
                   {filterDate && (
                     <button
@@ -343,12 +343,13 @@ export default function App() {
                     placeholder="Tìm kiếm theo tên sân..."
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
-                    className="flex-1 px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-all text-sm font-medium"
+                    className="flex-1 min-w-0 px-3 lg:px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-all text-sm font-medium"
                   />
                   <button
                     type="button"
-                    className="px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl transition-all shadow-sm flex items-center gap-2"
+                    className="w-12 h-12 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl transition-all shadow-sm flex items-center justify-center shrink-0"
                     onClick={() => setActiveSearch(searchQuery)}
+                    title="Tìm kiếm"
                   >
                     <Search className="w-4 h-4" />
                   </button>
@@ -384,180 +385,210 @@ export default function App() {
             <p className="text-gray-600 mt-1 text-sm font-medium">Quản lý và theo dõi hoạt động thể thao</p>
           </div>
           
-          <div className="divide-y divide-gray-100">
-            {(() => {
-              const filtered = bookingHistory.filter(booking => {
-                const q = activeSearch.toLowerCase();
-                const matchSearch = !q || booking.fieldName.toLowerCase().includes(q);
-                const matchStatus = !filterStatus || booking.status === filterStatus;
-                const matchSport = !filterSport || booking.sport === filterSport;
-                const matchDate = !filterDate || booking.date === filterDate;
-                return matchSearch && matchStatus && matchSport && matchDate;
-              });
-              const startIndex = (currentPage - 1) * ORDERS_PER_PAGE;
-              const paginated = filtered.slice(startIndex, startIndex + ORDERS_PER_PAGE);
-              
-              if (paginated.length === 0) {
-                return (
-                  <div className="p-8 text-center">
-                    <div className="text-gray-400 text-6xl mb-4">🏟️</div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">KHÔNG CÓ LỊCH ĐẶT SÂN</h3>
-                    <p className="text-gray-500 font-medium text-sm">Thử điều chỉnh bộ lọc hoặc tìm kiếm để xem kết quả khác</p>
-                  </div>
-                );
-              }
-              
-              return paginated.map((booking) => (
-                <div key={booking.id} className="p-4 hover:bg-gray-50 transition-all duration-200 group">
-                  <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
-                    {/* Left Section */}
-                    <div className="flex items-center gap-4 flex-1 min-w-0">
-                      <div className="w-14 h-14 flex items-center justify-center rounded-xl bg-white text-3xl shrink-0 transition-all">
-                        {typeof getSportIcon(booking.sport) === 'string' ? getSportIcon(booking.sport) : getSportIcon(booking.sport)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-base font-black text-black truncate mb-1 group-hover:text-green-600 transition-all">{booking.fieldName}</h3>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-xs font-bold text-white bg-black px-2 py-1 rounded-full">
-                            {booking.sport}
-                          </span>
-                          <span className="flex items-center gap-1 text-xs text-gray-700 bg-gray-100 px-2 py-1 rounded-full font-medium">
-                            <Calendar className="w-3 h-3" />
-                            {booking.date}
-                          </span>
-                          <span className="flex items-center gap-1 text-xs text-gray-700 bg-gray-100 px-2 py-1 rounded-full font-medium">
-                            <Clock className="w-3 h-3" />
-                            {booking.time}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Right Section */}
-                    <div className="flex flex-col items-end gap-2 shrink-0">
-                      <div className="text-base font-black text-green-600">{booking.price}</div>
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(booking.status)}`}>{getStatusText(booking.status)}</span>
-                      <div className="flex flex-wrap gap-2 justify-end">
-                        <button
-                          className="flex items-center gap-1 p-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all shadow-sm text-xs font-bold"
-                          onClick={() => setModalDetail(booking)}
-                          title="Chi tiết"
-                        >
-                          <Eye className="w-4 h-4" />
-                          <span>Chi tiết</span>
-                        </button>
-                        {booking.status === 'confirmed' && (
-                          <button
-                            className="flex items-center gap-1 p-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-all shadow-sm text-xs font-bold"
-                            onClick={() => setConfirmCancelId(booking.id)}
-                            title="Hủy đặt"
-                          >
-                            <XCircle className="w-4 h-4" />
-                            <span>Hủy đặt</span>
-                          </button>
-                        )}
-                        {booking.status === 'completed' && !feedbacks[booking.id] && (
-                          <button
-                            className="flex items-center gap-1 p-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-all shadow-sm text-xs font-bold"
-                            onClick={() => setFeedbackModal({ id: booking.id, content: '', rating: 5 })}
-                            title="Đánh giá"
-                          >
-                            <Star className="w-4 h-4" />
-                            <span>Đánh giá</span>
-                          </button>
-                        )}
-                        {(booking.status === 'cancelled' || booking.status === 'completed') && (
-                          <button
-                            className="flex items-center gap-1 p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all shadow-sm text-xs font-bold"
-                            onClick={() => setConfirmDeleteId(booking.id)}
-                            title="Xóa lịch sử"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                            <span>Xóa</span>
-                          </button>
-                        )}
-                        {booking.status === 'pending' && (
-                          <button
-                            className="flex items-center gap-1 p-2 bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition-all shadow-sm text-xs font-bold"
-                            onClick={() => setConfirmCancelRequestId(booking.id)}
-                            title="Hủy yêu cầu"
-                          >
-                            <XCircle className="w-4 h-4" />
-                            <span>Hủy yêu cầu</span>
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Pending Status Alert */}
-                  {booking.status === 'pending' && (
-                    <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
-                      <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center shrink-0">
-                          <Clock className="w-4 h-4 text-white" />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-black text-yellow-800 mb-2 text-base uppercase">YÊU CẦU HỦY ĐANG CHỜ XÁC NHẬN</h4>
-                          <div className="bg-white rounded-lg p-3 space-y-2 border border-yellow-200">
-                            <div className="flex items-center gap-2 text-xs">
-                              <User className="w-4 h-4 text-gray-400" />
-                              <span className="font-bold text-black">CHỦ SÂN:</span>
-                              <span className="text-gray-700 font-medium">{booking.owner?.name}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-xs">
-                              <Phone className="w-4 h-4 text-gray-400" />
-                              <span className="font-bold text-black">SĐT:</span>
-                              <span className="text-gray-700 font-medium">{booking.owner?.phone}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-xs">
-                              <Mail className="w-4 h-4 text-gray-400" />
-                              <span className="font-bold text-black">EMAIL:</span>
-                              <span className="text-gray-700 font-medium">{booking.owner?.email}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Feedback Display */}
-                  {booking.status === 'completed' && feedbacks[booking.id] && (
-                    <div className="mt-4 bg-gray-100 border border-gray-300 rounded-xl p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Trophy className="w-5 h-5 text-green-600" />
-                        <h4 className="font-black text-green-800 uppercase text-xs">ĐÁNH GIÁ CỦA BẠN</h4>
-                      </div>
-                      <div className="flex items-center gap-1 mb-2">
-                        {[1,2,3,4,5].map(i => (
-                          <Star key={i} className={`w-4 h-4 ${i <= feedbacks[booking.id].rating ? 'text-green-600 fill-green-600' : 'text-gray-300'}`} fill={i <= feedbacks[booking.id].rating ? 'currentColor' : 'none'} />
-                        ))}
-                      </div>
-                      <div className="text-gray-800 font-medium italic bg-white p-2 rounded-lg border border-gray-200 text-xs mb-2">{feedbacks[booking.id].content}</div>
-                      <div className="flex gap-2 mt-1">
-                        <button
-                          className="flex items-center gap-1 p-2 bg-black hover:bg-gray-900 text-white rounded-lg transition-all shadow-sm text-xs font-bold"
-                          onClick={() => setFeedbackModal({ id: booking.id, content: feedbacks[booking.id].content, rating: feedbacks[booking.id].rating })}
-                          title="Sửa đánh giá"
-                        >
-                          <Pencil className="w-4 h-4" />
-                          <span>Sửa</span>
-                        </button>
-                        <button
-                          className="flex items-center gap-1 p-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-all shadow-sm text-xs font-bold"
-                          onClick={() => setFeedbacks(fb => { const n = { ...fb }; delete n[booking.id]; return n; })}
-                          title="Xóa đánh giá"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                          <span>Xóa</span>
-                        </button>
-                      </div>
-                    </div>
-                  )}
+          {(() => {
+            const filtered = bookingHistory.filter(booking => {
+              const q = activeSearch.toLowerCase();
+              const matchSearch = !q || booking.fieldName.toLowerCase().includes(q);
+              const matchStatus = !filterStatus || booking.status === filterStatus;
+              const matchSport = !filterSport || booking.sport === filterSport;
+              const matchDate = !filterDate || booking.date === filterDate;
+              return matchSearch && matchStatus && matchSport && matchDate;
+            });
+            const startIndex = (currentPage - 1) * ORDERS_PER_PAGE;
+            const paginated = filtered.slice(startIndex, startIndex + ORDERS_PER_PAGE);
+            
+            if (paginated.length === 0) {
+              return (
+                <div className="p-8 text-center">
+                  <div className="text-gray-400 text-6xl mb-4">🏟️</div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">KHÔNG CÓ LỊCH ĐẶT SÂN</h3>
+                  <p className="text-gray-500 font-medium text-sm">Thử điều chỉnh bộ lọc hoặc tìm kiếm để xem kết quả khác</p>
                 </div>
-              ));
-            })()}
-          </div>
+              );
+            }
+            
+            return (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[800px]">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="text-left p-3 lg:p-4 text-xs font-black text-gray-700 uppercase tracking-wide min-w-[250px]">Sân & Môn thể thao</th>
+                      <th className="text-left p-3 lg:p-4 text-xs font-black text-gray-700 uppercase tracking-wide min-w-[150px]">Ngày & Giờ</th>
+                      <th className="text-left p-3 lg:p-4 text-xs font-black text-gray-700 uppercase tracking-wide min-w-[100px]">Giá</th>
+                      <th className="text-left p-3 lg:p-4 text-xs font-black text-gray-700 uppercase tracking-wide min-w-[120px]">Trạng thái</th>
+                      <th className="text-center p-3 lg:p-4 text-xs font-black text-gray-700 uppercase tracking-wide min-w-[180px]">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {paginated.map((booking) => (
+                      <React.Fragment key={booking.id}>
+                        <tr className="hover:bg-gray-50 transition-all duration-200 group">
+                          <td className="p-3 lg:p-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center rounded-xl bg-gray-100 text-lg lg:text-2xl shrink-0">
+                                {typeof getSportIcon(booking.sport) === 'string' ? getSportIcon(booking.sport) : getSportIcon(booking.sport)}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <h3 className="text-xs lg:text-sm font-black text-black truncate mb-1 group-hover:text-green-600 transition-all">{booking.fieldName}</h3>
+                                <span className="text-xs font-bold text-white bg-black px-2 py-1 rounded-full">
+                                  {booking.sport}
+                                </span>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-3 lg:p-4">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-1 text-xs lg:text-sm text-gray-700 font-medium">
+                                <Calendar className="w-3 h-3 lg:w-4 lg:h-4 shrink-0" />
+                                <span className="truncate">{booking.date}</span>
+                              </div>
+                              <div className="flex items-center gap-1 text-xs lg:text-sm text-gray-700 font-medium">
+                                <Clock className="w-3 h-3 lg:w-4 lg:h-4 shrink-0" />
+                                <span className="truncate">{booking.time}</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-3 lg:p-4">
+                            <div className="text-xs lg:text-sm font-black text-green-600">{booking.price}</div>
+                          </td>
+                          <td className="p-3 lg:p-4">
+                            <span className={`px-2 lg:px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(booking.status)} block text-center`}>
+                              {getStatusText(booking.status)}
+                            </span>
+                          </td>
+                          <td className="p-3 lg:p-4">
+                            <div className="flex flex-wrap gap-1 lg:gap-2 justify-center">
+                              <button
+                                className="flex items-center gap-1 p-1.5 lg:p-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all shadow-sm text-xs font-bold"
+                                onClick={() => setModalDetail(booking)}
+                                title="Chi tiết"
+                              >
+                                <Eye className="w-3 h-3 lg:w-4 lg:h-4" />
+                                <span className="hidden md:inline">Chi tiết</span>
+                              </button>
+                              {booking.status === 'confirmed' && (
+                                <button
+                                  className="flex items-center gap-1 p-1.5 lg:p-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-all shadow-sm text-xs font-bold"
+                                  onClick={() => setConfirmCancelId(booking.id)}
+                                  title="Hủy đặt"
+                                >
+                                  <XCircle className="w-3 h-3 lg:w-4 lg:h-4" />
+                                  <span className="hidden lg:inline">Hủy đặt</span>
+                                </button>
+                              )}
+                              {booking.status === 'completed' && !feedbacks[booking.id] && (
+                                <button
+                                  className="flex items-center gap-1 p-1.5 lg:p-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-all shadow-sm text-xs font-bold"
+                                  onClick={() => setFeedbackModal({ id: booking.id, content: '', rating: 5 })}
+                                  title="Đánh giá"
+                                >
+                                  <Star className="w-3 h-3 lg:w-4 lg:h-4" />
+                                  <span className="hidden lg:inline">Đánh giá</span>
+                                </button>
+                              )}
+                              {(booking.status === 'cancelled' || booking.status === 'completed') && (
+                                <button
+                                  className="flex items-center gap-1 p-1.5 lg:p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all shadow-sm text-xs font-bold"
+                                  onClick={() => setConfirmDeleteId(booking.id)}
+                                  title="Xóa lịch sử"
+                                >
+                                  <Trash2 className="w-3 h-3 lg:w-4 lg:h-4" />
+                                  <span className="hidden lg:inline">Xóa</span>
+                                </button>
+                              )}
+                              {booking.status === 'pending' && (
+                                <button
+                                  className="flex items-center gap-1 p-1.5 lg:p-2 bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition-all shadow-sm text-xs font-bold"
+                                  onClick={() => setConfirmCancelRequestId(booking.id)}
+                                  title="Hủy yêu cầu"
+                                >
+                                  <XCircle className="w-3 h-3 lg:w-4 lg:h-4" />
+                                  <span className="hidden xl:inline">Hủy yêu cầu</span>
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                        
+                        {/* Pending Status Alert Row */}
+                        {booking.status === 'pending' && (
+                          <tr>
+                            <td colSpan={5} className="p-0">
+                              <div className="p-4 bg-yellow-50 border border-yellow-200 mx-4 mb-2 rounded-xl">
+                                <div className="flex items-start gap-3">
+                                  <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center shrink-0">
+                                    <Clock className="w-4 h-4 text-white" />
+                                  </div>
+                                  <div className="flex-1">
+                                    <h4 className="font-black text-yellow-800 mb-2 text-sm uppercase">YÊU CẦU HỦY ĐANG CHỜ XÁC NHẬN</h4>
+                                    <div className="bg-white rounded-lg p-3 space-y-2 border border-yellow-200">
+                                      <div className="flex items-center gap-2 text-xs">
+                                        <User className="w-4 h-4 text-gray-400" />
+                                        <span className="font-bold text-black">CHỦ SÂN:</span>
+                                        <span className="text-gray-700 font-medium">{booking.owner?.name}</span>
+                                      </div>
+                                      <div className="flex items-center gap-2 text-xs">
+                                        <Phone className="w-4 h-4 text-gray-400" />
+                                        <span className="font-bold text-black">SĐT:</span>
+                                        <span className="text-gray-700 font-medium">{booking.owner?.phone}</span>
+                                      </div>
+                                      <div className="flex items-center gap-2 text-xs">
+                                        <Mail className="w-4 h-4 text-gray-400" />
+                                        <span className="font-bold text-black">EMAIL:</span>
+                                        <span className="text-gray-700 font-medium">{booking.owner?.email}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                        
+                        {/* Feedback Display Row */}
+                        {booking.status === 'completed' && feedbacks[booking.id] && (
+                          <tr>
+                            <td colSpan={5} className="p-0">
+                              <div className="p-4 bg-gray-100 border border-gray-300 mx-4 mb-2 rounded-xl">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Trophy className="w-5 h-5 text-green-600" />
+                                  <h4 className="font-black text-green-800 uppercase text-xs">ĐÁNH GIÁ CỦA BẠN</h4>
+                                </div>
+                                <div className="flex items-center gap-1 mb-2">
+                                  {[1,2,3,4,5].map(i => (
+                                    <Star key={i} className={`w-4 h-4 ${i <= feedbacks[booking.id].rating ? 'text-green-600 fill-green-600' : 'text-gray-300'}`} fill={i <= feedbacks[booking.id].rating ? 'currentColor' : 'none'} />
+                                  ))}
+                                </div>
+                                <div className="text-gray-800 font-medium italic bg-white p-2 rounded-lg border border-gray-200 text-xs mb-2">{feedbacks[booking.id].content}</div>
+                                <div className="flex gap-2 mt-1">
+                                  <button
+                                    className="flex items-center gap-1 p-2 bg-black hover:bg-gray-900 text-white rounded-lg transition-all shadow-sm text-xs font-bold"
+                                    onClick={() => setFeedbackModal({ id: booking.id, content: feedbacks[booking.id].content, rating: feedbacks[booking.id].rating })}
+                                    title="Sửa đánh giá"
+                                  >
+                                    <Pencil className="w-4 h-4" />
+                                    <span>Sửa</span>
+                                  </button>
+                                  <button
+                                    className="flex items-center gap-1 p-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-all shadow-sm text-xs font-bold"
+                                    onClick={() => setFeedbacks(fb => { const n = { ...fb }; delete n[booking.id]; return n; })}
+                                    title="Xóa đánh giá"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                    <span>Xóa</span>
+                                  </button>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Pagination */}
@@ -574,17 +605,17 @@ export default function App() {
           if (totalPages <= 1) return null;
           
           return (
-            <div className="flex justify-center items-center gap-3 mt-8">
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-3 mt-6 lg:mt-8">
               <button
                 type="button"
-                className="px-6 py-3 text-sm font-bold text-gray-700 bg-white border-2 border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="px-4 lg:px-6 py-2 lg:py-3 text-sm font-bold text-gray-700 bg-white border-2 border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               >
-                <ChevronLeft className="w-5 h-5" />
+                <ChevronLeft className="w-4 lg:w-5 lg:h-5 h-4" />
               </button>
               
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 lg:gap-2">
                 {(() => {
                   let start = Math.max(1, currentPage - 1);
                   let end = Math.min(totalPages, currentPage + 1);
@@ -602,7 +633,7 @@ export default function App() {
                       key={page}
                       type="button"
                       onClick={() => setCurrentPage(page)}
-                      className={`w-12 h-12 text-sm font-bold rounded-xl transition-all ${
+                      className={`w-10 h-10 lg:w-12 lg:h-12 text-xs lg:text-sm font-bold rounded-xl transition-all ${
                         currentPage === page 
                           ? 'bg-black text-white border-2 border-black' 
                           : 'bg-white text-gray-700 border-2 border-gray-200 hover:bg-gray-50'
@@ -616,11 +647,11 @@ export default function App() {
               
               <button
                 type="button"
-                className="px-6 py-3 text-sm font-bold text-gray-700 bg-white border-2 border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="px-4 lg:px-6 py-2 lg:py-3 text-sm font-bold text-gray-700 bg-white border-2 border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               >
-                <ChevronRight className="w-5 h-5" />
+                <ChevronRight className="w-4 lg:w-5 lg:h-5 h-4" />
               </button>
             </div>
           );
@@ -629,7 +660,7 @@ export default function App() {
         {/* Detail Modal */}
         {modalDetail && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-2 overflow-hidden border border-gray-200 p-4">
+            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-3 sm:mx-2 overflow-hidden border border-gray-200 p-3 lg:p-4">
               <div className="relative pb-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-xl">
                 <button
                   className="absolute top-2 right-2 text-white/80 hover:text-white text-xl w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/20 transition-all font-bold"
@@ -796,7 +827,7 @@ export default function App() {
         {/* Feedback Modal */}
         {feedbackModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full mx-2 p-4 border border-gray-200">
+            <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full mx-3 sm:mx-2 p-3 lg:p-4 border border-gray-200">
               <div className="text-center mb-4">
                 <div className="w-10 h-10 mx-auto mb-2 bg-green-100 rounded-full flex items-center justify-center">
                   <Trophy className="w-6 h-6 text-green-600" />
