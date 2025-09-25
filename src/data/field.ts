@@ -13,15 +13,17 @@ const createSampleSlots = (subCourtId: string, startHour: number, endHour: numbe
       const startTime = `${hour.toString().padStart(2, '0')}:00`;
       const endTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
       
-      const isBooked = Math.random() < 0.2;
+      // All slots are initially unbooked
+      const isBooked = false;
       
+      // Fixed price for all time slots
       slots.push({
         id: `${subCourtId}-${dateString}-${startTime}`,
         date: dateString,
         startTime,
         endTime,
         isBooked,
-        price: hour >= 17 && hour < 21 ? 300000 : 250000
+        price: 250000
       });
     }
   }

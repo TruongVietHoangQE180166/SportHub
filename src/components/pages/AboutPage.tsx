@@ -19,6 +19,8 @@ import {
   DollarSign,
   BarChart3,
   Handshake,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 
 export default function AboutPage() {
@@ -32,6 +34,8 @@ export default function AboutPage() {
     description: "",
   });
   const [ownerFormSubmitted, setOwnerFormSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [showSportDropdown, setShowSportDropdown] = useState(false);
   const sportOptions = [
     { value: "football", label: "Bóng đá" },
@@ -54,11 +58,56 @@ export default function AboutPage() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [showSportDropdown]);
 
-  const handleOwnerSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleOwnerSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Owner registration:", ownerForm);
-    setOwnerFormSubmitted(true);
-    setTimeout(() => setOwnerFormSubmitted(false), 3000);
+    setIsSubmitting(true);
+    setSubmitError("");
+
+    try {
+      const response = await fetch('/api/Owner-Register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(ownerForm),
+      });
+
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Server returned an invalid response. Please try again later.');
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        console.log("Owner registration successful:", data);
+        setOwnerFormSubmitted(true);
+        // Reset form
+        setOwnerForm({
+          name: "",
+          email: "",
+          phone: "",
+          fieldName: "",
+          location: "",
+          sport: "",
+          description: "",
+        });
+        // Auto hide success message after 5 seconds
+        setTimeout(() => setOwnerFormSubmitted(false), 5000);
+      } else {
+        setSubmitError(data.message || 'Có lỗi xảy ra khi đăng ký');
+      }
+    } catch (error: any) {
+      console.error('Error submitting form:', error);
+      if (error.message) {
+        setSubmitError(error.message);
+      } else {
+        setSubmitError('Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối internet và thử lại.');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -104,7 +153,10 @@ export default function AboutPage() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-6 items-start">
-                <button className="group bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-4 rounded-2xl font-bold hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:-translate-y-1 shadow-2xl">
+                <button 
+                  onClick={() => document.getElementById('register-form')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="group bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-4 rounded-2xl font-bold hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:-translate-y-1 shadow-2xl"
+                >
                   <span className="flex items-center gap-3">
                     <Play className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
                     Bắt đầu ngay
@@ -289,8 +341,8 @@ export default function AboutPage() {
         </div>
       </section>
 
-{/* Enhanced Registration Section */}
-<section className="min-h-screen bg-gradient-to-br from-gray-50 to-white relative overflow-hidden">
+      {/* Enhanced Registration Section */}
+      <section className="min-h-screen bg-gradient-to-br from-gray-50 to-white relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-green-500/10 to-transparent"></div>
           <div className="absolute bottom-0 left-0 w-1/3 h-full bg-gradient-to-r from-gray-900/5 to-transparent"></div>
@@ -343,7 +395,7 @@ export default function AboutPage() {
                     </div>
                     <h3 className="text-2xl font-black text-black mb-4">ĐĂNG KÝ THÀNH CÔNG!</h3>
                     <p className="text-gray-600 mb-8">
-                      Cảm ơn bạn đã quan tâm. Chúng tôi sẽ liên hệ trong vòng 24 giờ.
+                      Cảm ơn bạn đã quan tâm. Chúng tôi đã gửi email xác nhận và sẽ liên hệ trong vòng 24 giờ.
                     </p>
                     <button
                       onClick={() => setOwnerFormSubmitted(false)}
@@ -358,15 +410,25 @@ export default function AboutPage() {
                       <h3 className="text-2xl font-black text-black mb-2">FORM ĐĂNG KÝ</h3>
                       <p className="text-gray-600">Điền thông tin để trở thành đối tác</p>
                     </div>
+
+                    {/* Error Message */}
+                    {submitError && (
+                      <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3">
+                        <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                        <div className="text-red-700">{submitError}</div>
+                      </div>
+                    )}
+                    
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-black font-bold mb-2">Họ và tên *</label>
                         <input
                           type="text"
                           required
+                          disabled={isSubmitting}
                           value={ownerForm.name}
                           onChange={(e) => setOwnerForm({...ownerForm, name: e.target.value})}
-                          className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-black focus:border-green-500 focus:outline-none transition-all duration-300"
+                          className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-black focus:border-green-500 focus:outline-none transition-all duration-300 disabled:bg-gray-100"
                           placeholder="Nhập họ và tên"
                         />
                       </div>
@@ -375,9 +437,10 @@ export default function AboutPage() {
                         <input
                           type="tel"
                           required
+                          disabled={isSubmitting}
                           value={ownerForm.phone}
                           onChange={(e) => setOwnerForm({...ownerForm, phone: e.target.value})}
-                          className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-black focus:border-green-500 focus:outline-none transition-all duration-300"
+                          className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-black focus:border-green-500 focus:outline-none transition-all duration-300 disabled:bg-gray-100"
                           placeholder="Nhập số điện thoại"
                         />
                       </div>
@@ -388,9 +451,10 @@ export default function AboutPage() {
                       <input
                         type="email"
                         required
+                        disabled={isSubmitting}
                         value={ownerForm.email}
                         onChange={(e) => setOwnerForm({...ownerForm, email: e.target.value})}
-                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-black focus:border-green-500 focus:outline-none transition-all duration-300"
+                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-black focus:border-green-500 focus:outline-none transition-all duration-300 disabled:bg-gray-100"
                         placeholder="Nhập địa chỉ email"
                       />
                     </div>
@@ -401,9 +465,10 @@ export default function AboutPage() {
                         <input
                           type="text"
                           required
+                          disabled={isSubmitting}
                           value={ownerForm.fieldName}
                           onChange={(e) => setOwnerForm({...ownerForm, fieldName: e.target.value})}
-                          className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-black focus:border-green-500 focus:outline-none transition-all duration-300"
+                          className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-black focus:border-green-500 focus:outline-none transition-all duration-300 disabled:bg-gray-100"
                           placeholder="VD: Sân bóng ABC"
                         />
                       </div>
@@ -412,13 +477,14 @@ export default function AboutPage() {
                         <div className="relative" ref={sportDropdownRef}>
                           <button
                             type="button"
-                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-left font-medium text-black focus:outline-none focus:border-green-500 transition-all flex items-center justify-between hover:border-green-500"
-                            onClick={() => setShowSportDropdown((v) => !v)}
+                            disabled={isSubmitting}
+                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-left font-medium text-black focus:outline-none focus:border-green-500 transition-all flex items-center justify-between hover:border-green-500 disabled:bg-gray-100"
+                            onClick={() => !isSubmitting && setShowSportDropdown((v) => !v)}
                           >
                             <span>{sportOptions.find(opt => opt.value === ownerForm.sport)?.label || "Chọn môn thể thao"}</span>
                             <svg className="w-4 h-4 ml-2 text-gray-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
                           </button>
-                          {showSportDropdown && (
+                          {showSportDropdown && !isSubmitting && (
                             <div className="absolute z-50 left-0 right-0 mt-2 bg-white border border-green-500 rounded-xl shadow-xl animate-fadeIn">
                               {sportOptions.map(option => (
                                 <button
@@ -444,9 +510,10 @@ export default function AboutPage() {
                       <input
                         type="text"
                         required
+                        disabled={isSubmitting}
                         value={ownerForm.location}
                         onChange={(e) => setOwnerForm({...ownerForm, location: e.target.value})}
-                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-black focus:border-green-500 focus:outline-none transition-all duration-300"
+                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-black focus:border-green-500 focus:outline-none transition-all duration-300 disabled:bg-gray-100"
                         placeholder="Nhập địa chỉ chi tiết"
                       />
                     </div>
@@ -455,19 +522,30 @@ export default function AboutPage() {
                       <label className="block text-black font-bold mb-2">Mô tả sân</label>
                       <textarea
                         rows={4}
+                        disabled={isSubmitting}
                         value={ownerForm.description}
                         onChange={(e) => setOwnerForm({...ownerForm, description: e.target.value})}
-                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-black focus:border-green-500 focus:outline-none transition-all duration-300 resize-none"
+                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-black focus:border-green-500 focus:outline-none transition-all duration-300 resize-none disabled:bg-gray-100"
                         placeholder="Mô tả về sân, tiện ích, giá cả..."
                       />
                     </div>
 
                     <button
                       type="submit"
-                      className="w-full bg-green-500 text-white font-black py-4 px-6 rounded-xl hover:bg-green-600 transition-all duration-300 transform hover:-translate-y-1 shadow-lg flex items-center justify-center gap-3"
+                      disabled={isSubmitting}
+                      className="w-full bg-green-500 text-white font-black py-4 px-6 rounded-xl hover:bg-green-600 transition-all duration-300 transform hover:-translate-y-1 shadow-lg flex items-center justify-center gap-3 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none"
                     >
-                      <Send className="w-5 h-5" />
-                      ĐĂNG KÝ TRỞ THÀNH ĐỐI TÁC
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          ĐANG XỬ LÝ...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-5 h-5" />
+                          ĐĂNG KÝ TRỞ THÀNH ĐỐI TÁC
+                        </>
+                      )}
                     </button>
 
                     <p className="text-center text-gray-500 text-sm">

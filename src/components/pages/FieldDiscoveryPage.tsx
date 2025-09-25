@@ -6,7 +6,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 export const FieldDiscoveryPage: React.FC = () => {
-  const { allFields, loading, error, fetchAllFields } = useFieldStore();
+  const { serverFields, loading, error, fetchServerFields } = useFieldStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState({
@@ -21,8 +21,8 @@ export const FieldDiscoveryPage: React.FC = () => {
   const FIELDS_PER_PAGE = 8;
 
   useEffect(() => {
-    fetchAllFields();
-  }, [fetchAllFields]);
+    fetchServerFields();
+  }, [fetchServerFields]);
 
   // Set filter from query param sport
   useEffect(() => {
@@ -38,41 +38,64 @@ export const FieldDiscoveryPage: React.FC = () => {
     }
   }, [searchParams]);
 
-  const filteredFields = allFields.filter(field => {
-    const matchesSearch = field.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      field.location.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesSport = !filters.sport || field.sport === filters.sport;
-    const matchesRating = !filters.rating || field.rating >= parseFloat(filters.rating);
-
-    let matchesPrice = true;
-    if (filters.priceRange) {
-      const price = parseInt(field.price.replace(/[^\d]/g, ''));
-      switch (filters.priceRange) {
-        case 'under100':
-          matchesPrice = price < 100000;
-          break;
-        case '100-150':
-          matchesPrice = price >= 100000 && price < 150000;
-          break;
-        case '150-200':
-          matchesPrice = price >= 150000 && price < 200000;
-          break;
-        case '200-250':
-          matchesPrice = price >= 200000 && price < 250000;
-          break;
-        case '250-300':
-          matchesPrice = price >= 250000 && price < 300000;
-          break;
-        case 'over300':
-          matchesPrice = price >= 300000;
-          break;
-        default:
-          matchesPrice = true;
-      }
-    }
-
-    return matchesSearch && matchesSport && matchesRating && matchesPrice;
+  // Transform ServerField to match UI expectations
+  const transformServerFieldToUI = (serverField: any) => ({
+    id: serverField.id,
+    name: serverField.fieldName,
+    location: serverField.location,
+    rating: serverField.averageRating || 0, // Use actual averageRating
+    bookings: serverField.totalBookings || 0, // Use actual totalBookings
+    price: `${serverField.normalPricePerHour.toLocaleString('vi-VN')}đ/giờ`,
+    openingHours: `${serverField.openTime.substring(0, 5)} - ${serverField.closeTime.substring(0, 5)}`,
+    image: serverField.images[0] || 'https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg?auto=compress&cs=tinysrgb&w=1200',
+    sport: serverField.typeFieldName === 'Bóng Đá' ? 'football' : 
+           serverField.typeFieldName === 'Cầu Lông' ? 'badminton' : 'pickle',
+    isPopular: serverField.totalBookings > 50, // Use actual totalBookings for popularity with a reasonable threshold
+    subCourts: [],
+    owner: undefined,
+    reviewsList: [],
+    startHour: parseInt(serverField.openTime.substring(0, 2)),
+    endHour: parseInt(serverField.closeTime.substring(0, 2)),
   });
+
+  const filteredFields = serverFields
+    .filter((serverField: any) => serverField.available !== false) // Filter out unavailable fields
+    .map(transformServerFieldToUI)
+    .filter((field: any) => {
+      const matchesSearch = field.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        field.location.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSport = !filters.sport || field.sport === filters.sport;
+      const matchesRating = !filters.rating || field.rating >= parseFloat(filters.rating);
+
+      let matchesPrice = true;
+      if (filters.priceRange) {
+        const price = parseInt(field.price.replace(/[^\d]/g, ''));
+        switch (filters.priceRange) {
+          case 'under100':
+            matchesPrice = price < 100000;
+            break;
+          case '100-150':
+            matchesPrice = price >= 100000 && price < 150000;
+            break;
+          case '150-200':
+            matchesPrice = price >= 150000 && price < 200000;
+            break;
+          case '200-250':
+            matchesPrice = price >= 200000 && price < 250000;
+            break;
+          case '250-300':
+            matchesPrice = price >= 250000 && price < 300000;
+            break;
+          case 'over300':
+            matchesPrice = price >= 300000;
+            break;
+          default:
+            matchesPrice = true;
+        }
+      }
+
+      return matchesSearch && matchesSport && matchesRating && matchesPrice;
+    });
 
   // Pagination logic
   const totalPages = Math.ceil(filteredFields.length / FIELDS_PER_PAGE);
@@ -155,7 +178,7 @@ export const FieldDiscoveryPage: React.FC = () => {
         <div className="text-center">
           <p className="text-red-600 mb-4">{error}</p>
           <button
-            onClick={fetchAllFields}
+            onClick={fetchServerFields}
             className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
           >
             Thử lại
@@ -422,7 +445,7 @@ export const FieldDiscoveryPage: React.FC = () => {
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-xs text-green-700">{field.reviews} đánh giá</div>
+                    <div className="text-xs text-green-700">{field.bookings} lượt đặt</div>
                   </div>
                 </div>
 

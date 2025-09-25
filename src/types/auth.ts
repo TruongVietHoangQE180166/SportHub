@@ -16,16 +16,50 @@ export interface AuthUser {
     twitter?: string;
     linkedin?: string;
     instagram?: string;
+    // Additional fields based on API response
+    createdDate?: string;
+    updatedDate?: string;
+    nickName?: string;
+    fullName?: string;
+    dateOfBirth?: string;
+    gender?: string;
+    addresses?: {
+        id: string;
+        createdBy: string;
+        updatedBy: string;
+        createdDate: string;
+        updatedDate: string;
+        address: string;
+        other: string;
+        default: boolean;
+    }[];
+    information?: {
+        id: string;
+        createdBy: string;
+        updatedBy: string;
+        createdDate: string;
+        updatedDate: string;
+        facebook: string;
+        instagram: string;
+        tiktok: string;
+        zalo: string;
+        twitter: string;
+    };
+    bankNo?: string;
+    accountNo?: string;
+    bankName?: string;
+    qrCode?: string;
+    userId?: string;
 }
   
 export interface RegisterData {
-    name: string;
-    email: string;
+    username: string;
     password: string; 
+    email: string;
 }
   
 export interface LoginCredentials {
-    email: string;
+    username: string;
     password: string;
 }
   
@@ -41,6 +75,8 @@ export interface AuthActions {
     logout: () => void;
     updateProfile: (profileData: Partial<AuthUser>) => Promise<void>;
     changePassword: (params: { currentPassword: string; newPassword: string }) => Promise<void>;
+    sendOTP: (email: string) => Promise<void>;
+    verifyOTP: (email: string, otp: string) => Promise<void>;
 }
   
 export type AuthStore = AuthState & AuthActions;

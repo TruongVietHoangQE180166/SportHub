@@ -7,13 +7,22 @@ import {
   getSubCourts,
   getTimeSlots,
   getOwnerByField,
-  getReviewsByField
+  getReviewsByField,
+  getAllFieldServer,
+  getFieldDetailServer,
+  getSmallFieldBookings,
+  createBooking,
+  createPayment,
+  getOrderStatus,
+  getUserOrders,
+  cancelBooking
 } from '../services/fieldService';
-import { Field, MainSport, SubCourt, TimeSlot, Owner, Review } from '../types/field';
+import { Field, MainSport, SubCourt, TimeSlot, Owner, Review, ServerField, FieldBooking, BookingResponse, CreateBookingRequest, CreateBookingResponse, PaymentRequest, PaymentResponse, UserOrdersResponse } from '../types/field';
 
 interface FieldState {
   popularFields: Field[];
   allFields: Field[];
+  serverFields: ServerField[];
   mainSports: MainSport[];
   fieldsBySport: Field[];
   subCourts: SubCourt[];
@@ -22,20 +31,34 @@ interface FieldState {
   error: string | null;
   owner: Owner | null;
   reviews: Review[];
+  selectedField: ServerField | null;
+  smallFieldBookings: FieldBooking[];
+  totalBookings: number;
+  orderStatus: any | null;
+  userOrders: UserOrdersResponse | null; // Add user orders state
   
   fetchPopularFields: () => Promise<void>;
   fetchAllFields: () => Promise<void>;
+  fetchServerFields: () => Promise<void>;
+  fetchFieldDetail: (fieldId: string) => Promise<void>;
   fetchMainSports: () => Promise<void>;
   fetchFieldsBySport: (sport: string) => Promise<void>;
   fetchSubCourts: (fieldId: number) => Promise<void>;
   fetchTimeSlots: (fieldId: number, subCourtId: string) => Promise<void>;
   fetchOwnerByField: (fieldId: number) => Promise<void>;
   fetchReviewsByField: (fieldId: number) => Promise<void>;
+  fetchSmallFieldBookings: (smallFieldId: string) => Promise<void>;
+  createBooking: (bookingData: CreateBookingRequest) => Promise<CreateBookingResponse>;
+  createPayment: (paymentData: PaymentRequest) => Promise<PaymentResponse>;
+  fetchOrderStatus: (orderId: string) => Promise<void>;
+  fetchUserOrders: (userId: string) => Promise<void>; // Add user orders action
+  cancelBooking: (bookingId: string, bookingData: any) => Promise<any>; // Add cancel booking action
 }
 
 export const useFieldStore = create<FieldState>((set) => ({
   popularFields: [],
   allFields: [],
+  serverFields: [],
   mainSports: [],
   fieldsBySport: [],
   subCourts: [],
@@ -44,6 +67,11 @@ export const useFieldStore = create<FieldState>((set) => ({
   error: null,
   owner: null,
   reviews: [],
+  selectedField: null,
+  smallFieldBookings: [],
+  totalBookings: 0,
+  orderStatus: null,
+  userOrders: null, // Initialize user orders state
 
   fetchPopularFields: async () => {
     set({ loading: true, error: null });
@@ -146,6 +174,107 @@ export const useFieldStore = create<FieldState>((set) => ({
       set({ reviews, loading: false });
     } catch {
       set({ reviews: [], error: 'Failed to fetch reviews', loading: false });
+    }
+  },
+
+  fetchServerFields: async () => {
+    set({ loading: true, error: null });
+    try {
+      const { data } = await getAllFieldServer();
+      set({ serverFields: data, loading: false });
+    } catch {
+      set({ serverFields: [], error: 'Failed to fetch server fields', loading: false });
+    }
+  },
+
+  fetchFieldDetail: async (fieldId: string) => {
+    set({ loading: true, error: null });
+    try {
+      const fieldDetail = await getFieldDetailServer(fieldId);
+      set({ selectedField: fieldDetail, loading: false });
+    } catch (error) {
+      set({ selectedField: null, error: 'Failed to fetch field detail', loading: false });
+      throw error;
+    }
+  },
+
+  fetchSmallFieldBookings: async (smallFieldId: string) => {
+    set({ loading: true, error: null });
+    try {
+      const response: BookingResponse = await getSmallFieldBookings(smallFieldId);
+      set({ 
+        smallFieldBookings: response.data.content, 
+        totalBookings: response.data.totalElement,
+        loading: false 
+      });
+    } catch (error) {
+      set({ 
+        smallFieldBookings: [], 
+        totalBookings: 0,
+        error: 'Failed to fetch small field bookings', 
+        loading: false 
+      });
+      throw error;
+    }
+  },
+
+  createBooking: async (bookingData: CreateBookingRequest) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await createBooking(bookingData);
+      set({ loading: false });
+      return response;
+    } catch (error) {
+      set({ error: 'Failed to create booking', loading: false });
+      throw error;
+    }
+  },
+
+  createPayment: async (paymentData: PaymentRequest) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await createPayment(paymentData);
+      set({ loading: false });
+      return response;
+    } catch (error) {
+      set({ error: 'Failed to create payment', loading: false });
+      throw error;
+    }
+  },
+
+  fetchOrderStatus: async (orderId: string) => {
+    set({ loading: true, error: null });
+    try {
+      const status = await getOrderStatus(orderId);
+      set({ orderStatus: status, loading: false });
+    } catch (error) {
+      set({ orderStatus: null, error: 'Failed to fetch order status', loading: false });
+      throw error;
+    }
+  },
+
+  // Add the fetchUserOrders action
+  fetchUserOrders: async (userId: string) => {
+    set({ loading: true, error: null });
+    try {
+      const orders = await getUserOrders(userId);
+      set({ userOrders: orders, loading: false });
+    } catch (error) {
+      set({ userOrders: null, error: 'Failed to fetch user orders', loading: false });
+      throw error;
+    }
+  },
+
+  // Add the cancelBooking action
+  cancelBooking: async (bookingId: string, bookingData: any) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await cancelBooking(bookingId, bookingData);
+      set({ loading: false });
+      return response;
+    } catch (error) {
+      set({ error: 'Failed to cancel booking', loading: false });
+      throw error;
     }
   }
 }));

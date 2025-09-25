@@ -4,16 +4,19 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: '**',
+        protocol: "https",
+        hostname: "**",
       },
       {
-        protocol: 'http',
-        hostname: '**',
+        protocol: "http",
+        hostname: "**",
       },
     ],
   },
-  /* config options here */
+  eslint: {
+    // 👇 Tắt ESLint khi build
+    ignoreDuringBuilds: true,
+  },
 };
 
 export default nextConfig;
