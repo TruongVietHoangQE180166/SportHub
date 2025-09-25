@@ -4,23 +4,22 @@ import {
   Eye, 
   EyeOff, 
   User, 
-  MapPin, 
   Lock, 
   Edit2, 
   Save, 
   X, 
   Facebook, 
   Twitter, 
-  Linkedin, 
   Instagram, 
   Camera, 
   Shield, 
   Phone,
-  Mail,
   Globe,
-  Hash,
-  FileText,
-  AlertCircle
+  AlertCircle,
+  ChevronDown,
+  Calendar,
+  Users,
+  AlertTriangle
 } from 'lucide-react';
 import Image from 'next/image';
 import { useAuthStore } from "@/stores/authStore";
@@ -37,6 +36,9 @@ interface InlineInputProps {
   onCancel: () => void;
   placeholder?: string;
   multiline?: boolean;
+  // Add new props for special input types
+  inputType?: 'text' | 'textarea' | 'select' | 'date' | 'dropdown';
+  options?: { value: string; label: string }[]; // For select inputs
 }
 
 const InlineInput: React.FC<InlineInputProps> = ({
@@ -50,10 +52,13 @@ const InlineInput: React.FC<InlineInputProps> = ({
   onSave,
   onCancel,
   placeholder = "",
-  multiline = false
+  multiline = false,
+  inputType = 'text',
+  options = []
 }) => {
   const [tempValue, setTempValue] = useState(value);
-  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
+  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => {
     setTempValue(value);
@@ -76,11 +81,17 @@ const InlineInput: React.FC<InlineInputProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !multiline) {
+    if (e.key === 'Enter' && !multiline && inputType !== 'textarea') {
       handleSave();
     } else if (e.key === 'Escape') {
       handleCancel();
     }
+  };
+
+  // Handle dropdown option selection
+  const handleOptionSelect = (optionValue: string) => {
+    setTempValue(optionValue);
+    setDropdownOpen(false);
   };
 
   return (
@@ -94,9 +105,15 @@ const InlineInput: React.FC<InlineInputProps> = ({
             className="flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-xl cursor-pointer hover:border-green-300 hover:bg-green-50/30 transition-all duration-200 group"
             onClick={onEdit}
           >
-            {icon && <span className="text-gray-500">{icon}</span>}
-            <span className="text-gray-900 font-medium flex-1">{value || placeholder}</span>
-            <Edit2 className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+            {icon && <span className="text-gray-500 flex-shrink-0">{icon}</span>}
+            <span className="text-gray-900 font-medium flex-1 truncate">
+              {inputType === 'select' || inputType === 'dropdown'
+                ? (value && options.length > 0
+                    ? options.find(option => option.value === value)?.label || value
+                    : placeholder)
+                : value || placeholder}
+            </span>
+            <Edit2 className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0" />
           </div>
         ) : (
           <div className="flex items-center gap-2">
@@ -106,7 +123,7 @@ const InlineInput: React.FC<InlineInputProps> = ({
                   {icon}
                 </div>
               )}
-              {multiline ? (
+              {inputType === 'textarea' ? (
                 <textarea
                   ref={inputRef as React.RefObject<HTMLTextAreaElement>}
                   value={tempValue}
@@ -115,6 +132,51 @@ const InlineInput: React.FC<InlineInputProps> = ({
                   className={`w-full px-4 py-3 border-2 border-green-500 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-600 resize-none transition-all duration-200 ${icon ? 'pl-10' : ''}`}
                   placeholder={placeholder}
                   rows={3}
+                />
+              ) : inputType === 'select' || inputType === 'dropdown' ? (
+                <div className="relative">
+                  <button
+                    type="button"
+                    className={`w-full px-4 py-3 text-left bg-white border-2 border-gray-200 rounded-xl hover:border-green-500 focus:border-green-500 focus:outline-none transition-all flex items-center justify-between text-sm font-medium ${icon ? 'pl-10' : ''}`}
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                  >
+                    {icon && (
+                      <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                        {icon}
+                      </div>
+                    )}
+                    <span className="text-gray-700 truncate flex items-center">
+                      {tempValue 
+                        ? options.find(o => o.value === tempValue)?.label || tempValue 
+                        : placeholder}
+                    </span>
+                    <ChevronDown className="w-4 h-4 text-gray-500 flex-shrink-0 ml-2" />
+                  </button>
+                  
+                  {dropdownOpen && (
+                    <div className="absolute top-full left-0 right-0 z-50 mt-2 bg-white border-2 border-green-500 rounded-xl shadow-2xl">
+                      {options.map(option => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          className={`w-full text-left px-4 py-3 hover:bg-green-50 transition-all text-sm font-medium first:rounded-t-xl last:rounded-b-xl flex items-center ${
+                            tempValue === option.value ? 'bg-green-100 text-green-700' : 'text-gray-700'
+                          }`}
+                          onClick={() => handleOptionSelect(option.value)}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : inputType === 'date' ? (
+                <input
+                  ref={inputRef as React.RefObject<HTMLInputElement>}
+                  type="date"
+                  value={tempValue}
+                  onChange={(e) => setTempValue(e.target.value)}
+                  className={`w-full px-4 py-3 border-2 border-green-500 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-600 transition-all duration-200 ${icon ? 'pl-10' : ''}`}
                 />
               ) : (
                 <input
@@ -130,13 +192,13 @@ const InlineInput: React.FC<InlineInputProps> = ({
             </div>
             <button
               onClick={handleSave}
-              className="p-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors duration-200 shadow-sm"
+              className="p-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors duration-200 shadow-sm flex-shrink-0"
             >
               <Save className="w-4 h-4" />
             </button>
             <button
               onClick={handleCancel}
-              className="p-2.5 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition-colors duration-200 shadow-sm"
+              className="p-2.5 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition-colors duration-200 shadow-sm flex-shrink-0"
             >
               <X className="w-4 h-4" />
             </button>
@@ -197,38 +259,77 @@ export default function ProfilePage() {
   const updateProfile = useAuthStore((state) => state.updateProfile);
   const changePassword = useAuthStore((state) => state.changePassword);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const fetchUserProfile = useAuthStore((state) => state.fetchUserProfile);
+  const uploadImage = useAuthStore((state) => state.uploadImage);
 
   // Form states (sync with user)
   const [formData, setFormData] = useState({
-    name: user?.name || "",
-    email: user?.email || "",
-    phone: user?.phone || "",
-    bio: user?.bio || "",
-    country: user?.country || "",
-    cityState: user?.cityState || "",
-    postalCode: user?.postalCode || "",
-    taxId: user?.taxId || "",
-    facebook: user?.facebook || "",
-    twitter: user?.twitter || "",
-    linkedin: user?.linkedin || "",
-    instagram: user?.instagram || "",
+    name: "",
+    email: "",
+    phone: "",
+    country: "",
+    cityState: "",
+    postalCode: "",
+    taxId: "",
+    facebook: "",
+    twitter: "",
+    instagram: "",
+    nickName: "",
+    fullName: "",
+    dateOfBirth: "",
+    gender: "",
   });
 
+  // Fetch user profile when component mounts and user is authenticated
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      if (isAuthenticated && user?.id) {
+        try {
+          const userProfile = await fetchUserProfile(user.id);
+          // Update form data with fetched profile
+          setFormData({
+            name: userProfile.name || "",
+            email: userProfile.email || "",
+            phone: userProfile.phone || "",
+            country: userProfile.country || "",
+            cityState: userProfile.cityState || "",
+            postalCode: userProfile.postalCode || "",
+            taxId: userProfile.taxId || "",
+            facebook: userProfile.facebook || "",
+            twitter: userProfile.twitter || "",
+            instagram: userProfile.instagram || "",
+            nickName: userProfile.nickName || "",
+            fullName: userProfile.fullName || "",
+            dateOfBirth: userProfile.dateOfBirth || "",
+            gender: userProfile.gender || "",
+          });
+        } catch (error) {
+          console.error("Failed to fetch user profile:", error);
+        }
+      }
+    };
+
+    loadUserProfile();
+  }, [isAuthenticated, user?.id, fetchUserProfile]);
+
+  // Update form data when user object changes
   useEffect(() => {
     if (user) {
       setFormData({
         name: user.name || "",
         email: user.email || "",
         phone: user.phone || "",
-        bio: user.bio || "",
         country: user.country || "",
         cityState: user.cityState || "",
         postalCode: user.postalCode || "",
         taxId: user.taxId || "",
         facebook: user.facebook || "",
         twitter: user.twitter || "",
-        linkedin: user.linkedin || "",
         instagram: user.instagram || "",
+        nickName: user.nickName || "",
+        fullName: user.fullName || "",
+        dateOfBirth: user.dateOfBirth || "",
+        gender: user.gender || "",
       });
     }
   }, [user]);
@@ -242,27 +343,115 @@ export default function ProfilePage() {
   // Avatar states
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
-  // Handle avatar file selection
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle avatar file selection and upload
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setAvatarPreview(URL.createObjectURL(file));
-      // Nếu muốn cập nhật avatar lên store, có thể gọi updateProfile({ avatar: ... }) ở đây
+      try {
+        // Show loading state
+        setLoading(true);
+        
+        // Upload the image first
+        const imageUrl = await uploadImage(file);
+        
+        // Update the avatar preview
+        setAvatarPreview(imageUrl);
+        
+        // Update the profile with the new avatar URL
+        await handleFieldUpdate('avatar', imageUrl);
+      } catch (err: unknown) {
+        // Set error and show modal
+        const error = err as Error;
+        const errorMessage = error.message || "Tải ảnh lên thất bại";
+        setError(errorMessage);
+        setShowErrorModal(true);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
-  // Handle field updates
-  const handleFieldUpdate = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    updateProfile({ [field]: value });
+  // Add loading and error states
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+
+  // Handle field updates with loading and error handling
+  const handleFieldUpdate = async (field: string, value: string) => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      setFormData(prev => ({ ...prev, [field]: value }));
+      
+      // Prepare the data to match the API structure
+      const profileData: Record<string, string | undefined> = {
+        [field]: value
+      };
+      
+      // Handle special fields that need to be mapped differently
+      if (field === 'nickName') profileData.nickName = value;
+      if (field === 'fullName') profileData.fullName = value;
+      if (field === 'phone') profileData.phoneNumber = value;
+      if (field === 'dateOfBirth') {
+        // Format date properly for API
+        profileData.dateOfBirth = value ? new Date(value).toISOString() : undefined;
+      }
+      if (field === 'gender') profileData.gender = value;
+      if (field === 'facebook') profileData.facebook = value;
+      if (field === 'twitter') profileData.twitter = value;
+      if (field === 'instagram') profileData.instagram = value;
+      // Handle avatar field
+      if (field === 'avatar') profileData.avatar = value;
+      
+      await updateProfile(profileData);
+      
+      // Reload profile data to ensure synchronization
+      if (user?.id) {
+        const updatedProfile = await fetchUserProfile(user.id);
+        setFormData({
+          name: updatedProfile.name || "",
+          email: updatedProfile.email || "",
+          phone: updatedProfile.phone || "",
+          country: updatedProfile.country || "",
+          cityState: updatedProfile.cityState || "",
+          postalCode: updatedProfile.postalCode || "",
+          taxId: updatedProfile.taxId || "",
+          facebook: updatedProfile.facebook || "",
+          twitter: updatedProfile.twitter || "",
+          instagram: updatedProfile.instagram || "",
+          nickName: updatedProfile.nickName || "",
+          fullName: updatedProfile.fullName || "",
+          dateOfBirth: updatedProfile.dateOfBirth || "",
+          gender: updatedProfile.gender || "",
+        });
+      }
+      
+      setEditingField(null);
+    } catch (err: unknown) {
+      // Revert the form data change
+      setFormData(prev => ({ ...prev, [field]: formData[field as keyof typeof formData] }));
+      
+      // Set error and show modal
+      const error = err as Error;
+      const errorMessage = error.message || "Cập nhật thông tin thất bại";
+      setError(errorMessage);
+      setShowErrorModal(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Handle password change
+  // Handle password change with loading and error handling
   const handlePasswordChange = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       alert("New passwords don't match!");
       return;
     }
+    
+    setLoading(true);
+    setError(null);
+    
     try {
       await changePassword({
         currentPassword: passwordData.currentPassword,
@@ -275,13 +464,20 @@ export default function ProfilePage() {
         newPassword: "",
         confirmPassword: ""
       });
-    } catch (error: unknown) {
-      if (typeof error === 'object' && error && 'message' in error) {
-        alert((error as { message?: string }).message || "Password change failed");
-      } else {
-        alert("Password change failed");
-      }
+    } catch (err: unknown) {
+      const error = err as Error;
+      const errorMessage = error.message || "Thay đổi mật khẩu thất bại";
+      setError(errorMessage);
+      setShowErrorModal(true);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  // Close error modal
+  const closeErrorModal = () => {
+    setShowErrorModal(false);
+    setError(null);
   };
 
   if (!isAuthenticated || !user) {
@@ -290,20 +486,43 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900">Profile Settings</h1>
-              <p className="text-gray-600 mt-2 text-lg">Manage your account information and preferences</p>
-            </div>
-            <div className="flex items-center gap-3 px-5 py-3 bg-green-50 rounded-xl border border-green-200">
-              <Shield className="w-5 h-5 text-green-600" />
-              <span className="text-sm font-semibold text-green-800">Verified Account</span>
+      {/* Error Modal */}
+      {showErrorModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+            <div className="text-center">
+              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100">
+                <AlertTriangle className="h-8 w-8 text-red-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mt-4">Có lỗi xảy ra</h3>
+              <div className="mt-4">
+                <p className="text-gray-600 break-words">{error}</p>
+              </div>
+              <div className="mt-6">
+                <button
+                  type="button"
+                  className="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors duration-200 font-medium"
+                  onClick={closeErrorModal}
+                >
+                  Đóng
+                </button>
+              </div>
             </div>
           </div>
         </div>
+      )}
+
+      {/* Loading overlay */}
+      {loading && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 flex flex-col items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mb-4"></div>
+            <p className="text-gray-700 font-medium">Đang xử lý...</p>
+          </div>
+        </div>
+      )}
+
+      <div className="max-w-7xl mx-auto">
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Profile Overview */}
@@ -332,30 +551,40 @@ export default function ProfilePage() {
                     />
                   </label>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 mt-6">
-                  {formData.name}
+                <h2 className="text-2xl font-bold text-gray-900 mt-6 truncate">
+                  {formData.nickName || formData.name}
                 </h2>
-                <p className="text-gray-600 mt-2 text-base">{formData.bio}</p>
-                <div className="flex items-center justify-center gap-2 mt-3 text-sm text-gray-500">
-                  <MapPin className="w-4 h-4" />
-                  <span>{formData.cityState}</span>
-                </div>
               </div>
 
               {/* Social Links */}
               <div className="border-t border-gray-100 pt-8">
-                <h3 className="text-sm font-semibold text-gray-700 mb-6 text-center">Social Links</h3>
+                <h3 className="text-sm font-semibold text-gray-700 mb-6 text-center">Liên kết mạng xã hội</h3>
                 <div className="flex justify-center gap-4">
-                  <a href={formData.facebook} className="p-3 bg-gray-50 rounded-xl hover:bg-green-50 hover:border-green-200 border border-gray-200 transition-all duration-200">
+                  <a 
+                    href={formData.facebook} 
+                    className="p-3 bg-gray-50 rounded-xl hover:bg-green-50 hover:border-green-200 border border-gray-200 transition-all duration-200"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={formData.facebook}
+                  >
                     <Facebook className="w-5 h-5 text-gray-600 hover:text-green-600" />
                   </a>
-                  <a href={formData.twitter} className="p-3 bg-gray-50 rounded-xl hover:bg-green-50 hover:border-green-200 border border-gray-200 transition-all duration-200">
+                  <a 
+                    href={formData.twitter} 
+                    className="p-3 bg-gray-50 rounded-xl hover:bg-green-50 hover:border-green-200 border border-gray-200 transition-all duration-200"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={formData.twitter}
+                  >
                     <Twitter className="w-5 h-5 text-gray-600 hover:text-green-600" />
                   </a>
-                  <a href={formData.linkedin} className="p-3 bg-gray-50 rounded-xl hover:bg-green-50 hover:border-green-200 border border-gray-200 transition-all duration-200">
-                    <Linkedin className="w-5 h-5 text-gray-600 hover:text-green-600" />
-                  </a>
-                  <a href={formData.instagram} className="p-3 bg-gray-50 rounded-xl hover:bg-green-50 hover:border-green-200 border border-gray-200 transition-all duration-200">
+                  <a 
+                    href={formData.instagram} 
+                    className="p-3 bg-gray-50 rounded-xl hover:bg-green-50 hover:border-green-200 border border-gray-200 transition-all duration-200"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={formData.instagram}
+                  >
                     <Instagram className="w-5 h-5 text-gray-600 hover:text-green-600" />
                   </a>
                 </div>
@@ -371,33 +600,33 @@ export default function ProfilePage() {
                 <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
                   <User className="w-5 h-5 text-green-600" />
                 </div>
-                Personal Information
+                Thông tin cá nhân
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <InlineInput
-                  label="Name"
-                  value={formData.name}
-                  onChange={(value) => handleFieldUpdate('name', value)}
-                  isEditing={editingField === 'name'}
-                  onEdit={() => setEditingField('name')}
+                  label="Tên người dùng"
+                  value={formData.nickName}
+                  onChange={(value) => handleFieldUpdate('nickName', value)}
+                  isEditing={editingField === 'nickName'}
+                  onEdit={() => setEditingField('nickName')}
                   onSave={() => setEditingField(null)}
                   onCancel={() => setEditingField(null)}
-                  placeholder="Enter your name"
+                  placeholder="Nhập tên người dùng của bạn"
+                  icon={<User className="w-4 h-4" />}
                 />
                 <InlineInput
-                  label="Email Address"
-                  value={formData.email}
-                  onChange={(value) => handleFieldUpdate('email', value)}
-                  type="email"
-                  icon={<Mail className="w-4 h-4" />}
-                  isEditing={editingField === 'email'}
-                  onEdit={() => setEditingField('email')}
+                  label="Họ và tên"
+                  value={formData.fullName}
+                  onChange={(value) => handleFieldUpdate('fullName', value)}
+                  isEditing={editingField === 'fullName'}
+                  onEdit={() => setEditingField('fullName')}
                   onSave={() => setEditingField(null)}
                   onCancel={() => setEditingField(null)}
-                  placeholder="Enter email address"
+                  placeholder="Nhập họ và tên của bạn"
+                  icon={<Users className="w-4 h-4" />}
                 />
                 <InlineInput
-                  label="Phone Number"
+                  label="Số điện thoại"
                   value={formData.phone}
                   onChange={(value) => handleFieldUpdate('phone', value)}
                   type="tel"
@@ -406,77 +635,35 @@ export default function ProfilePage() {
                   onEdit={() => setEditingField('phone')}
                   onSave={() => setEditingField(null)}
                   onCancel={() => setEditingField(null)}
-                  placeholder="Enter phone number"
-                />
-                <div className="md:col-span-2">
-                  <InlineInput
-                    label="Bio"
-                    value={formData.bio}
-                    onChange={(value) => handleFieldUpdate('bio', value)}
-                    icon={<FileText className="w-4 h-4" />}
-                    isEditing={editingField === 'bio'}
-                    onEdit={() => setEditingField('bio')}
-                    onSave={() => setEditingField(null)}
-                    onCancel={() => setEditingField(null)}
-                    placeholder="Tell us about yourself"
-                    multiline
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Address Information */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-8 flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-                  <MapPin className="w-5 h-5 text-green-600" />
-                </div>
-                Address Information
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <InlineInput
-                  label="Country"
-                  value={formData.country}
-                  onChange={(value) => handleFieldUpdate('country', value)}
-                  icon={<Globe className="w-4 h-4" />}
-                  isEditing={editingField === 'country'}
-                  onEdit={() => setEditingField('country')}
-                  onSave={() => setEditingField(null)}
-                  onCancel={() => setEditingField(null)}
-                  placeholder="Enter country"
+                  placeholder="Nhập số điện thoại"
                 />
                 <InlineInput
-                  label="City/State"
-                  value={formData.cityState}
-                  onChange={(value) => handleFieldUpdate('cityState', value)}
-                  icon={<MapPin className="w-4 h-4" />}
-                  isEditing={editingField === 'cityState'}
-                  onEdit={() => setEditingField('cityState')}
+                  label="Ngày sinh"
+                  value={formData.dateOfBirth ? new Date(formData.dateOfBirth).toISOString().split('T')[0] : ''}
+                  onChange={(value) => handleFieldUpdate('dateOfBirth', value)}
+                  isEditing={editingField === 'dateOfBirth'}
+                  onEdit={() => setEditingField('dateOfBirth')}
                   onSave={() => setEditingField(null)}
                   onCancel={() => setEditingField(null)}
-                  placeholder="Enter city and state"
+                  inputType="date"
+                  placeholder="Nhập ngày sinh của bạn"
+                  icon={<Calendar className="w-4 h-4" />}
                 />
                 <InlineInput
-                  label="Postal Code"
-                  value={formData.postalCode}
-                  onChange={(value) => handleFieldUpdate('postalCode', value)}
-                  icon={<Hash className="w-4 h-4" />}
-                  isEditing={editingField === 'postalCode'}
-                  onEdit={() => setEditingField('postalCode')}
+                  label="Giới tính"
+                  value={formData.gender}
+                  onChange={(value) => handleFieldUpdate('gender', value)}
+                  isEditing={editingField === 'gender'}
+                  onEdit={() => setEditingField('gender')}
                   onSave={() => setEditingField(null)}
                   onCancel={() => setEditingField(null)}
-                  placeholder="Enter postal code"
-                />
-                <InlineInput
-                  label="Tax ID"
-                  value={formData.taxId}
-                  onChange={(value) => handleFieldUpdate('taxId', value)}
-                  icon={<Hash className="w-4 h-4" />}
-                  isEditing={editingField === 'taxId'}
-                  onEdit={() => setEditingField('taxId')}
-                  onSave={() => setEditingField(null)}
-                  onCancel={() => setEditingField(null)}
-                  placeholder="Enter tax ID"
+                  inputType="dropdown"
+                  options={[
+                    { value: 'MALE', label: 'Nam' },
+                    { value: 'FEMALE', label: 'Nữ' }
+                  ]}
+                  placeholder="Chọn giới tính"
+                  icon={<Users className="w-4 h-4" />}
                 />
               </div>
             </div>
@@ -487,7 +674,7 @@ export default function ProfilePage() {
                 <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
                   <Globe className="w-5 h-5 text-green-600" />
                 </div>
-                Social Media Links
+                Liên kết mạng xã hội
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <InlineInput
@@ -499,7 +686,7 @@ export default function ProfilePage() {
                   onEdit={() => setEditingField('facebook')}
                   onSave={() => setEditingField(null)}
                   onCancel={() => setEditingField(null)}
-                  placeholder="Facebook profile URL"
+                  placeholder="URL trang cá nhân Facebook"
                 />
                 <InlineInput
                   label="Twitter"
@@ -510,18 +697,7 @@ export default function ProfilePage() {
                   onEdit={() => setEditingField('twitter')}
                   onSave={() => setEditingField(null)}
                   onCancel={() => setEditingField(null)}
-                  placeholder="Twitter profile URL"
-                />
-                <InlineInput
-                  label="LinkedIn"
-                  value={formData.linkedin}
-                  onChange={(value) => handleFieldUpdate('linkedin', value)}
-                  icon={<Linkedin className="w-4 h-4" />}
-                  isEditing={editingField === 'linkedin'}
-                  onEdit={() => setEditingField('linkedin')}
-                  onSave={() => setEditingField(null)}
-                  onCancel={() => setEditingField(null)}
-                  placeholder="LinkedIn profile URL"
+                  placeholder="URL trang cá nhân Twitter"
                 />
                 <InlineInput
                   label="Instagram"
@@ -532,7 +708,7 @@ export default function ProfilePage() {
                   onEdit={() => setEditingField('instagram')}
                   onSave={() => setEditingField(null)}
                   onCancel={() => setEditingField(null)}
-                  placeholder="Instagram profile URL"
+                  placeholder="URL trang cá nhân Instagram"
                 />
               </div>
             </div>
@@ -543,7 +719,7 @@ export default function ProfilePage() {
                 <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
                   <Lock className="w-5 h-5 text-green-600" />
                 </div>
-                Password & Security
+                Mật khẩu & Bảo mật
               </h3>
               
               {!editingPassword ? (
@@ -554,16 +730,15 @@ export default function ProfilePage() {
                         <Lock className="w-6 h-6 text-gray-500" />
                       </div>
                       <div>
-                        <p className="font-semibold text-gray-900 text-lg">Password</p>
-                        <p className="text-sm text-gray-500">Last changed 2 months ago</p>
+                        <p className="font-semibold text-gray-900 text-lg truncate">Mật khẩu</p>
                       </div>
                     </div>
                     <button
                       onClick={() => setEditingPassword(true)}
-                      className="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors duration-200 flex items-center gap-2 font-medium"
+                      className="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors duration-200 flex items-center gap-2 font-medium whitespace-nowrap"
                     >
                       <Edit2 className="w-4 h-4" />
-                      Change Password
+                      Thay đổi mật khẩu
                     </button>
                   </div>
                 </div>
@@ -572,7 +747,7 @@ export default function ProfilePage() {
                   <div className="space-y-6">
                     <div className="relative">
                       <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                        Current Password
+                        Mật khẩu hiện tại
                       </label>
                       <div className="relative">
                         <input
@@ -580,7 +755,7 @@ export default function ProfilePage() {
                           value={passwordData.currentPassword}
                           onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
                           className="w-full px-4 py-3 pr-12 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-600 transition-all duration-200"
-                          placeholder="Enter current password"
+                          placeholder="Nhập mật khẩu hiện tại"
                         />
                         <button
                           type="button"
@@ -594,7 +769,7 @@ export default function ProfilePage() {
 
                     <div className="relative">
                       <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                        New Password
+                        Mật khẩu mới
                       </label>
                       <div className="relative">
                         <input
@@ -602,7 +777,7 @@ export default function ProfilePage() {
                           value={passwordData.newPassword}
                           onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
                           className="w-full px-4 py-3 pr-12 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-600 transition-all duration-200"
-                          placeholder="Enter new password"
+                          placeholder="Nhập mật khẩu mới"
                         />
                         <button
                           type="button"
@@ -617,7 +792,7 @@ export default function ProfilePage() {
 
                     <div className="relative">
                       <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                        Confirm New Password
+                        Xác nhận mật khẩu mới
                       </label>
                       <div className="relative">
                         <input
@@ -625,7 +800,7 @@ export default function ProfilePage() {
                           value={passwordData.confirmPassword}
                           onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
                           className="w-full px-4 py-3 pr-12 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-600 transition-all duration-200"
-                          placeholder="Confirm new password"
+                          placeholder="Xác nhận mật khẩu mới"
                         />
                         <button
                           type="button"
@@ -638,7 +813,7 @@ export default function ProfilePage() {
                       {passwordData.confirmPassword && passwordData.newPassword !== passwordData.confirmPassword && (
                         <div className="flex items-center gap-2 mt-3">
                           <AlertCircle className="w-4 h-4 text-red-500" />
-                          <span className="text-sm text-red-600 font-medium">Passwords do not match</span>
+                          <span className="text-sm text-red-600 font-medium">Mật khẩu không khớp</span>
                         </div>
                       )}
                     </div>
@@ -647,11 +822,11 @@ export default function ProfilePage() {
                   <div className="flex gap-4">
                     <button
                       onClick={handlePasswordChange}
-                      disabled={!passwordData.currentPassword || !passwordData.newPassword || passwordData.newPassword !== passwordData.confirmPassword}
+                      disabled={!passwordData.currentPassword || !passwordData.newPassword || passwordData.newPassword !== passwordData.confirmPassword || loading}
                       className="px-8 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-medium"
                     >
                       <Save className="w-4 h-4" />
-                      Update Password
+                      Cập nhật mật khẩu
                     </button>
                     <button
                       onClick={() => {
@@ -665,7 +840,7 @@ export default function ProfilePage() {
                       className="px-8 py-3 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition-colors duration-200 flex items-center gap-2 font-medium"
                     >
                       <X className="w-4 h-4" />
-                      Cancel
+                      Hủy
                     </button>
                   </div>
                 </div>

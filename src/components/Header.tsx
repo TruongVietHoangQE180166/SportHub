@@ -16,30 +16,41 @@ import {
   BookOpenTextIcon
 } from 'lucide-react';
 import Image from 'next/image';
-import { useAuthStore } from '../stores/authStore';
+import { useAuthStore, rehydrateAuthState } from '../stores/authStore';
 
 export const Header: React.FC = () => {
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname(); 
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const { user, isAuthenticated, logout, fetchUserProfile } = useAuthStore();
   const router = useRouter();
   
   useEffect(() => {
     setMounted(true);
+    // Rehydrate auth state on component mount
+    rehydrateAuthState();
   }, []);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const isScrolled = window.scrollY > 20;
-      setScrolled(isScrolled);
+    // Fetch full user profile if authenticated but user data is minimal
+    const fetchFullUserProfile = async () => {
+      if (isAuthenticated && user?.id) {
+        try {
+          // Check if we have minimal user data (from sessionStorage)
+          // If so, fetch the full profile
+          if (!user.avatar && !user.loyaltyPoints) {
+            await fetchUserProfile(user.id);
+            // The store will automatically update with the full user data
+          }
+        } catch (error) {
+          console.error('Failed to fetch user profile:', error);
+        }
+      }
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    fetchFullUserProfile();
+  }, [isAuthenticated, user?.id, user?.avatar, user?.loyaltyPoints, fetchUserProfile]);
 
   useEffect(() => {
     setMobileMenuOpen(false);
@@ -77,20 +88,20 @@ export const Header: React.FC = () => {
     return (
       <Link
         href={item.href}
-        className={`relative flex items-center space-x-2 px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-300 group ${
+        className={`relative flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 group mx-1 ${
           isActive
             ? 'text-white bg-gradient-to-r from-green-500 to-emerald-600 shadow-lg shadow-green-500/30 transform scale-105'
-            : 'text-gray-700 hover:text-green-800 hover:bg-green-200 hover:shadow-md hover:backdrop-blur-sm hover:scale-105'
+            : 'text-gray-300 hover:text-white'
         }`}
       >
         <Icon className={`w-4 h-4 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 ${
-          isActive ? 'text-white drop-shadow-sm' : 'text-gray-600 group-hover:text-green-600'
+          isActive ? 'text-white drop-shadow-sm' : 'text-gray-400 group-hover:text-white'
         }`} />
         <span className="font-semibold tracking-wide">{item.name}</span>
-        {isActive && (
-          <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-white rounded-full shadow-sm animate-pulse"></div>
+        {/* Uniform hover background effect */}
+        {!isActive && (
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-green-900/30 to-emerald-900/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
         )}
-        <div className={`absolute inset-0 rounded-full bg-gradient-to-r from-green-400/20 to-emerald-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${isActive ? 'opacity-20' : ''}`}></div>
       </Link>
     );
   };
@@ -105,7 +116,7 @@ export const Header: React.FC = () => {
         className={`flex items-center space-x-3 px-4 py-4 rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-105 ${
           isActive
             ? 'text-white bg-gradient-to-r from-green-500 to-emerald-600 shadow-lg shadow-green-500/30'
-            : 'text-gray-700 hover:text-green-600 hover:bg-green-50/80 hover:backdrop-blur-sm'
+            : 'text-gray-300 hover:text-white hover:bg-green-900/50 hover:backdrop-blur-sm'
         }`}
         onClick={() => setMobileMenuOpen(false)}
       >
@@ -117,15 +128,9 @@ export const Header: React.FC = () => {
 
   return (
     <>
-      <header className={`sticky top-0 z-50 transition-all duration-500 ${
-        scrolled 
-          ? 'bg-white/95 shadow-2xl backdrop-saturate-150' 
-          : 'bg-white/95 backdrop-blur-2xl shadow-lg backdrop-saturate-125'
-      }`}>
+      <header className="sticky top-0 z-50 bg-black text-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className={`flex justify-between items-center transition-all duration-500 ${
-            scrolled ? 'h-16' : 'h-20'
-          }`}>
+          <div className="flex justify-between items-center h-20">
             {/* Logo - Cải thiện kích thước và hiệu ứng */}
             <Link href="/" className="flex items-center group">
               <div className="relative">
@@ -134,17 +139,13 @@ export const Header: React.FC = () => {
                   alt="Logo" 
                   width={150}
                   height={80}
-                  className={`transition-all duration-300 drop-shadow-lg object-contain h-24 group-hover:h-28 group-hover:scale-110`}
+                  className="transition-all duration-300 drop-shadow-lg object-contain h-24 group-hover:h-28 group-hover:scale-110"
                 />
               </div>
             </Link>
 
             {/* Desktop Navigation - Cải thiện blur */}
-            <nav className={`hidden lg:flex items-center space-x-1 rounded-full p-2 shadow-inner transition-all duration-500 ${
-              scrolled 
-                ? 'bg-gray-50/50 backdrop-blur-2xl backdrop-saturate-150' 
-                : 'bg-gray-50/70 backdrop-blur-xl backdrop-saturate-125'
-            }`}>
+            <nav className="hidden lg:flex items-center space-x-1 rounded-full p-2 shadow-inner bg-gray-900/70 backdrop-blur-xl backdrop-saturate-125">
               {navigation.map((item) => (
                 <NavigationLink key={item.name} item={item} />
               ))}
@@ -178,8 +179,6 @@ export const Header: React.FC = () => {
                         )}
                       </div>
                     </div>
-                    {/* Online indicator with pulse */}
-                    <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 border-2 border-white rounded-full shadow-sm animate-pulse"></div>
                   </button>
 
                   {/* User Dropdown với blur cải thiện */}
@@ -206,13 +205,7 @@ export const Header: React.FC = () => {
                           </div>
                           <div>
                             <p className="text-base font-bold text-gray-900">{user.name}</p>
-                            <p className="text-sm text-gray-500">{user.email}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2 mt-3">
-                          <div className="flex items-center space-x-2 bg-green-500 px-3 py-1.5 rounded-full">
-                            <Gift className="w-4 h-4 text-white" />
-                            <span className="text-sm font-bold text-white">{user.loyaltyPoints} điểm</span>
+                            <p className="text-sm text-gray-500">{user.nickName}</p>
                           </div>
                         </div>
                       </div>
@@ -251,7 +244,7 @@ export const Header: React.FC = () => {
                 <div className="flex items-center space-x-3">
                   <button
                     onClick={() => router.push('/login')}
-                    className="text-gray-700 hover:text-green-600 font-bold px-5 py-2.5 rounded-full hover:bg-green-50/80 hover:backdrop-blur-sm transition-all duration-300 tracking-wide hover:scale-105"
+                    className="text-white hover:text-green-400 font-bold px-5 py-2.5 rounded-full hover:bg-white/10 hover:backdrop-blur-sm transition-all duration-300 tracking-wide hover:scale-105"
                   >
                     Đăng nhập
                   </button>
@@ -270,12 +263,12 @@ export const Header: React.FC = () => {
                   e.stopPropagation();
                   setMobileMenuOpen(!mobileMenuOpen);
                 }}
-                className="lg:hidden p-2.5 rounded-full hover:bg-green-50/80 hover:backdrop-blur-sm transition-all duration-300 hover:shadow-md hover:scale-110"
+                className="lg:hidden p-2.5 rounded-full hover:bg-white/10 hover:backdrop-blur-sm transition-all duration-300 hover:shadow-md hover:scale-110"
               >
                 {mobileMenuOpen ? (
-                  <X className="w-6 h-6 text-gray-600 transition-transform duration-200 hover:rotate-90" />
+                  <X className="w-6 h-6 text-white transition-transform duration-200 hover:rotate-90" />
                 ) : (
-                  <Menu className="w-6 h-6 text-gray-600 transition-transform duration-200 hover:scale-110" />
+                  <Menu className="w-6 h-6 text-white transition-transform duration-200 hover:scale-110" />
                 )}
               </button>
             </div>
@@ -285,10 +278,8 @@ export const Header: React.FC = () => {
 
       {/* Mobile Navigation Overlay với blur cải thiện */}
       {mobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-xl transition-all duration-300">
-          <div className={`absolute left-0 right-0 bg-white/85 backdrop-blur-3xl backdrop-saturate-150 border-b-2 border-green-100/50 shadow-2xl transition-all duration-500 ${
-            scrolled ? 'top-16' : 'top-20'
-          }`}>
+        <div className="lg:hidden fixed inset-0 z-40 bg-black/80 backdrop-blur-xl transition-all duration-300">
+          <div className="absolute left-0 right-0 top-20 bg-black/95 backdrop-blur-3xl backdrop-saturate-150 border-b-2 border-green-900/50 shadow-2xl transition-all duration-500">
             <div className="px-4 py-6 space-y-3">
               {navigation.map((item) => (
                 <MobileNavigationLink key={item.name} item={item} />
@@ -296,8 +287,8 @@ export const Header: React.FC = () => {
               
               {/* Mobile User Info */}
               {isAuthenticated && user && (
-                <div className="pt-4 border-t-2 border-green-100/50 mt-6">
-                  <div className="flex items-center space-x-4 px-4 py-4 bg-gradient-to-r from-green-50/80 to-emerald-50/80 backdrop-blur-sm rounded-xl border border-green-200/50">
+                <div className="pt-4 border-t-2 border-green-900/50 mt-6">
+                  <div className="flex items-center space-x-4 px-4 py-4 bg-gradient-to-r from-green-900/80 to-emerald-900/80 backdrop-blur-sm rounded-xl border border-green-800/50">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 p-0.5">
                       <div className="w-full h-full rounded-full bg-white p-0.5">
                         {user.avatar ? (
@@ -316,10 +307,10 @@ export const Header: React.FC = () => {
                       </div>
                     </div>
                     <div className="flex-1">
-                      <p className="text-base font-bold text-gray-900">{user.name}</p>
+                      <p className="text-base font-bold text-white">{user.name}</p>
                       <div className="flex items-center space-x-2 mt-1">
-                        <Gift className="w-4 h-4 text-green-600" />
-                        <span className="text-sm text-green-700 font-bold">{user.loyaltyPoints} điểm</span>
+                        <Gift className="w-4 h-4 text-green-400" />
+                        <span className="text-sm text-green-300 font-bold">{user.loyaltyPoints} điểm</span>
                       </div>
                     </div>
                   </div>

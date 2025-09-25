@@ -2,19 +2,27 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFieldStore } from '../../stores/fieldStore';
-import { MapPin, Clock, DollarSign, Info, Star, Phone, Mail, Calendar, Users, LayoutGrid, ChevronDown } from 'lucide-react';
+import { MapPin, Clock, DollarSign, Info, Star, Phone, Mail, Calendar, Users, LayoutGrid, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 
 
 const FieldDetailPage: React.FC<{ fieldId: string }> = ({ fieldId }) => {
   const router = useRouter();
   const {
-    allFields, owner, reviews, loading, error,
-    fetchAllFields, fetchOwnerByField, fetchReviewsByField, fetchSubCourts
+    selectedField, owner, reviews, loading, error,
+    fetchFieldDetail, fetchOwnerByField, fetchReviewsByField, fetchSubCourts
   } = useFieldStore();
 
-  const idNum = Number(fieldId);
-  const field = allFields.find(f => f.id === idNum);
+  // State cho image carousel
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+  // Mock data cho nhiều ảnh (trong thực tế, bạn sẽ lấy từ API)
+  const fieldImages = selectedField && selectedField.images ? 
+    selectedField.images.map((img, index) => 
+      img || `https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg?auto=compress&cs=tinysrgb&w=1200&random=${index}`
+    ) : [
+      'https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg?auto=compress&cs=tinysrgb&w=1200'
+    ];
 
   // State cho filter đánh giá
   const [sortType, setSortType] = useState<'ratingAsc' | 'ratingDesc' | 'dateDesc' | 'dateAsc'>('ratingDesc');
@@ -25,22 +33,53 @@ const FieldDetailPage: React.FC<{ fieldId: string }> = ({ fieldId }) => {
     { value: 'dateDesc', label: 'Mới nhất' },
     { value: 'dateAsc', label: 'Cũ nhất' },
   ];
-  const sortedReviews = [...reviews].sort((a, b) => {
+  
+  // Use rateResponses from selectedField instead of separate reviews
+  const reviewsData = selectedField?.rateResponses || [];
+  
+  const sortedReviews = [...reviewsData].sort((a, b) => {
     if (sortType === 'ratingAsc') return a.rating - b.rating;
     if (sortType === 'ratingDesc') return b.rating - a.rating;
-    if (sortType === 'dateDesc') return new Date(b.date).getTime() - new Date(a.date).getTime();
-    if (sortType === 'dateAsc') return new Date(a.date).getTime() - new Date(b.date).getTime();
+    if (sortType === 'dateDesc') return new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime();
+    if (sortType === 'dateAsc') return new Date(a.createdDate).getTime() - new Date(b.createdDate).getTime();
     return 0;
   });
 
+  // Functions cho carousel
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % fieldImages.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + fieldImages.length) % fieldImages.length);
+  };
+
+  const goToImage = (index: number) => {
+    setCurrentImageIndex(index);
+  };
+
+  // Auto-play carousel
   useEffect(() => {
-    if (!allFields.length) fetchAllFields();
-    if (idNum) {
-      fetchOwnerByField(idNum);
-      fetchReviewsByField(idNum);
-      fetchSubCourts(idNum);
+    if (fieldImages.length > 1) {
+      const interval = setInterval(() => {
+        nextImage();
+      }, 5000); // Chuyển ảnh sau mỗi 5 giây
+      
+      return () => clearInterval(interval);
     }
-  }, [idNum, allFields.length, fetchAllFields, fetchOwnerByField, fetchReviewsByField, fetchSubCourts]);
+  }, [fieldImages.length]);
+
+  useEffect(() => {
+    if (fieldId) {
+      fetchFieldDetail(fieldId);
+      const idNum = Number(fieldId);
+      if (idNum) {
+        fetchOwnerByField(idNum);
+        // fetchReviewsByField is no longer needed since we get reviews from field detail
+        fetchSubCourts(idNum);
+      }
+    }
+  }, [fieldId, fetchFieldDetail, fetchOwnerByField, fetchSubCourts]);
 
   if (loading) {
     return (
@@ -71,63 +110,130 @@ const FieldDetailPage: React.FC<{ fieldId: string }> = ({ fieldId }) => {
     );
   }
 
-  if (!field) {
+  // Check if field is available
+  if (!selectedField || selectedField.available === false) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-green-50 flex items-center justify-center">
         <div className="text-center p-12 bg-white rounded-3xl shadow-2xl border border-gray-100 max-w-md">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <MapPin className="w-8 h-8 text-gray-400" />
           </div>
-          <p className="text-2xl text-gray-600 font-bold mb-2">Không tìm thấy sân</p>
-          <p className="text-gray-500">Sân bạn tìm kiếm không tồn tại</p>
+          <p className="text-2xl text-gray-600 font-bold mb-2">Sân không khả dụng</p>
+          <p className="text-gray-500">Sân bạn tìm kiếm hiện không khả dụng để đặt chỗ</p>
         </div>
       </div>
     );
   }
 
-  const averageRating = reviews.length > 0 
-    ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)
-    : 0;
+  // Use actual averageRating from API
+  const averageRating = selectedField.averageRating ? selectedField.averageRating.toFixed(1) : '0.0';
 
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Hero Section */}
+        {/* Hero Section với Carousel */}
         <div className="relative bg-white rounded-[2rem] shadow-2xl overflow-hidden mb-10 border border-gray-100 group">
           <div className="absolute inset-0 bg-gradient-to-r from-green-600/5 to-green-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
           
           <div className="relative">
-            <div className="overflow-hidden rounded-t-[2rem]">
-              <Image
-                src={field.image}
-                alt={field.name}
-                width={1200}
-                height={450}
-                className="w-full h-[450px] object-cover rounded-t-[2rem] transform group-hover:scale-105 transition-transform duration-700"
-              />
+            {/* Image Carousel Container */}
+            <div className="relative overflow-hidden rounded-t-[2rem] h-[600px]">
+              <div 
+                className="flex transition-transform duration-500 ease-in-out h-full"
+                style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}
+              >
+                {fieldImages.map((image, index) => (
+                  <div key={index} className="w-full flex-shrink-0 relative">
+                    <Image
+                      src={image}
+                      alt={`${selectedField?.fieldName || 'Sân thể thao'} - Ảnh ${index + 1}`}
+                      width={1200}
+                      height={600}
+                      className="w-full h-[600px] object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {/* Navigation Arrows */}
+              {fieldImages.length > 1 && (
+                <>
+                  <button
+                    onClick={prevImage}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 hover:bg-black/70 backdrop-blur-sm text-white rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 z-10"
+                    aria-label="Ảnh trước"
+                  >
+                    <ChevronLeft className="w-6 h-6" />
+                  </button>
+                  <button
+                    onClick={nextImage}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 hover:bg-black/70 backdrop-blur-sm text-white rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 z-10"
+                    aria-label="Ảnh tiếp theo"
+                  >
+                    <ChevronRight className="w-6 h-6" />
+                  </button>
+                </>
+              )}
+
+              {/* Image Counter */}
+              {fieldImages.length > 1 && (
+                <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm font-bold z-10">
+                  {currentImageIndex + 1} / {fieldImages.length}
+                </div>
+              )}
             </div>
-            
-            {/* Gradient overlays (giảm opacity để ảnh sáng hơn) */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent"></div>
-            <div className="absolute inset-0 bg-gradient-to-r from-green-900/10 via-transparent to-green-900/10"></div>
-            
-            {/* Decorative elements */}
-            <div className="absolute top-8 right-8 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-8 left-8 w-24 h-24 bg-green-500/20 rounded-full blur-2xl"></div>
-            
-            <div className="absolute bottom-0 left-0 right-0 p-10">
-              <div className="bg-white/20 backdrop-blur-xl rounded-2xl p-5 border border-white/30 shadow-2xl">
-                <h1 className="text-3xl md:text-4xl font-black text-white mb-3 drop-shadow-2xl tracking-tight leading-tight">
-                  {field.name}
+
+            {/* Thumbnail dots - chỉ hiển thị dots ở dưới ảnh */}
+            {fieldImages.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10">
+                <div className="flex items-center gap-2 bg-black/30 backdrop-blur-sm px-3 py-2 rounded-full">
+                  {fieldImages.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => goToImage(index)}
+                      className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                        currentImageIndex === index
+                          ? 'bg-white scale-125 shadow-lg'
+                          : 'bg-white/50 hover:bg-white/75 hover:scale-110'
+                      }`}
+                      aria-label={`Xem ảnh ${index + 1}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Field Name & Rating - đưa ra ngoài ảnh */}
+        <div className="mb-8">
+          <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-2 tracking-tight leading-tight">
+                  {selectedField?.fieldName || 'Tên sân không xác định'}
                 </h1>
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2 bg-green-600/95 backdrop-blur-sm px-4 py-2 rounded-xl border border-green-400/50 shadow-xl">
-                    <Star className="w-5 h-5 fill-white text-white drop-shadow-lg" />
-                    <span className="font-black text-white text-base">{averageRating}</span>
+                  <div className="flex items-center gap-2 bg-green-100 px-4 py-2 rounded-xl border-2 border-green-200 shadow-lg">
+                    <Star className="w-5 h-5 fill-green-600 text-green-600" />
+                    <span className="font-black text-green-800 text-base">{averageRating}</span>
                   </div>
-                  <span className="text-white/95 font-bold text-base drop-shadow-lg">
-                    ({reviews.length} đánh giá)
+                  <span className="text-gray-700 font-bold text-base">
+                    ({selectedField.totalBookings || 0} lượt đặt)
                   </span>
+                </div>
+              </div>
+              
+              {/* Quick Info */}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-xl font-black text-sm border-2 border-gray-200 shadow-lg">
+                  <LayoutGrid className="w-4 h-4" />
+                  {/* Using a default value since ServerField doesn't have subYards */}
+                  {selectedField.smallFieldResponses?.length || 0} sân
+                </div>
+                <div className="flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-xl font-black text-sm border-2 border-gray-200 shadow-lg">
+                  <Users className="w-4 h-4" />
+                  {selectedField.typeFieldName}
                 </div>
               </div>
             </div>
@@ -157,7 +263,7 @@ const FieldDetailPage: React.FC<{ fieldId: string }> = ({ fieldId }) => {
                       </div>
                       <div>
                         <p className="font-black text-gray-900 mb-1 text-base">Địa chỉ</p>
-                        <p className="text-gray-700 leading-relaxed text-sm font-medium">{field.location}</p>
+                        <p className="text-gray-700 leading-relaxed text-sm font-medium">{selectedField.location}</p>
                       </div>
                     </div>
                     
@@ -167,7 +273,9 @@ const FieldDetailPage: React.FC<{ fieldId: string }> = ({ fieldId }) => {
                       </div>
                       <div>
                         <p className="font-black text-gray-900 mb-1 text-base">Giờ mở cửa</p>
-                        <p className="text-gray-700 leading-relaxed text-sm font-medium">{field.openingHours}</p>
+                        <p className="text-gray-700 leading-relaxed text-sm font-medium">
+                          {selectedField.openTime?.substring(0, 5)} - {selectedField.closeTime?.substring(0, 5)}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -179,7 +287,9 @@ const FieldDetailPage: React.FC<{ fieldId: string }> = ({ fieldId }) => {
                       </div>
                       <div>
                         <p className="font-black text-gray-900 mb-1 text-base">Giá</p>
-                        <p className="text-gray-700 font-black text-base">{field.price}</p>
+                        <p className="text-gray-700 font-black text-base">
+                          {selectedField.normalPricePerHour?.toLocaleString('vi-VN')}đ/giờ
+                        </p>
                       </div>
                     </div>
 
@@ -189,7 +299,7 @@ const FieldDetailPage: React.FC<{ fieldId: string }> = ({ fieldId }) => {
                       </div>
                       <div>
                         <p className="font-black text-gray-900 mb-1 text-base">Môn thể thao</p>
-                        <p className="text-gray-700 font-black text-base">{field.sport}</p>
+                        <p className="text-gray-700 font-black text-base">{selectedField.typeFieldName}</p>
                       </div>
                     </div>
                   </div>
@@ -197,7 +307,7 @@ const FieldDetailPage: React.FC<{ fieldId: string }> = ({ fieldId }) => {
 
                 <div className="mt-5 p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200 shadow-inner">
                   <p className="font-black text-gray-900 mb-2 text-base">Mô tả</p>
-                  <p className="text-gray-700 leading-relaxed text-sm font-medium">{field.description}</p>
+                  <p className="text-gray-700 leading-relaxed text-sm font-medium">{selectedField.description}</p>
                 </div>
               </div>
             </div>
@@ -208,33 +318,36 @@ const FieldDetailPage: React.FC<{ fieldId: string }> = ({ fieldId }) => {
               
               <div className="relative">
                 <h2 className="text-2xl font-black text-gray-900 mb-5">Thông tin chủ sân</h2>
-                {owner ? (
+                {selectedField && (selectedField.ownerName || selectedField.numberPhone) ? (
                   <div className="flex items-center gap-5 p-5 bg-white rounded-xl border border-gray-200 shadow-inner">
                     <div className="relative">
                       <div className="absolute inset-0 bg-gradient-to-br from-green-400 to-green-600 rounded-2xl blur-lg opacity-20"></div>
-                      <Image
-                        src={owner.avatar || '/default-avatar.png'}
-                        alt={owner.name}
-                        width={64}
-                        height={64}
-                        className="relative w-16 h-16 rounded-2xl border-2 border-white shadow-xl object-cover"
-                      />
+                      <div className="relative w-16 h-16 rounded-2xl border-2 border-white shadow-xl bg-gray-200 flex items-center justify-center overflow-hidden">
+                        {selectedField.avatar ? (
+                          <Image
+                            src={selectedField.avatar}
+                            alt={selectedField.ownerName || 'Chủ sân'}
+                            width={64}
+                            height={64}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <Users className="w-8 h-8 text-gray-500" />
+                        )}
+                      </div>
                       <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-green-500 rounded-full border-2 border-white shadow-xl flex items-center justify-center">
                         <div className="w-2 h-2 bg-white rounded-full"></div>
                       </div>
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-lg font-black text-gray-900 mb-1">{owner.name}</h3>
-                      <p className="text-gray-700 mb-2 leading-relaxed text-sm font-medium">{owner.description}</p>
+                      <h3 className="text-lg font-black text-gray-900 mb-1">{selectedField.ownerName || 'Chủ sân'}</h3>
                       <div className="flex flex-wrap gap-2">
-                        <div className="flex items-center gap-2 text-xs text-gray-700 bg-white px-3 py-1.5 rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300">
-                          <Phone className="w-4 h-4 text-green-600" />
-                          <span className="font-bold">{owner.phone}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-gray-700 bg-white px-3 py-1.5 rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300">
-                          <Mail className="w-4 h-4 text-green-600" />
-                          <span className="font-bold">{owner.email}</span>
-                        </div>
+                        {selectedField.numberPhone && (
+                          <div className="flex items-center gap-2 text-xs text-gray-700 bg-white px-3 py-1.5 rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300">
+                            <Phone className="w-4 h-4 text-green-600" />
+                            <span className="font-bold">{selectedField.numberPhone}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -291,7 +404,7 @@ const FieldDetailPage: React.FC<{ fieldId: string }> = ({ fieldId }) => {
                     <div className="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-xl border-2 border-gray-200 shadow-lg">
                       <Star className="w-5 h-5 fill-green-600 text-green-600" />
                       <span className="font-black text-gray-900 text-base">{averageRating}</span>
-                      <span className="text-gray-700 font-bold text-sm">({reviews.length})</span>
+                      <span className="text-gray-700 font-bold text-sm">({reviewsData.length})</span>
                     </div>
                   </div>
                 </div>
@@ -318,20 +431,20 @@ const FieldDetailPage: React.FC<{ fieldId: string }> = ({ fieldId }) => {
                         <div className="flex items-start gap-3">
                           <div className="relative">
                             <Image
-                              src={review.userAvatar || '/default-avatar.png'}
-                              alt={review.userName}
+                              src={review.avatar || '/default-avatar.png'}
+                              alt={review.email}
                               width={32}
                               height={32}
-                              className="w-8 h-8 rounded-xl border-2 border-white shadow-xl object-cover flex-shrink-0 group-hover/review:scale-110 transition-transform duration-300"
+                              className="w-8 h-8 rounded-full border-2 border-white shadow-xl object-cover flex-shrink-0 group-hover/review:scale-110 transition-transform duration-300"
                             />
                             <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border border-white"></div>
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center justify-between mb-1">
-                              <h4 className="font-black text-gray-900 text-sm">{review.userName}</h4>
+                              <h4 className="font-black text-gray-900 text-sm">{review.email}</h4>
                               <div className="flex items-center gap-1 text-xs text-gray-600 bg-white px-2 py-1 rounded-lg border border-gray-200 shadow-md">
                                 <Calendar className="w-3 h-3" />
-                                <span className="font-bold">{new Date(review.date).toLocaleDateString('vi-VN')}</span>
+                                <span className="font-bold">{new Date(review.createdDate).toLocaleDateString('vi-VN')}</span>
                               </div>
                             </div>
                             <div className="flex items-center gap-1 mb-2">
@@ -363,13 +476,26 @@ const FieldDetailPage: React.FC<{ fieldId: string }> = ({ fieldId }) => {
                 <div className="text-center mb-4">
                   <div className="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-xl font-black mb-4 text-base border-2 border-gray-200 shadow-lg">
                     <LayoutGrid className="w-5 h-5" />
-                    {field.subCourts.length} sân
+                    {selectedField.smallFieldResponses?.length || 0} sân
                   </div>
-                  <p className="text-gray-700 mb-4 text-base font-bold">Sẵn sàng cho trận đấu của bạn!</p>
+                  <p className="text-gray-700 mb-1 text-base font-bold">{selectedField.totalBookings || 0} lượt đặt</p>
+                  <p className="text-gray-700 mb-4 text-sm">Sẵn sàng cho trận đấu của bạn!</p>
                 </div>
 
                 <button
-                  onClick={() => router.push(`/booking?fieldId=${field.id}&sport=${field.sport}`)}
+                  onClick={() => {
+                    // Map typeFieldName to sport key expected by booking page
+                    let sportKey = 'football'; // default
+                    if (selectedField.typeFieldName === 'Bóng Đá') {
+                      sportKey = 'football';
+                    } else if (selectedField.typeFieldName === 'Cầu Lông') {
+                      sportKey = 'badminton';
+                    } else if (selectedField.typeFieldName === 'Pickle Ball') {
+                      sportKey = 'pickle';
+                    }
+                    
+                    router.push(`/booking?fieldId=${selectedField.id}&sport=${sportKey}`);
+                  }}
                   className="w-full bg-gradient-to-br from-green-600 via-green-700 to-green-800 hover:from-green-700 hover:via-green-800 hover:to-green-900 text-white font-black py-4 px-5 rounded-xl shadow-2xl hover:shadow-3xl transform hover:scale-105 hover:-translate-y-1 transition-all duration-500 flex items-center justify-center gap-2 text-lg border-2 border-green-600 relative overflow-hidden group/button"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover/button:translate-x-full transition-transform duration-1000"></div>
