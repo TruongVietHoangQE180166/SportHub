@@ -203,6 +203,7 @@ export interface UserOrder {
   email: string;
   booking: OrderBooking[];
   location: string;
+  createdDate?: string;
 }
 
 export interface UserOrdersResponse {
@@ -223,5 +224,82 @@ export interface UserOrdersResponse {
     };
     totalElement: number;
   };
+  success: boolean;
+}
+
+// Add the new Point interface
+export interface UserPoint {
+  id: string;
+  userId: string;
+  email: string;
+  currentPoints: number;
+}
+
+export interface UserPointResponse {
+  message: {
+    messageCode: string;
+    messageDetail: string;
+  };
+  errors: null;
+  data: UserPoint;
+  success: boolean;
+}
+
+// Add new interfaces for user vouchers
+export interface UserVoucher {
+  user: {
+    username: string;
+    password: string;
+    email: string;
+    status: string;
+    role: string;
+    deleted: boolean;
+  };
+  voucher: {
+    id: string;
+    code: string;
+    discountValue: number;
+    minOrderValue: number;
+    createdDate: string;
+    image: string;
+    exchangePoint: number;
+    active: boolean;
+    percentage: boolean;
+  };
+  used: boolean;
+}
+
+export interface UserVouchersResponse {
+  message: {
+    messageCode: string;
+    messageDetail: string;
+  };
+  errors: null;
+  data: {
+    content: UserVoucher[];
+    request: {
+      page: number;
+      size: number;
+      sortRequest: {
+        direction: string;
+        field: string;
+      };
+    };
+    totalElement: number;
+  };
+  success: boolean;
+}
+
+// Add new interface for user voucher exchange response
+export interface UserVoucherExchangeResponse {
+  message: {
+    messageCode: string;
+    messageDetail: string;
+  };
+  errors: {
+    field: string;
+    message: string;
+  }[] | null;
+  data: UserVoucher;
   success: boolean;
 }

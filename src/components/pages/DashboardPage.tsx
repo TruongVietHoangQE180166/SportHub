@@ -57,7 +57,7 @@ function App() {
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
       case 'confirmed':
-        return 'bg-green-100 text-green-800 border-green-300';
+        return 'bg-green-100 text-green-400 border-green-400';
       case 'pending':
         return 'bg-yellow-100 text-yellow-800 border-yellow-300';
       case 'completed':
@@ -87,7 +87,7 @@ function App() {
   // Get sport icon based on sport type
   const getSportIcon = (sport: string) => {
     // Use a calendar icon to represent bookings
-    return <Calendar className="w-5 h-5 text-green-500" />;
+    return <Calendar className="w-5 h-5 text-green-400" />;
   };
 
   // Filter out cancelled orders (but keep all bookings including cancelled ones)
@@ -168,7 +168,7 @@ function App() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-400 mx-auto"></div>
           <p className="mt-4 text-gray-600 font-medium">Đang tải dữ liệu...</p>
         </div>
       </div>
@@ -214,17 +214,17 @@ function App() {
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4">
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center p-4 bg-gray-50 rounded-xl">
-              <Package className="w-6 h-6 mx-auto mb-2 text-green-500" />
+              <Package className="w-6 h-6 mx-auto mb-2 text-green-400" />
               <div className="text-2xl font-black text-black">{stats.total}</div>
               <div className="text-xs text-gray-600 font-medium">TỔNG ĐƠN</div>
             </div>
             <div className="text-center p-4 bg-gray-50 rounded-xl">
-              <Activity className="w-6 h-6 mx-auto mb-2 text-green-500" />
+              <Activity className="w-6 h-6 mx-auto mb-2 text-green-400" />
               <div className="text-2xl font-black text-black">{stats.confirmed}</div>
               <div className="text-xs text-gray-600 font-medium">ĐÃ XÁC NHẬN</div>
             </div>
             <div className="text-center p-4 bg-gray-50 rounded-xl">
-              <Target className="w-6 h-6 mx-auto mb-2 text-green-500" />
+              <Target className="w-6 h-6 mx-auto mb-2 text-green-400" />
               <div className="text-2xl font-black text-black">{stats.completed}</div>
               <div className="text-xs text-gray-600 font-medium">HOÀN THÀNH</div>
             </div>
@@ -237,7 +237,7 @@ function App() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 mb-8">
           <div className="p-6 border-b border-gray-100">
             <div className="flex items-center gap-3 mb-4">
-              <Filter className="w-6 h-6 text-green-500" />
+              <Filter className="w-6 h-6 text-green-400" />
               <h2 className="text-xl font-bold text-black">BỘ LỌC & TÌM KIẾM</h2>
             </div>
             
@@ -248,7 +248,7 @@ function App() {
                 <div className="relative">
                   <button
                     type="button"
-                    className="w-full px-3 lg:px-4 py-3 text-left bg-gray-50 border-2 border-gray-200 rounded-xl hover:border-green-500 focus:border-green-500 focus:outline-none transition-all flex items-center justify-between text-sm font-medium"
+                    className="w-full px-3 lg:px-4 py-3 text-left bg-gray-50 border-2 border-gray-200 rounded-xl hover:border-green-400 focus:border-green-400 focus:outline-none transition-all flex items-center justify-between text-sm font-medium"
                     onClick={() => setShowStatusDropdown(v => !v)}
                   >
                     <span className="text-gray-800 truncate">
@@ -264,7 +264,7 @@ function App() {
                       {['', 'confirmed', 'pending', 'completed'].map(option => ( // Removed 'cancelled' from options
                         <button
                           key={option}
-                          className={`w-full text-left px-3 lg:px-4 py-3 hover:bg-gray-50 transition-all text-sm first:rounded-t-xl last:rounded-b-xl ${filterStatus === option ? 'bg-green-50 text-green-700 font-bold' : 'text-gray-700'}`}
+                          className={`w-full text-left px-3 lg:px-4 py-3 hover:bg-green-50 transition-all text-sm first:rounded-t-xl last:rounded-b-xl ${filterStatus === option ? 'bg-green-100 text-green-400 font-bold' : 'text-gray-700'}`}
                           onClick={() => { setFilterStatus(option); setShowStatusDropdown(false); }}
                         >
                           {option === '' ? 'Tất cả trạng thái' :
@@ -284,7 +284,7 @@ function App() {
                 <div className="relative">
                   <button
                     type="button"
-                    className="w-full px-3 lg:px-4 py-3 text-left bg-gray-50 border-2 border-gray-200 rounded-xl hover:border-green-500 focus:border-green-500 focus:outline-none transition-all flex items-center justify-between text-sm font-medium"
+                    className="w-full px-3 lg:px-4 py-3 text-left bg-gray-50 border-2 border-gray-200 rounded-xl hover:border-green-400 focus:border-green-400 focus:outline-none transition-all flex items-center justify-between text-sm font-medium"
                     onClick={() => setShowSportDropdown(v => !v)}
                   >
                     <span className="text-gray-800 truncate">
@@ -297,7 +297,7 @@ function App() {
                       {['', 'Bóng đá', 'Cầu lông', 'Pickle Ball', 'football', 'badminton', 'pickle'].map(option => (
                         <button
                           key={option}
-                          className={`w-full text-left px-3 lg:px-4 py-3 hover:bg-gray-50 transition-all text-sm first:rounded-t-xl last:rounded-b-xl ${filterSport === option ? 'bg-green-50 text-green-700 font-bold' : 'text-gray-700'}`}
+                          className={`w-full text-left px-3 lg:px-4 py-3 hover:bg-green-50 transition-all text-sm first:rounded-t-xl last:rounded-b-xl ${filterSport === option ? 'bg-green-100 text-green-400 font-bold' : 'text-gray-700'}`}
                           onClick={() => { setFilterSport(option); setShowSportDropdown(false); }}
                         >
                           {option === '' ? 'Tất cả môn thể thao' : 
@@ -319,7 +319,7 @@ function App() {
                     type="date"
                     value={filterDate}
                     onChange={e => setFilterDate(e.target.value)}
-                    className="w-full px-3 lg:px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-all text-sm text-gray-800 font-medium"
+                    className="w-full px-3 lg:px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-green-400 focus:outline-none transition-all text-sm text-gray-800 font-medium"
                   />
                   {filterDate && (
                     <button
@@ -342,11 +342,11 @@ function App() {
                     placeholder="Tìm kiếm theo tên sân..."
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
-                    className="flex-1 min-w-0 px-3 lg:px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none transition-all text-sm font-medium"
+                    className="flex-1 min-w-0 px-3 lg:px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-green-400 focus:outline-none transition-all text-sm font-medium"
                   />
                   <button
                     type="button"
-                    className="w-12 h-12 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl transition-all shadow-sm flex items-center justify-center shrink-0"
+                    className="w-12 h-12 bg-green-400 hover:bg-green-400 text-white font-bold rounded-xl transition-all shadow-sm flex items-center justify-center shrink-0"
                     onClick={() => setActiveSearch(searchQuery)}
                     title="Tìm kiếm"
                   >
@@ -368,7 +368,7 @@ function App() {
                     setSearchQuery('');
                     setActiveSearch('');
                   }}
-                  className="px-6 py-2 text-green-600 hover:text-green-700 font-bold transition-all text-sm hover:bg-green-50 rounded-xl border-2 border-green-200 hover:border-green-300"
+                  className="px-6 py-2 text-green-400 hover:text-green-400 font-bold transition-all text-sm hover:bg-green-50 rounded-xl border-2 border-green-200 hover:border-green-400"
                 >
                   XÓA TẤT CẢ BỘ LỌC
                 </button>
@@ -406,18 +406,28 @@ function App() {
                     <div className="flex flex-wrap items-center justify-between gap-3 mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                          <Package className="w-5 h-5 text-green-600" />
+                          <Package className="w-5 h-5 text-green-400" />
                         </div>
                         <div>
                           <h3 className="font-black text-gray-900">Đơn hàng #{order.id.substring(0, 8)}</h3>
-                          <p className="text-xs text-gray-500">N/A</p>
+                          <p className="text-xs text-gray-500">
+                            {order.createdDate && order.createdDate !== 'null'
+                              ? new Date(order.createdDate).toLocaleDateString('vi-VN', {
+                                  day: '2-digit',
+                                  month: '2-digit',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })
+                              : 'N/A'}
+                          </p>
                         </div>
                       </div>
                       
                       <div className="flex flex-wrap items-center gap-3">
                         <div className="text-right">
                           <div className="text-xs text-gray-500">Tổng tiền</div>
-                          <div className="font-black text-green-600">{order.totalAmount?.toLocaleString('vi-VN')} VNĐ</div>
+                          <div className="font-black text-green-400">{order.totalAmount?.toLocaleString('vi-VN')} VNĐ</div>
                         </div>
                         <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(order.status)}`}>
                           {getStatusText(order.status)}
@@ -428,7 +438,7 @@ function App() {
                     {/* Bookings within the order - enhanced visual distinction */}
                     <div className="space-y-3 ml-6 pl-4 border-l-2 border-gray-300 bg-gray-50 rounded-r-lg">
                       {order.booking.map((booking) => (
-                        <div key={booking.id} className="flex flex-wrap items-center gap-4 p-3 border border-gray-200 rounded-lg hover:border-green-300 transition-all bg-white">
+                        <div key={booking.id} className="flex flex-wrap items-center gap-4 p-3 border border-gray-200 rounded-lg hover:border-green-400 transition-all bg-white">
                           <div className="flex items-center gap-3 flex-1 min-w-0">
                             <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-100 text-lg">
                               {getSportIcon(booking.smallField?.smallFiledName || '')}
@@ -481,7 +491,7 @@ function App() {
                           
                           <div className="text-right">
                             <div className="text-xs text-gray-500">Giá</div>
-                            <div className="font-black text-green-600">
+                            <div className="font-black text-green-400">
                               {booking.totalPrice !== undefined && booking.totalPrice !== null 
                                 ? `${booking.totalPrice.toLocaleString('vi-VN')} VNĐ` 
                                 : 'N/A'}
@@ -589,11 +599,10 @@ function App() {
             </div>
           </div>
         )}
-
       </div>
     </div>
   </div>
-  );
+);
 }
 
 export default App;

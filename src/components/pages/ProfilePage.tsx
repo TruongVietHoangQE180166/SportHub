@@ -19,10 +19,13 @@ import {
   ChevronDown,
   Calendar,
   Users,
-  AlertTriangle
+  AlertTriangle,
+  Gift
 } from 'lucide-react';
 import Image from 'next/image';
 import { useAuthStore } from "@/stores/authStore";
+import { useFieldStore } from "@/stores/fieldStore";
+import { useRouter } from 'next/navigation';
 
 interface InlineInputProps {
   label: string;
@@ -237,7 +240,7 @@ const PasswordStrengthIndicator: React.FC<{ password: string }> = ({ password })
           />
         ))}
       </div>
-      <p className="text-xs text-gray-600 font-medium">
+      <p className="text-xs text-gray-600 font-medium truncate">
         {password ? strengthLabels[Math.min(strength - 1, 4)] : 'Enter a password'}
       </p>
     </div>
@@ -280,6 +283,9 @@ export default function ProfilePage() {
     gender: "",
   });
 
+  // Add field store hooks for vouchers
+  const { userPoints, fetchUserPoints } = useFieldStore();
+  
   // Fetch user profile when component mounts and user is authenticated
   useEffect(() => {
     const loadUserProfile = async () => {
@@ -303,6 +309,9 @@ export default function ProfilePage() {
             dateOfBirth: userProfile.dateOfBirth || "",
             gender: userProfile.gender || "",
           });
+          
+          // Fetch user points
+          await fetchUserPoints(user.id);
         } catch (error) {
           console.error("Failed to fetch user profile:", error);
         }
@@ -310,7 +319,7 @@ export default function ProfilePage() {
     };
 
     loadUserProfile();
-  }, [isAuthenticated, user?.id, fetchUserProfile]);
+  }, [isAuthenticated, user?.id, fetchUserProfile, fetchUserPoints]);
 
   // Update form data when user object changes
   useEffect(() => {
@@ -484,6 +493,15 @@ export default function ProfilePage() {
     return <div className="min-h-screen flex items-center justify-center text-lg font-semibold text-gray-700">Bạn cần đăng nhập để xem trang này.</div>;
   }
 
+  const router = useRouter();
+
+  // Add function to navigate to booking page
+  // handleUseVoucher function has been moved to RewardsPage
+
+  if (!isAuthenticated || !user) {
+    return <div className="min-h-screen flex items-center justify-center text-lg font-semibold text-gray-700">Bạn cần đăng nhập để xem trang này.</div>;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       {/* Error Modal */}
@@ -491,8 +509,8 @@ export default function ProfilePage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
             <div className="text-center">
-              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100">
-                <AlertTriangle className="h-8 w-8 text-red-600" />
+              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-400">
+                <AlertTriangle className="h-8 w-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mt-4">Có lỗi xảy ra</h3>
               <div className="mt-4">
@@ -501,7 +519,7 @@ export default function ProfilePage() {
               <div className="mt-6">
                 <button
                   type="button"
-                  className="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors duration-200 font-medium"
+                  className="px-6 py-3 bg-green-400 text-white rounded-xl hover:bg-green-500 transition-colors duration-200 font-medium"
                   onClick={closeErrorModal}
                 >
                   Đóng
@@ -516,13 +534,13 @@ export default function ProfilePage() {
       {loading && (
         <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 flex flex-col items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-400 mb-4"></div>
             <p className="text-gray-700 font-medium">Đang xử lý...</p>
           </div>
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-6xl mx-auto">
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Profile Overview */}
@@ -540,7 +558,7 @@ export default function ProfilePage() {
                       <User className="w-18 h-18 text-gray-400" />
                     )}
                   </div>
-                  <label htmlFor="avatar-upload" className="absolute -right-2 -bottom-2 bg-green-600 border-4 border-white shadow-lg rounded-full p-3 cursor-pointer flex items-center justify-center transition-all hover:bg-green-700 hover:scale-105 duration-200">
+                  <label htmlFor="avatar-upload" className="absolute -right-2 -bottom-2 bg-green-400 border-4 border-white shadow-lg rounded-full p-3 cursor-pointer flex items-center justify-center transition-all hover:bg-green-500 hover:scale-105 duration-200">
                     <Camera className="w-5 h-5 text-white" />
                     <input 
                       id="avatar-upload" 
@@ -554,6 +572,13 @@ export default function ProfilePage() {
                 <h2 className="text-2xl font-bold text-gray-900 mt-6 truncate">
                   {formData.nickName || formData.name}
                 </h2>
+                {/* Display user points */}
+                <div className="flex items-center justify-center gap-2 mt-3 bg-green-400 rounded-full py-2 px-4 border border-green-200">
+                  <Gift className="w-5 h-5 text-white" />
+                  <span className="text-lg font-bold text-white">
+                    {(userPoints?.currentPoints || 0)} điểm
+                  </span>
+                </div>
               </div>
 
               {/* Social Links */}
@@ -567,7 +592,7 @@ export default function ProfilePage() {
                     rel="noopener noreferrer"
                     title={formData.facebook}
                   >
-                    <Facebook className="w-5 h-5 text-gray-600 hover:text-green-600" />
+                    <Facebook className="w-5 h-5 text-gray-600 hover:text-green-400" />
                   </a>
                   <a 
                     href={formData.twitter} 
@@ -576,7 +601,7 @@ export default function ProfilePage() {
                     rel="noopener noreferrer"
                     title={formData.twitter}
                   >
-                    <Twitter className="w-5 h-5 text-gray-600 hover:text-green-600" />
+                    <Twitter className="w-5 h-5 text-gray-600 hover:text-green-400" />
                   </a>
                   <a 
                     href={formData.instagram} 
@@ -585,7 +610,7 @@ export default function ProfilePage() {
                     rel="noopener noreferrer"
                     title={formData.instagram}
                   >
-                    <Instagram className="w-5 h-5 text-gray-600 hover:text-green-600" />
+                    <Instagram className="w-5 h-5 text-gray-600 hover:text-green-400" />
                   </a>
                 </div>
               </div>
@@ -598,7 +623,7 @@ export default function ProfilePage() {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
               <h3 className="text-2xl font-bold text-gray-900 mb-8 flex items-center gap-3">
                 <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-                  <User className="w-5 h-5 text-green-600" />
+                  <User className="w-5 h-5 text-green-400" />
                 </div>
                 Thông tin cá nhân
               </h3>
@@ -612,7 +637,7 @@ export default function ProfilePage() {
                   onSave={() => setEditingField(null)}
                   onCancel={() => setEditingField(null)}
                   placeholder="Nhập tên người dùng của bạn"
-                  icon={<User className="w-4 h-4" />}
+                  icon={<User className="w-4 h-4 text-green-400" />}
                 />
                 <InlineInput
                   label="Họ và tên"
@@ -623,14 +648,14 @@ export default function ProfilePage() {
                   onSave={() => setEditingField(null)}
                   onCancel={() => setEditingField(null)}
                   placeholder="Nhập họ và tên của bạn"
-                  icon={<Users className="w-4 h-4" />}
+                  icon={<Users className="w-4 h-4 text-green-400" />}
                 />
                 <InlineInput
                   label="Số điện thoại"
                   value={formData.phone}
                   onChange={(value) => handleFieldUpdate('phone', value)}
                   type="tel"
-                  icon={<Phone className="w-4 h-4" />}
+                  icon={<Phone className="w-4 h-4 text-green-400" />}
                   isEditing={editingField === 'phone'}
                   onEdit={() => setEditingField('phone')}
                   onSave={() => setEditingField(null)}
@@ -647,7 +672,7 @@ export default function ProfilePage() {
                   onCancel={() => setEditingField(null)}
                   inputType="date"
                   placeholder="Nhập ngày sinh của bạn"
-                  icon={<Calendar className="w-4 h-4" />}
+                  icon={<Calendar className="w-4 h-4 text-green-400" />}
                 />
                 <InlineInput
                   label="Giới tính"
@@ -663,7 +688,7 @@ export default function ProfilePage() {
                     { value: 'FEMALE', label: 'Nữ' }
                   ]}
                   placeholder="Chọn giới tính"
-                  icon={<Users className="w-4 h-4" />}
+                  icon={<Users className="w-4 h-4 text-green-400" />}
                 />
               </div>
             </div>
@@ -672,7 +697,7 @@ export default function ProfilePage() {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
               <h3 className="text-2xl font-bold text-gray-900 mb-8 flex items-center gap-3">
                 <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-                  <Globe className="w-5 h-5 text-green-600" />
+                  <Globe className="w-5 h-5 text-green-400" />
                 </div>
                 Liên kết mạng xã hội
               </h3>
@@ -681,7 +706,7 @@ export default function ProfilePage() {
                   label="Facebook"
                   value={formData.facebook}
                   onChange={(value) => handleFieldUpdate('facebook', value)}
-                  icon={<Facebook className="w-4 h-4" />}
+                  icon={<Facebook className="w-4 h-4 text-green-400" />}
                   isEditing={editingField === 'facebook'}
                   onEdit={() => setEditingField('facebook')}
                   onSave={() => setEditingField(null)}
@@ -692,7 +717,7 @@ export default function ProfilePage() {
                   label="Twitter"
                   value={formData.twitter}
                   onChange={(value) => handleFieldUpdate('twitter', value)}
-                  icon={<Twitter className="w-4 h-4" />}
+                  icon={<Twitter className="w-4 h-4 text-green-400" />}
                   isEditing={editingField === 'twitter'}
                   onEdit={() => setEditingField('twitter')}
                   onSave={() => setEditingField(null)}
@@ -703,7 +728,7 @@ export default function ProfilePage() {
                   label="Instagram"
                   value={formData.instagram}
                   onChange={(value) => handleFieldUpdate('instagram', value)}
-                  icon={<Instagram className="w-4 h-4" />}
+                  icon={<Instagram className="w-4 h-4 text-green-400" />}
                   isEditing={editingField === 'instagram'}
                   onEdit={() => setEditingField('instagram')}
                   onSave={() => setEditingField(null)}
@@ -716,18 +741,18 @@ export default function ProfilePage() {
             {/* Password & Security */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
               <h3 className="text-2xl font-bold text-gray-900 mb-8 flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-                  <Lock className="w-5 h-5 text-green-600" />
+                <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <Lock className="w-5 h-5 text-green-400" />
                 </div>
-                Mật khẩu & Bảo mật
+                <span className="truncate">Mật khẩu & Bảo mật</span>
               </h3>
               
               {!editingPassword ? (
                 <div className="space-y-6">
-                  <div className="flex items-center justify-between p-6 bg-gray-50 rounded-xl border border-gray-200">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center border border-gray-200">
-                        <Lock className="w-6 h-6 text-gray-500" />
+                  <div className="flex flex-col sm:flex-row items-center justify-between p-6 bg-gray-50 rounded-xl border border-gray-200 gap-4 sm:gap-0">
+                    <div className="flex items-center gap-4 w-full sm:w-auto">
+                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center border border-gray-200 flex-shrink-0">
+                        <Lock className="w-6 h-6 text-green-400" />
                       </div>
                       <div>
                         <p className="font-semibold text-gray-900 text-lg truncate">Mật khẩu</p>
@@ -735,10 +760,11 @@ export default function ProfilePage() {
                     </div>
                     <button
                       onClick={() => setEditingPassword(true)}
-                      className="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors duration-200 flex items-center gap-2 font-medium whitespace-nowrap"
+                      className="px-4 py-3 md:px-6 md:py-3 bg-green-400 text-white rounded-xl hover:bg-green-500 transition-colors duration-200 flex items-center gap-2 font-medium whitespace-nowrap text-sm md:text-base w-full sm:w-auto justify-center"
                     >
                       <Edit2 className="w-4 h-4" />
-                      Thay đổi mật khẩu
+                      <span className="hidden md:inline">Thay đổi mật khẩu</span>
+                      <span className="md:hidden">Thay đổi</span>
                     </button>
                   </div>
                 </div>
@@ -754,7 +780,7 @@ export default function ProfilePage() {
                           type={showCurrentPassword ? "text" : "password"}
                           value={passwordData.currentPassword}
                           onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
-                          className="w-full px-4 py-3 pr-12 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-600 transition-all duration-200"
+                          className="w-full px-4 py-3 pr-12 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-400/20 focus:border-green-400 transition-all duration-200"
                           placeholder="Nhập mật khẩu hiện tại"
                         />
                         <button
@@ -776,7 +802,7 @@ export default function ProfilePage() {
                           type={showNewPassword ? "text" : "password"}
                           value={passwordData.newPassword}
                           onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                          className="w-full px-4 py-3 pr-12 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-600 transition-all duration-200"
+                          className="w-full px-4 py-3 pr-12 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-400/20 focus:border-green-400 transition-all duration-200"
                           placeholder="Nhập mật khẩu mới"
                         />
                         <button
@@ -799,7 +825,7 @@ export default function ProfilePage() {
                           type={showConfirmPassword ? "text" : "password"}
                           value={passwordData.confirmPassword}
                           onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                          className="w-full px-4 py-3 pr-12 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-600 transition-all duration-200"
+                          className="w-full px-4 py-3 pr-12 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-400/20 focus:border-green-400 transition-all duration-200"
                           placeholder="Xác nhận mật khẩu mới"
                         />
                         <button
@@ -819,14 +845,14 @@ export default function ProfilePage() {
                     </div>
                   </div>
 
-                  <div className="flex gap-4">
+                  <div className="flex flex-col sm:flex-row gap-4">
                     <button
                       onClick={handlePasswordChange}
                       disabled={!passwordData.currentPassword || !passwordData.newPassword || passwordData.newPassword !== passwordData.confirmPassword || loading}
-                      className="px-8 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-medium"
+                      className="px-6 py-3 md:px-8 md:py-3 bg-green-400 text-white rounded-xl hover:bg-green-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-medium flex-1"
                     >
                       <Save className="w-4 h-4" />
-                      Cập nhật mật khẩu
+                      <span className="whitespace-nowrap">Cập nhật mật khẩu</span>
                     </button>
                     <button
                       onClick={() => {
@@ -837,15 +863,18 @@ export default function ProfilePage() {
                           confirmPassword: ""
                         });
                       }}
-                      className="px-8 py-3 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition-colors duration-200 flex items-center gap-2 font-medium"
+                      className="px-6 py-3 md:px-8 md:py-3 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition-colors duration-200 flex items-center justify-center gap-2 font-medium flex-1"
                     >
                       <X className="w-4 h-4" />
-                      Hủy
+                      <span className="whitespace-nowrap">Hủy</span>
                     </button>
                   </div>
                 </div>
               )}
             </div>
+
+            {/* User Vouchers Section - REMOVED */}
+            {/* Voucher section has been moved to the RewardsPage */}
           </div>
         </div>
       </div>

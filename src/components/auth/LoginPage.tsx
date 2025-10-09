@@ -79,16 +79,16 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="h-screen overflow-hidden flex items-center justify-center p-4 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-900 via-black to-gray-800">
       <div className="w-full max-w-sm">
-        <div className="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-6 max-h-[95vh] overflow-y-auto">
+        <div className="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-6 ">
           {/* Logo - Compact */}
           <div className="text-center mb-6">
             <Link
               href="/"
               className="inline-flex items-center justify-center group"
             >
-              <div className="w-36 h-14 relative mx-auto">
+              <div className="w-50 h-14 relative mx-auto">
                 <Image
                   src="/SportHub-Logo.png"
                   alt="SportHub Logo"
@@ -236,13 +236,10 @@ export default function LoginPage() {
 
             {/* Divider */}
             <div className="relative my-4">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200" />
-              </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="px-3 bg-white text-gray-500 font-medium">
-                  Hoặc
-                </span>
+              <div className="flex items-center">
+                <div className="flex-grow border-t border-gray-200"></div>
+                <span className="px-3 text-xs text-gray-500 font-medium">Hoặc</span>
+                <div className="flex-grow border-t border-gray-200"></div>
               </div>
             </div>
 
@@ -273,13 +270,10 @@ export default function LoginPage() {
             </button>
 
             <div className="relative my-4">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200" />
-              </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="px-3 bg-white text-gray-500 font-medium">
-                  Bảo mật
-                </span>
+              <div className="flex items-center">
+                <div className="flex-grow border-t border-gray-200"></div>
+                <span className="px-3 text-xs text-gray-500 font-medium">Bảo mật</span>
+                <div className="flex-grow border-t border-gray-200"></div>
               </div>
             </div>
           </form>

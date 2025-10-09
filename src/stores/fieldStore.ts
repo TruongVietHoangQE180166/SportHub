@@ -15,9 +15,12 @@ import {
   createPayment,
   getOrderStatus,
   getUserOrders,
-  cancelBooking
+  cancelBooking,
+  getUserPoints,
+  getUserVouchers,
+  exchangeUserVoucher
 } from '../services/fieldService';
-import { Field, MainSport, SubCourt, TimeSlot, Owner, Review, ServerField, FieldBooking, BookingResponse, CreateBookingRequest, CreateBookingResponse, PaymentRequest, PaymentResponse, UserOrdersResponse } from '../types/field';
+import { Field, MainSport, SubCourt, TimeSlot, Owner, Review, ServerField, FieldBooking, BookingResponse, CreateBookingRequest, CreateBookingResponse, PaymentRequest, PaymentResponse, UserOrdersResponse, UserPoint, UserVoucher, UserVoucherExchangeResponse } from '../types/field';
 
 interface FieldState {
   popularFields: Field[];
@@ -35,7 +38,10 @@ interface FieldState {
   smallFieldBookings: FieldBooking[];
   totalBookings: number;
   orderStatus: any | null;
-  userOrders: UserOrdersResponse | null; // Add user orders state
+  userOrders: UserOrdersResponse | null;
+  userPoints: UserPoint | null;
+  userVouchers: UserVoucher[] | null;
+  totalVouchers: number;
   
   fetchPopularFields: () => Promise<void>;
   fetchAllFields: () => Promise<void>;
@@ -51,8 +57,18 @@ interface FieldState {
   createBooking: (bookingData: CreateBookingRequest) => Promise<CreateBookingResponse>;
   createPayment: (paymentData: PaymentRequest) => Promise<PaymentResponse>;
   fetchOrderStatus: (orderId: string) => Promise<void>;
-  fetchUserOrders: (userId: string) => Promise<void>; // Add user orders action
-  cancelBooking: (bookingId: string, bookingData: any) => Promise<any>; // Add cancel booking action
+  fetchUserOrders: (userId: string) => Promise<void>;
+  cancelBooking: (bookingId: string, bookingData: any) => Promise<any>;
+  fetchUserPoints: (userId: string) => Promise<void>;
+  fetchUserVouchers: (userId: string) => Promise<void>;
+  exchangeUserVoucher: (voucher: {
+    discountValue: number;
+    minOrderValue: number;
+    image: string;
+    exchangePoint: number;
+    active: boolean;
+    percentage: boolean;
+  }) => Promise<UserVoucherExchangeResponse>;
 }
 
 export const useFieldStore = create<FieldState>((set) => ({
@@ -71,7 +87,10 @@ export const useFieldStore = create<FieldState>((set) => ({
   smallFieldBookings: [],
   totalBookings: 0,
   orderStatus: null,
-  userOrders: null, // Initialize user orders state
+  userOrders: null,
+  userPoints: null,
+  userVouchers: null,
+  totalVouchers: 0,
 
   fetchPopularFields: async () => {
     set({ loading: true, error: null });
@@ -253,7 +272,6 @@ export const useFieldStore = create<FieldState>((set) => ({
     }
   },
 
-  // Add the fetchUserOrders action
   fetchUserOrders: async (userId: string) => {
     set({ loading: true, error: null });
     try {
@@ -265,7 +283,6 @@ export const useFieldStore = create<FieldState>((set) => ({
     }
   },
 
-  // Add the cancelBooking action
   cancelBooking: async (bookingId: string, bookingData: any) => {
     set({ loading: true, error: null });
     try {
@@ -276,5 +293,51 @@ export const useFieldStore = create<FieldState>((set) => ({
       set({ error: 'Failed to cancel booking', loading: false });
       throw error;
     }
-  }
+  },
+
+  fetchUserPoints: async (userId: string) => {
+    set({ loading: true, error: null });
+    try {
+      const points = await getUserPoints(userId);
+      set({ userPoints: points.data, loading: false });
+    } catch (error) {
+      set({ userPoints: null, error: 'Failed to fetch user points', loading: false });
+      throw error;
+    }
+  },
+
+  fetchUserVouchers: async (userId: string) => {
+    set({ loading: true, error: null });
+    try {
+      const vouchers = await getUserVouchers(userId);
+      set({ 
+        userVouchers: vouchers.data.content, 
+        totalVouchers: vouchers.data.totalElement,
+        loading: false 
+      });
+    } catch (error) {
+      set({ userVouchers: null, totalVouchers: 0, error: 'Failed to fetch user vouchers', loading: false });
+      throw error;
+    }
+  },
+
+  exchangeUserVoucher: async (voucher: {
+    discountValue: number;
+    minOrderValue: number;
+    image: string;
+    exchangePoint: number;
+    active: boolean;
+    percentage: boolean;
+  }) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await exchangeUserVoucher(voucher);
+      set({ loading: false });
+      return response;
+    } catch (error) {
+      set({ error: 'Failed to exchange user voucher', loading: false });
+      throw error;
+    }
+  },
+
 }));

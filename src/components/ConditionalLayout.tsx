@@ -1,17 +1,19 @@
-'use client';
-import React, { useEffect, useRef, useState } from 'react';
-import { usePathname } from 'next/navigation';
-import { Header } from './Header';
-import { Footer } from './Footer';
-import { GlobalLoading } from './GlobalLoading';
-import { rehydrateAuthState } from '@/stores/authStore';
-import AIChat from './AIChat';
+"use client";
+import React, { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import { Header } from "./Header";
+import { Footer } from "./Footer";
+import { GlobalLoading } from "./GlobalLoading";
+import { rehydrateAuthState } from "@/stores/authStore";
+import AIChatSideSheet from './Chat';
 
 interface ConditionalLayoutProps {
   children: React.ReactNode;
 }
 
-export const ConditionalLayout: React.FC<ConditionalLayoutProps> = ({ children }) => {
+export const ConditionalLayout: React.FC<ConditionalLayoutProps> = ({
+  children,
+}) => {
   const pathname = usePathname();
   const [loading, setLoading] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -37,20 +39,37 @@ export const ConditionalLayout: React.FC<ConditionalLayoutProps> = ({ children }
   }, [pathname]);
 
   // Define routes that should not have Header and Footer
-  const authRoutes = ['/login', '/register', '/forgot-password', '/carousel-test', '/send-otp', '/verify-otp', '/reset-password'];
+  const authRoutes = [
+    "/login",
+    "/register",
+    "/forgot-password",
+    "/carousel-test",
+    "/send-otp",
+    "/verify-otp",
+    "/reset-password",
+    "/404",
+  ];
   const isAuthRoute = authRoutes.includes(pathname);
 
   return (
-    <div className={isAuthRoute ? "min-h-screen bg-gradient-to-br from-sky-50 to-emerald-50" : "min-h-screen bg-gray-50"}>
+    <div
+      className={
+        isAuthRoute
+          ? "min-h-screen bg-gradient-to-br from-sky-50 to-emerald-50"
+          : "min-h-screen bg-gray-50"
+      }
+    >
       {loading && <GlobalLoading />}
       {!isAuthRoute && <Header />}
-      <main>
-        {children}
-      </main>
+      <main>{children}</main>
       {!isAuthRoute && <Footer />}
       {!isAuthRoute && (
-        <div className="fixed bottom-6 right-6 z-50">
-          <AIChat className="w-96 h-96" isFloating={true} />
+        <div>
+          <AIChatSideSheet
+            side="left" // hoặc "right"
+            width="450px"
+            placeholder="Nhập tin nhắn..."
+          />
         </div>
       )}
     </div>

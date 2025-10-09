@@ -1,4 +1,4 @@
-import { Field, MainSport, SubCourt, TimeSlot, Owner, Review, ServerField, FieldBooking, BookingResponse, CreateBookingRequest, CreateBookingResponse, PaymentRequest, PaymentResponse, UserOrdersResponse } from '../types/field';
+import { Field, MainSport, SubCourt, TimeSlot, Owner, Review, ServerField, FieldBooking, BookingResponse, CreateBookingRequest, CreateBookingResponse, PaymentRequest, PaymentResponse, UserOrdersResponse, UserPointResponse, UserVouchersResponse, UserVoucherExchangeResponse } from '../types/field';
 import { allFields, popularFields, mainSports } from '../data/field';
 import { api } from '../config/api.config';
 
@@ -210,6 +210,58 @@ export const cancelBooking = async (bookingId: string, bookingData: any): Promis
     return response.data;
   } catch (error) {
     console.error('Error updating booking:', error);
+    throw error;
+  }
+};
+
+// Add the new function to fetch user points
+export const getUserPoints = async (userId: string): Promise<UserPointResponse> => {
+  try {
+    const response = await api.get<UserPointResponse>('/api/point/detail', {
+      params: {
+        userId: userId
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching user points:', error);
+    throw error;
+  }
+};
+
+// Add the new function to fetch user vouchers
+export const getUserVouchers = async (userId: string): Promise<UserVouchersResponse> => {
+  try {
+    const response = await api.get<UserVouchersResponse>('/api/user-vouchers', {
+      params: {
+        page: 1,
+        size: 1000,
+        field: 'createdDate',
+        direction: 'desc',
+        userId: userId
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching user vouchers:', error);
+    throw error;
+  }
+};
+
+// Add the new function to exchange user vouchers
+export const exchangeUserVoucher = async (voucher: {
+  discountValue: number;
+  minOrderValue: number;
+  image: string;
+  exchangePoint: number;
+  active: boolean;
+  percentage: boolean;
+}): Promise<UserVoucherExchangeResponse> => {
+  try {
+    const response = await api.post<UserVoucherExchangeResponse>('/api/user-vouchers/exchange', voucher);
+    return response.data;
+  } catch (error) {
+    console.error('Error exchanging user voucher:', error);
     throw error;
   }
 };

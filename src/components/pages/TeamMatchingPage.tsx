@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Users, Calendar, Clock, MapPin, Search, Star, MessageCircle, ChevronDown, X, Eye, Trash2, Trophy, Target, Zap, Shield } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
-import { useMatchStore } from '@/stores/matchStore';
 import { Match, SkillLevel } from '@/types/match';
 import Image from 'next/image';
 
@@ -24,18 +23,74 @@ export const TeamMatchingPage = () => {
     phone: '',
     facebook: '',
   });
-  const { user, isAuthenticated, fetchAllUsers, users } = useAuthStore();
-  const {
-    matches,
-    fetchAllMatches,
-    createMatch,
-    joinMatch,
-    approveJoinRequest,
-    rejectJoinRequest,
-    cancelMatch,
-    deleteMatch,
-    leaveMatch
-  } = useMatchStore();
+  const { user, isAuthenticated } = useAuthStore();
+  
+  // Mock data for matches
+  const matches: Match[] = [
+    {
+      id: 1,
+      title: 'Giao hữu bóng đá cuối tuần',
+      sport: 'Bóng đá',
+      organizer: 'Nguyễn Văn A',
+      organizerAvatar: '',
+      date: '2025-10-15',
+      time: '17:00',
+      location: 'Sân bóng Quy Nhon Center',
+      address: '123 Đường ABC, Quy Nhơn',
+      maxParticipants: 12,
+      skillLevel: 'Trung bình',
+      description: 'Trận giao hữu bóng đá thân mật vào cuối tuần. Mời các bạn yêu thích bóng đá cùng tham gia!',
+      status: 'open',
+      phone: '0123456789',
+      facebook: 'https://facebook.com/nguyenvana',
+      role: 'organizer',
+      joinRequests: [
+        { user: 'Trần Văn B', status: 'approved' },
+        { user: 'Lê Thị C', status: 'pending' }
+      ]
+    },
+    {
+      id: 2,
+      title: 'Cầu lông giải trí buổi tối',
+      sport: 'Cầu lông',
+      organizer: 'Trần Thị D',
+      organizerAvatar: '',
+      date: '2025-10-12',
+      time: '19:30',
+      location: 'Trung tâm thể thao Quy Nhơn',
+      address: '456 Đường XYZ, Quy Nhơn',
+      maxParticipants: 8,
+      skillLevel: 'Thấp',
+      description: 'Chơi cầu lông giải trí vào buổi tối. Ai cũng có thể tham gia!',
+      status: 'full',
+      phone: '0987654321',
+      facebook: 'https://facebook.com/tranthid',
+      role: 'organizer',
+      joinRequests: [
+        { user: 'Phạm Văn E', status: 'approved' },
+        { user: 'Hoàng Thị F', status: 'approved' }
+      ]
+    }
+  ];
+  
+  // Mock users data
+  const users = [
+    { name: 'Nguyễn Văn A', avatar: '' },
+    { name: 'Trần Văn B', avatar: '' },
+    { name: 'Lê Thị C', avatar: '' },
+    { name: 'Trần Thị D', avatar: '' },
+    { name: 'Phạm Văn E', avatar: '' },
+    { name: 'Hoàng Thị F', avatar: '' }
+  ];
+  
+  // Mock functions (no-op)
+  const createMatch = async (match: Match) => {};
+  const joinMatch = async (matchId: number, userName: string) => {};
+  const approveJoinRequest = async (matchId: number, userName: string) => {};
+  const rejectJoinRequest = async (matchId: number, userName: string) => {};
+  const cancelMatch = (matchId: number) => {};
+  const deleteMatch = (matchId: number) => {};
+  const leaveMatch = (matchId: number, userName: string) => {};
 
   // State filter mới
   const [filters, setFilters] = useState({
@@ -79,10 +134,7 @@ export const TeamMatchingPage = () => {
     }
   }
 
-  useEffect(() => {
-    fetchAllUsers();
-    fetchAllMatches();
-  }, [fetchAllUsers, fetchAllMatches]);
+  // Removed fetchAllUsers and fetchAllMatches since we're using mock data
 
   // Cập nhật logic lọc trận đấu
   const filteredMatches = matches.filter(match => {
