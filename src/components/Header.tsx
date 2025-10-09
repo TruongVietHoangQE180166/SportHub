@@ -112,11 +112,11 @@ export const Header: React.FC = () => {
         className={`relative flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 group mx-1 ${
           isActive
             ? 'text-white bg-gradient-to-r from-green-500 to-emerald-600 shadow-lg shadow-green-500/30 transform scale-105'
-            : 'text-gray-300 hover:text-white'
+            : 'text-gray-900 hover:text-black'
         }`}
       >
         <Icon className={`w-4 h-4 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 ${
-          isActive ? 'text-white drop-shadow-sm' : 'text-gray-400 group-hover:text-white'
+          isActive ? 'text-white drop-shadow-sm' : 'text-gray-700 group-hover:text-black'
         }`} />
         <span className="font-semibold tracking-wide">{item.name}</span>
         {!isActive && (
@@ -136,7 +136,7 @@ export const Header: React.FC = () => {
         className={`flex items-center space-x-3 px-4 py-4 rounded-xl text-base font-semibold transition-all duration-300 transform hover:scale-105 ${
           isActive
             ? 'text-white bg-gradient-to-r from-green-500 to-emerald-600 shadow-lg shadow-green-500/30'
-            : 'text-gray-300 hover:text-white hover:bg-green-900/50 hover:backdrop-blur-sm'
+            : 'text-gray-900 hover:text-black hover:bg-green-100/50 hover:backdrop-blur-sm'
         }`}
         onClick={() => setMobileMenuOpen(false)}
       >
@@ -148,7 +148,7 @@ export const Header: React.FC = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-black text-white shadow-lg">
+      <header className="sticky top-0 z-50 bg-white text-black shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <Link href="/" className="flex items-center group">
@@ -156,14 +156,14 @@ export const Header: React.FC = () => {
                 <Image 
                   src="/SportHub-Logo.png" 
                   alt="Logo" 
-                  width={150}
+                  width={200}
                   height={80}
                   className="transition-all duration-300 drop-shadow-lg object-contain h-24 group-hover:h-28 group-hover:scale-110"
                 />
               </div>
             </Link>
 
-            <nav className="hidden lg:flex items-center space-x-1 rounded-full p-2 shadow-inner bg-gray-900/70 backdrop-blur-xl backdrop-saturate-125">
+            <nav className="hidden lg:flex items-center space-x-1 rounded-full p-2 shadow-inner bg-gray-100/70 backdrop-blur-xl backdrop-saturate-125">
               {navigation.map((item) => (
                 <NavigationLink key={item.name} item={item} />
               ))}
@@ -267,7 +267,7 @@ export const Header: React.FC = () => {
                   <div className="flex items-center space-x-3">
                     <button
                       onClick={() => router.push('/login')}
-                      className="text-white hover:text-green-400 font-bold px-5 py-2.5 rounded-full hover:bg-white/10 hover:backdrop-blur-sm transition-all duration-300 tracking-wide hover:scale-105"
+                      className="text-black hover:text-green-400 font-bold px-5 py-2.5 rounded-full hover:bg-black/10 hover:backdrop-blur-sm transition-all duration-300 tracking-wide hover:scale-105"
                     >
                       Đăng nhập
                     </button>
@@ -287,12 +287,12 @@ export const Header: React.FC = () => {
                   e.stopPropagation();
                   setMobileMenuOpen(!mobileMenuOpen);
                 }}
-                className="lg:hidden p-2.5 rounded-full hover:bg-white/10 hover:backdrop-blur-sm transition-all duration-300 hover:shadow-md hover:scale-110"
+                className="lg:hidden p-2.5 rounded-full hover:bg-black/10 hover:backdrop-blur-sm transition-all duration-300 hover:shadow-md hover:scale-110"
               >
                 {mobileMenuOpen ? (
-                  <X className="w-6 h-6 text-white transition-transform duration-200 hover:rotate-90" />
+                  <X className="w-6 h-6 text-black transition-transform duration-200 hover:rotate-90" />
                 ) : (
-                  <Menu className="w-6 h-6 text-white transition-transform duration-200 hover:scale-110" />
+                  <Menu className="w-6 h-6 text-black transition-transform duration-200 hover:scale-110" />
                 )}
               </button>
             </div>
@@ -302,7 +302,7 @@ export const Header: React.FC = () => {
 
       {mobileMenuOpen && (
         <div className="lg:hidden fixed inset-0 z-40 bg-black/80 backdrop-blur-xl transition-all duration-300">
-          <div id="mobile-menu" className="absolute left-0 right-0 top-20 bg-black/95 backdrop-blur-3xl backdrop-saturate-150 border-b-2 border-green-400/50 shadow-2xl transition-all duration-500">
+          <div id="mobile-menu" className="absolute left-0 right-0 top-20 bg-white/95 backdrop-blur-3xl backdrop-saturate-150 border-b-2 border-green-400/50 shadow-2xl transition-all duration-500">
             <div className="px-4 py-6 space-y-3">
               {navigation.map((item) => (
                 <MobileNavigationLink key={item.name} item={item} />
@@ -348,7 +348,7 @@ export const Header: React.FC = () => {
                         <Link
                           key={item.name}
                           href={item.href}
-                          className="flex items-center space-x-3 px-4 py-3 text-base font-semibold text-gray-200 hover:bg-green-900/50 hover:text-white transition-all duration-200 rounded-xl"
+                          className="flex items-center space-x-3 px-4 py-3 text-base font-semibold text-gray-700 hover:bg-green-50/80 hover:text-green-400 transition-all duration-200 rounded-xl"
                           onClick={() => setMobileMenuOpen(false)}
                         >
                           <Icon className="w-5 h-5" />
@@ -362,7 +362,7 @@ export const Header: React.FC = () => {
                         logout();
                         setMobileMenuOpen(false);
                       }}
-                      className="flex items-center space-x-3 w-full px-4 py-3 text-base font-semibold text-red-400 hover:bg-red-900/50 hover:text-red-200 transition-all duration-200 rounded-xl"
+                      className="flex items-center space-x-3 w-full px-4 py-3 text-base font-semibold text-red-600 hover:bg-red-50/80 hover:text-red-700 transition-all duration-200 rounded-xl"
                     >
                       <LogOut className="w-5 h-5" />
                       <span>Đăng xuất</span>
@@ -377,7 +377,7 @@ export const Header: React.FC = () => {
                         router.push('/login');
                         setMobileMenuOpen(false);
                       }}
-                      className="text-white hover:text-green-400 font-bold px-5 py-3.5 rounded-full hover:bg-white/10 hover:backdrop-blur-sm transition-all duration-300 tracking-wide text-base"
+                      className="text-black hover:text-green-400 font-bold px-5 py-3.5 rounded-full hover:bg-black/10 hover:backdrop-blur-sm transition-all duration-300 tracking-wide text-base"
                     >
                       Đăng nhập
                     </button>

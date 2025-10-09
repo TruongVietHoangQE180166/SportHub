@@ -19,10 +19,11 @@ interface JoinRequest {
 }
 
 interface Match {
-  id: number;
+  id: string;
   title: string;
   sport: string;
   organizer: string;
+  ownerId: string;
   organizerAvatar: string;
   date: string;
   time: string;
@@ -36,10 +37,12 @@ interface Match {
   facebook: string;
   role: MatchRole;
   joinRequests: JoinRequest[];
+  teamJoinRequests: any[];
+  members?: Array<{ userId: string; username: string; email: string }>;
 }
 
 export const MyMatchesPage = () => {
-  const [selectedMatch, setSelectedMatch] = useState<number | null>(null);
+  const [selectedMatch, setSelectedMatch] = useState<string | null>(null);
   const [myMatchFilters, setMyMatchFilters] = useState({
     status: '',
     role: '',
@@ -56,55 +59,76 @@ export const MyMatchesPage = () => {
 
   // Fetch user's matches
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchMatches = async () => {
       if (!isAuthenticated || !user) {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
         return;
       }
 
       try {
-        setLoading(true);
-        setError(null);
+        if (isMounted) {
+          setLoading(true);
+          setError(null);
+        }
         
         // Call the getMyMatch service
         const response = await getMyMatch(user.id);
         
         // Convert API response to Match format
-        const convertedMatches: Match[] = response.data.content.map(match => ({
-          id: parseInt(match.id, 10),
-          title: match.nameMatch,
-          sport: match.nameSport,
-          organizer: match.ownerName,
-          organizerAvatar: '', // Will need to get this from user service or API
-          date: match.timeMatch.split('T')[0],
-          time: match.timeMatch.split('T')[1].substring(0, 5),
-          location: match.location,
-          address: match.location,
-          maxParticipants: match.maxPlayers,
-          skillLevel: match.level === 'LOW' ? 'Thấp' : 
-                      match.level === 'MEDIUM' ? 'Trung bình' : 
-                      match.level === 'HIGH' ? 'Cao' : 'Chuyên nghiệp',
-          description: match.descriptionMatch,
-          status: 'open', // Default status, would need to be determined from API data
-          phone: match.numberPhone,
-          facebook: match.linkFacebook,
-          role: match.ownerId === user.id ? 'organizer' : 'participant',
-          joinRequests: match.members.map(member => ({
-            user: member.username,
-            status: 'approved'
-          }))
-        }));
+        const convertedMatches: Match[] = response.data.content.map(match => {
+          return {
+            id: match.id, // Keep ID as string
+            title: match.nameMatch,
+            sport: match.nameSport,
+            organizer: match.ownerName,
+            ownerId: match.ownerId,
+            organizerAvatar: '', // Will need to get this from user service or API
+            date: match.timeMatch.split('T')[0],
+            time: match.timeMatch.split('T')[1].substring(0, 5),
+            location: match.location,
+            address: match.location,
+            maxParticipants: match.maxPlayers,
+            skillLevel: match.level === 'LOW' ? 'Thấp' : 
+                        match.level === 'MEDIUM' ? 'Trung bình' : 
+                        match.level === 'HIGH' ? 'Cao' : 'Chuyên nghiệp',
+            description: match.descriptionMatch,
+            status: 'open', // Default status, would need to be determined from API data
+            phone: match.numberPhone,
+            facebook: match.linkFacebook,
+            role: match.ownerId === user.id ? 'organizer' : 'participant',
+            joinRequests: match.members.map(member => ({
+              user: member.username,
+              status: 'approved'
+            })),
+            teamJoinRequests: Array.isArray(match.teamJoinRequest) ? match.teamJoinRequest : [],
+            members: match.members // Add members property
+          }
+        });
         
-        setMatches(convertedMatches);
+        if (isMounted) {
+          setMatches(convertedMatches);
+        }
       } catch (err) {
         console.error('Error fetching matches:', err);
-        setError('Có lỗi xảy ra khi tải danh sách trận đấu');
+        if (isMounted) {
+          setError('Có lỗi xảy ra khi tải danh sách trận đấu');
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchMatches();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [isAuthenticated, user]);
 
   // Logic lọc trận đấu của tôi
@@ -353,11 +377,17 @@ export const MyMatchesPage = () => {
                       ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                           {myFilteredMatches.map((match) => {
-                            const SportIcon = getSportIcon(match.sport);
-                            const isOrganizer = match.organizer === user?.name;
+                            // Ensure match has a valid ID
+                            const validMatch = {
+                              ...match,
+                              id: match.id || '0'
+                            };
+                            
+                            const SportIcon = getSportIcon(validMatch.sport);
+                            const isOrganizer = validMatch.organizer === user?.name;
                             
                             return (
-                              <div key={match.id} className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 p-6 border border-gray-100 group">
+                              <div key={validMatch.id} className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 p-6 border border-gray-100 group">
                                 {/* Header with sport icon and title */}
                                 <div className="flex items-center space-x-3 mb-4">
                                   <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${getSportGradient()} flex items-center justify-center text-white shadow-sm`}>
@@ -365,9 +395,9 @@ export const MyMatchesPage = () => {
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <h3 className="text-lg font-bold text-gray-900 group-hover:text-green-600 transition-colors truncate">
-                                      {match.title}
+                                      {validMatch.title}
                                     </h3>
-                                    <p className="text-sm text-gray-500">{match.sport}</p>
+                                    <p className="text-sm text-gray-500">{validMatch.sport}</p>
                                   </div>
                                 </div>
                                 
@@ -396,18 +426,18 @@ export const MyMatchesPage = () => {
                                 <div className="space-y-3 mb-6">
                                   <div className="flex items-center space-x-2 text-gray-600">
                                     <Calendar className="w-4 h-4" />
-                                    <span className="text-sm font-medium">{match.date}</span>
+                                    <span className="text-sm font-medium">{validMatch.date}</span>
                                     <Clock className="w-4 h-4 ml-2" />
-                                    <span className="text-sm font-medium">{match.time}</span>
+                                    <span className="text-sm font-medium">{validMatch.time}</span>
                                   </div>
                                   <div className="flex items-center space-x-2 text-gray-600">
                                     <MapPin className="w-4 h-4" />
-                                    <span className="text-sm font-medium truncate">{match.location}</span>
+                                    <span className="text-sm font-medium truncate">{validMatch.location}</span>
                                   </div>
                                   <div className="flex items-center space-x-2 text-gray-600">
                                     <Users className="w-4 h-4" />
                                     <span className="text-sm font-medium">
-                                      {1 + match.joinRequests.filter(r => r.status === 'approved').length}/{match.maxParticipants} người
+                                      {1 + (validMatch.joinRequests && Array.isArray(validMatch.joinRequests) ? validMatch.joinRequests.filter(r => r.status === 'approved').length : 0)}/{validMatch.maxParticipants} người
                                     </span>
                                   </div>
                                 </div>
@@ -415,17 +445,17 @@ export const MyMatchesPage = () => {
                                 {/* Status and skill level */}
                                 <div className="flex items-center justify-between mb-4">
                                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                    match.status === 'open' ? 'bg-green-100 text-green-700' :
-                                    match.status === 'full' ? 'bg-gray-100 text-gray-700' :
-                                    match.status === 'finished' ? 'bg-blue-100 text-blue-700' :
+                                    validMatch.status === 'open' ? 'bg-green-100 text-green-700' :
+                                    validMatch.status === 'full' ? 'bg-gray-100 text-gray-700' :
+                                    validMatch.status === 'finished' ? 'bg-blue-100 text-blue-700' :
                                     'bg-red-100 text-red-700'
                                   }`}>
-                                    {match.status === 'open' ? 'Đang tuyển' : 
-                                     match.status === 'full' ? 'Đã đầy' : 
-                                     match.status === 'finished' ? 'Đã kết thúc' : 'Đã hủy'}
+                                    {validMatch.status === 'open' ? 'Đang tuyển' : 
+                                     validMatch.status === 'full' ? 'Đã đầy' : 
+                                     validMatch.status === 'finished' ? 'Đã kết thúc' : 'Đã hủy'}
                                   </span>
                                   <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700">
-                                    {match.skillLevel}
+                                    {validMatch.skillLevel}
                                   </span>
                                 </div>
                                 
@@ -433,7 +463,7 @@ export const MyMatchesPage = () => {
                                 <div className="mt-auto">
                                   <button 
                                     className="w-full px-4 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 font-semibold text-sm transform hover:scale-105 transition-all duration-200 flex items-center justify-center space-x-2" 
-                                    onClick={() => setSelectedMatch(match.id)}
+                                    onClick={() => setSelectedMatch(validMatch.id.toString())}
                                   >
                                     <Eye className="w-4 h-4" />
                                     <span>Xem chi tiết</span>
@@ -449,8 +479,20 @@ export const MyMatchesPage = () => {
                     // Xem chi tiết trận đấu
                     <>
                       {(() => {
-                        const match = myFilteredMatches.find(m => m.id === selectedMatch) || matches.find(m => m.id === selectedMatch);
-                        return match ? <MatchCard match={match} isDetailed={true} /> : null;
+                        const match = myFilteredMatches.find(m => m.id === selectedMatch) || 
+                                     matches.find(m => m.id === selectedMatch);
+                        
+                        return match ? <MatchCard match={match} isDetailed={true} /> : (
+                          <div className="text-center py-10">
+                            <p className="text-red-500">Không tìm thấy thông tin trận đấu</p>
+                            <button 
+                              onClick={() => setSelectedMatch(null)}
+                              className="mt-4 px-4 py-2 bg-gray-200 rounded"
+                            >
+                              Quay lại danh sách
+                            </button>
+                          </div>
+                        );
                       })()}
                       <div className="flex justify-end mt-8">
                         <button

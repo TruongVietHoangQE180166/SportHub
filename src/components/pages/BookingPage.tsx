@@ -171,7 +171,7 @@ export const BookingPage: React.FC = () => {
           if (intervalId) clearInterval(intervalId);
           setIsCheckingStatus(false);
         }
-      }, 10000); // Check every 10 seconds
+      }, 30000); // Check every 30 seconds
     }
 
     // Cleanup function to clear interval

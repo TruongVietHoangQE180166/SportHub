@@ -23,6 +23,17 @@ interface LoginResponseData {
   email: string;
 }
 
+// Add interface for Google login response
+interface GoogleLoginResponseData {
+  username: string;
+  password: string;
+  email: string;
+  status: string;
+  role: string;
+  userId: string;
+  deleted: boolean;
+}
+
 interface RegisterResponseData {
   id: string;
   username: string;
@@ -385,6 +396,42 @@ export const authService = {
         throw new Error(err.response.data.message);
       }
       throw new Error("Đã có lỗi xảy ra khi tải ảnh lên");
+    }
+  },
+
+  // Add new method for Google OAuth login
+  loginGoogle: async (token: string): Promise<{ user: AuthUser; accessToken: string }> => {
+    try {
+      // Set the token in the authorization header
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
+      // Call the user info endpoint to get user details
+      const response = await api.get<ApiResponse<GoogleLoginResponseData>>("/api/user/getme");
+      
+      // Save to sessionStorage
+      sessionStorage.setItem("accessToken", token);
+      sessionStorage.setItem("userId", response.data.data.userId);
+      sessionStorage.setItem("username", response.data.data.username);
+      sessionStorage.setItem("userEmail", response.data.data.email);
+
+      // Create AuthUser object from response
+      const user: AuthUser = {
+        id: response.data.data.userId,
+        name: response.data.data.username,
+        email: response.data.data.email,
+        loyaltyPoints: 0, // Default value, will be updated when fetching user details
+      };
+
+      return { user, accessToken: token };
+    } catch (error: unknown) {
+      // Return error message from server if available, otherwise use generic message
+      const err = error as any;
+      if (err.response?.data?.message?.messageDetail) {
+        throw new Error(err.response.data.message.messageDetail);
+      } else if (err.response?.data?.message) {
+        throw new Error(err.response.data.message);
+      }
+      throw new Error("Đã có lỗi xảy ra khi đăng nhập bằng Google");
     }
   },
 
