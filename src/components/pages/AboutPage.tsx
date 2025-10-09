@@ -490,7 +490,7 @@ export default function AboutPage() {
                                 <button
                                   key={option.value}
                                   type="button"
-                                  className={`w-full text-left px-4 py-3 hover:bg-green-50 transition-all text-sm first:rounded-t-xl last:rounded-b-xl ${ownerForm.sport === option.value ? 'bg-green-100 text-green-700 font-semibold' : 'text-gray-700'}`}
+                                  className={`w-full text-left px-4 py-3 hover:bg-green-50 transition-all text-sm first:rounded-t-xl last:rounded-b-xl ${ownerForm.sport === option.value ? 'bg-green-100 text-green-400 font-semibold' : 'text-gray-700'}`}
                                   onClick={() => {
                                     setOwnerForm({...ownerForm, sport: option.value});
                                     setShowSportDropdown(false);

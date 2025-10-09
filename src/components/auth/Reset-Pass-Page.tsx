@@ -225,13 +225,13 @@ export default function ResetPasswordPage() {
   const strengthIndicator = getPasswordStrengthText();
 
   return (
-    <div className="h-screen flex items-center justify-center p-4 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
+    <div className="h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-900 via-black to-gray-800">
       <div className="w-full max-w-md">
         <div className="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-6">
           {/* Logo - Ultra Compact */}
           <div className="text-center mb-3">
             <Link href="/" className="inline-flex items-center justify-center group">
-              <div className="w-28 h-10 relative mx-auto">
+              <div className="w-50 h-14 relative mx-auto">
                 <Image 
                   src="/SportHub-Logo.png" 
                   alt="SportHub Logo" 
@@ -404,7 +404,7 @@ export default function ResetPasswordPage() {
             )}
 
             {/* Password Requirements - Ultra Compact */}
-            <div className="bg-gray-50 rounded-lg p-2">
+            <div className="rounded-lg p-2">
               <div className="grid grid-cols-2 gap-1 text-xs">
                 <div className={`flex items-center ${newPassword.length >= 8 ? 'text-green-600' : 'text-gray-500'}`}>
                   <span className="w-1 h-1 bg-current rounded-full mr-1"></span>
@@ -446,7 +446,7 @@ export default function ResetPasswordPage() {
           </form>
 
           {/* Footer Links - Compact */}
-          <div className="mt-3 pt-3 border-t border-gray-100 text-center space-y-1">
+          <div className="mt-3 pt-3 text-center space-y-1">
             <p className="text-xs text-gray-600">
               Nhớ mật khẩu?{' '}
               <Link href="/login" className="text-green-600 hover:text-green-700 font-medium">

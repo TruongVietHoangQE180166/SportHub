@@ -3,6 +3,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Settings, Key, Trash2, X } from 'lucide-react';
 
+// Import Google GenAI SDK
+// npm install @google/generative-ai
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
 interface Message {
   id: string;
   content: string;
@@ -36,6 +40,12 @@ const AIChat: React.FC<AIChatProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const editableRef = useRef<HTMLDivElement>(null);
 
+  // Initialize Google AI với SDK
+  const getGoogleAI = () => {
+    if (!apiKey) return null;
+    return new GoogleGenerativeAI(apiKey);
+  };
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -49,41 +59,31 @@ const AIChat: React.FC<AIChatProps> = ({
     }
   }, [showSettings, isChatOpen, isFloating]);
 
+  // Sử dụng SDK với gemini-2.5-flash
   const callGeminiAPI = async (prompt: string): Promise<string> => {
-    if (!apiKey) {
+    const genAI = getGoogleAI();
+    if (!genAI) {
       throw new Error('API Key chưa được cấu hình');
     }
 
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: prompt
-            }]
-          }]
-        })
+      const model = genAI.getGenerativeModel({ 
+        model: "gemini-2.5-flash"
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`API Error: ${errorData.error?.message || 'Không thể kết nối với Gemini AI'}`);
-      }
-
-      const data = await response.json();
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
       
-      if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-        throw new Error('Không nhận được phản hồi từ AI');
-      }
-
-      return data.candidates[0].content.parts[0].text;
+      return text;
     } catch (error) {
       console.error('Gemini API Error:', error);
-      throw error;
+      
+      if (error instanceof Error && error.message.includes('API_KEY')) {
+        throw new Error('API key không hợp lệ hoặc đã hết quota. Vui lòng kiểm tra lại.');
+      }
+      
+      throw new Error(`Lỗi: ${error instanceof Error ? error.message : 'Có lỗi xảy ra khi gọi API'}`);
     }
   };
 
@@ -107,11 +107,6 @@ const AIChat: React.FC<AIChatProps> = ({
     setInputValue('');
     setIsLoading(true);
 
-    // Clear content editable
-    if (editableRef.current) {
-      editableRef.current.innerText = '';
-    }
-
     try {
       const aiResponse = await callGeminiAPI(trimmedInput);
       
@@ -134,12 +129,11 @@ const AIChat: React.FC<AIChatProps> = ({
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
-      focusEditable();
     }
   };
 
   const handleEditableInput = (e: React.FormEvent<HTMLDivElement>) => {
-    const content = (e.target as HTMLDivElement).innerText || '';
+    const content = (e.target as HTMLDivElement).textContent || '';
     setInputValue(content);
   };
 
@@ -149,17 +143,42 @@ const AIChat: React.FC<AIChatProps> = ({
       handleSendMessage();
     }
     
-    // Prevent new lines on Shift+Enter
+    // Cho phép xuống dòng với Shift+Enter
     if (e.key === 'Enter' && e.shiftKey) {
       e.preventDefault();
-      document.execCommand('insertLineBreak');
+      const selection = window.getSelection();
+      const range = selection?.getRangeAt(0);
+      if (range) {
+        const br = document.createElement('br');
+        range.deleteContents();
+        range.insertNode(br);
+        range.setStartAfter(br);
+        range.setEndAfter(br);
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+      }
     }
   };
 
   const handleEditablePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
     e.preventDefault();
     const text = e.clipboardData.getData('text/plain');
-    document.execCommand('insertText', false, text);
+    
+    const selection = window.getSelection();
+    if (!selection?.rangeCount) return;
+    
+    const range = selection.getRangeAt(0);
+    range.deleteContents();
+    const textNode = document.createTextNode(text);
+    range.insertNode(textNode);
+    range.setStartAfter(textNode);
+    range.setEndAfter(textNode);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    
+    // Trigger input event
+    const event = new Event('input', { bubbles: true });
+    editableRef.current?.dispatchEvent(event);
   };
 
   const focusEditable = () => {
@@ -199,7 +218,7 @@ const AIChat: React.FC<AIChatProps> = ({
     setMessages([]);
     setInputValue('');
     if (editableRef.current) {
-      editableRef.current.innerText = '';
+      editableRef.current.textContent = '';
     }
     focusEditable();
   };
@@ -209,10 +228,10 @@ const AIChat: React.FC<AIChatProps> = ({
     return (
       <button
         onClick={() => setIsChatOpen(true)}
-        className="fixed bottom-6 right-6 bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700 text-white rounded-full w-16 h-16 shadow-2xl hover:shadow-emerald-500/25 transition-all duration-300 transform hover:scale-110 flex items-center justify-center z-50 border-2 border-emerald-400/50"
+        className="fixed bottom-6 right-6 bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-full w-16 h-16 shadow-2xl hover:shadow-gray-500/25 transition-all duration-300 transform hover:scale-110 flex items-center justify-center z-50 border-2 border-gray-700"
         aria-label="Open AI Chat"
       >
-        <Bot className="w-8 h-8" />
+        <Bot className="w-8 h-8 text-emerald-400" />
       </button>
     );
   }
@@ -220,7 +239,7 @@ const AIChat: React.FC<AIChatProps> = ({
   // Settings panel
   if (showSettings) {
     return (
-      <div className={`flex flex-col h-[500px] max-w-md mx-auto bg-gradient-to-b from-gray-900 to-black rounded-2xl shadow-2xl border border-gray-700 ${className} ${isFloating ? 'fixed bottom-6 right-6 z-40' : ''}`}>
+      <div className={`flex flex-col h-[500px] max-w-md mx-auto bg-white rounded-2xl shadow-2xl border border-gray-700 ${className} ${isFloating ? 'fixed bottom-6 right-6 z-40' : ''}`}>
         <div className="flex items-center justify-between p-4 border-b border-gray-700 bg-gradient-to-r from-gray-800 to-gray-900 rounded-t-2xl">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-emerald-500/20 rounded-full flex items-center justify-center border border-emerald-400/30">
@@ -257,7 +276,7 @@ const AIChat: React.FC<AIChatProps> = ({
               <h3 className="text-xl font-bold text-white mb-2">
                 API Key Required
               </h3>
-              <p className="text-gray-300 text-sm leading-relaxed">
+              <p className="text-gray-900 text-sm leading-relaxed">
                 {envApiKey ? 
                   'API key từ environment đã được phát hiện nhưng có vấn đề. Vui lòng nhập API key khác:' 
                   : 'Để sử dụng AI Chat, bạn cần cung cấp API key của Google Gemini'
@@ -267,11 +286,16 @@ const AIChat: React.FC<AIChatProps> = ({
 
             {!envApiKey && (
               <div className="bg-gray-800 border border-gray-700 rounded-xl p-4">
-                <p className="text-xs text-gray-300 leading-relaxed">
-                  <strong className="text-emerald-400">Gợi ý:</strong> Bạn có thể đặt API key trong file .env.local:
+                <p className="text-xs text-gray-900 leading-relaxed">
+                  <strong className="text-gray-900">Gợi ý:</strong> Bạn có thể đặt API key trong file .env.local:
                   <br />
-                  <code className="bg-black text-emerald-400 px-2 py-1 rounded text-xs mt-1 inline-block border border-gray-700">
+                  <code className="bg-black text-gray-900 px-2 py-1 rounded text-xs mt-1 inline-block border border-gray-700">
                     NEXT_PUBLIC_GEMINI_API_KEY=your_key
+                  </code>
+                  <br />
+                  <strong className="text-gray-900 mt-2 block">Cài đặt SDK:</strong>
+                  <code className="bg-black text-gray-900 px-2 py-1 rounded text-xs mt-1 inline-block border border-gray-700">
+                    npm install @google/generative-ai
                   </code>
                 </p>
               </div>
@@ -279,7 +303,7 @@ const AIChat: React.FC<AIChatProps> = ({
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-200 mb-2">
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
                   Google Gemini API Key
                 </label>
                 <input
@@ -287,7 +311,7 @@ const AIChat: React.FC<AIChatProps> = ({
                   value={tempApiKey}
                   onChange={(e) => setTempApiKey(e.target.value)}
                   placeholder="Nhập API key của bạn..."
-                  className="w-full px-4 py-3 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all bg-gray-800 text-white placeholder-gray-400"
+                  className="w-full px-4 py-3 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-400 transition-all bg-white text-gray-900 placeholder-gray-400"
                   autoComplete="off"
                   spellCheck={false}
                 />
@@ -296,20 +320,20 @@ const AIChat: React.FC<AIChatProps> = ({
               <button
                 onClick={handleSaveApiKey}
                 disabled={!tempApiKey.trim()}
-                className="w-full bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 disabled:cursor-not-allowed transform active:scale-95"
+                className="w-full bg-gradient-to-r from-gray-800 to-gray-800 hover:from-emerald-400 hover:to-emerald-400 disabled:from-gray-100 disabled:to-gray-100 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 disabled:cursor-not-allowed transform active:scale-95"
               >
                 Lưu và Bắt đầu
               </button>
             </div>
 
-            <div className="text-xs text-gray-400 text-center">
+            <div className="text-xs text-gray-900 text-center">
               <p>
                 Lấy API key miễn phí tại{' '}
                 <a 
                   href="https://makersuite.google.com/app/apikey" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-emerald-400 hover:text-emerald-300 font-medium hover:underline"
+                  className="text-emerald-400 hover:text-emerald-500 font-medium hover:underline"
                 >
                   Google AI Studio
                 </a>
@@ -323,35 +347,35 @@ const AIChat: React.FC<AIChatProps> = ({
 
   // Main chat interface
   return (
-    <div className={`flex flex-col h-[500px] max-w-md mx-auto bg-gradient-to-b from-gray-900 to-black rounded-2xl shadow-2xl border border-gray-700 ${className} ${isFloating ? 'fixed bottom-6 right-6 z-40' : ''}`}>
+    <div className={`flex flex-col h-[500px] max-w-md mx-auto bg-white rounded-2xl shadow-2xl border border-gray-700 ${className} ${isFloating ? 'fixed bottom-6 right-6 z-40' : ''}`}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-700 bg-gradient-to-r from-gray-800 via-emerald-800 to-cyan-800 text-white rounded-t-2xl">
+      <div className="flex items-center justify-between p-4 border-b border-gray-700 bg-gradient-to-r from-gray-800 to-gray-900 rounded-t-2xl">
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-emerald-400/20 rounded-full flex items-center justify-center border border-emerald-400/30">
+          <div className="w-8 h-8 bg-emerald-500/20 rounded-full flex items-center justify-center border border-emerald-400/30">
             <Bot className="w-5 h-5 text-emerald-400" />
           </div>
-          <h1 className="text-lg font-bold">AI Assistant</h1>
+          <h1 className="text-lg font-bold text-white">AI Assistant</h1>
         </div>
         <div className="flex items-center space-x-1">
           <button
             onClick={clearChat}
-            className="px-3 py-1.5 text-sm bg-gray-700/50 hover:bg-gray-600/50 rounded-lg transition-all duration-200 flex items-center space-x-1 border border-gray-600/50"
+            className="px-3 py-1.5 text-sm bg-gray-700 hover:bg-gray-600 rounded-lg transition-all duration-200 flex items-center space-x-1 border border-gray-600"
             title="Xóa cuộc trò chuyện"
           >
             <Trash2 className="w-3 h-3" />
-            <span className="hidden sm:inline">Xóa</span>
+            <span className="hidden sm:inline text-white">Xóa</span>
           </button>
           <button
             onClick={() => setShowSettings(true)}
-            className="p-2 hover:bg-gray-700/50 rounded-lg transition-colors border border-gray-600/50"
+            className="p-2 hover:bg-gray-700 rounded-lg transition-colors border border-gray-600"
             title="Cài đặt"
           >
-            <Settings className="w-4 h-4" />
+            <Settings className="w-4 h-4 text-white" />
           </button>
           {isFloating && (
             <button
               onClick={() => setIsChatOpen(false)}
-              className="p-2 hover:bg-gray-700/50 rounded-lg transition-colors"
+              className="p-2 hover:bg-gray-700 rounded-lg transition-colors text-white"
               title="Đóng chat"
             >
               <X className="w-4 h-4" />
@@ -361,7 +385,7 @@ const AIChat: React.FC<AIChatProps> = ({
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-gray-900 to-black">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white">
         {messages.length === 0 ? (
           <div className="text-center text-gray-400 mt-8">
             <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-400/30">
@@ -387,12 +411,12 @@ const AIChat: React.FC<AIChatProps> = ({
               <div
                 className={`max-w-[75%] px-4 py-3 rounded-2xl shadow-lg ${
                   message.sender === 'user'
-                    ? 'bg-gradient-to-r from-emerald-600 to-cyan-600 text-white rounded-br-sm border border-emerald-500/30'
-                    : 'bg-gray-800 text-gray-100 border border-gray-700 rounded-bl-sm'
+                    ? 'bg-gradient-to-r from-gray-800 to-gray-800 text-white rounded-br-sm border border-gray-700'
+                    : 'bg-gray-100 text-gray-800 border border-gray-200 rounded-bl-sm'
                 }`}
               >
                 <p className="whitespace-pre-wrap text-sm leading-relaxed">{message.content}</p>
-                <p className={`text-xs mt-2 ${message.sender === 'user' ? 'text-emerald-100' : 'text-gray-400'}`}>
+                <p className={`text-xs mt-2 ${message.sender === 'user' ? 'text-gray-300' : 'text-gray-500'}`}>
                   {message.timestamp.toLocaleTimeString('vi-VN', { 
                     hour: '2-digit', 
                     minute: '2-digit' 
@@ -414,7 +438,7 @@ const AIChat: React.FC<AIChatProps> = ({
             <div className="w-8 h-8 bg-emerald-500/20 rounded-full flex items-center justify-center border border-emerald-400/30">
               <Bot className="w-4 h-4 text-emerald-400" />
             </div>
-            <div className="bg-gray-800 px-4 py-3 rounded-2xl rounded-bl-sm shadow-lg border border-gray-700">
+            <div className="bg-gray-100 px-4 py-3 rounded-2xl rounded-bl-sm shadow-lg border border-gray-200">
               <div className="flex space-x-1">
                 <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce"></div>
                 <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
@@ -426,39 +450,29 @@ const AIChat: React.FC<AIChatProps> = ({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area với ContentEditable Div */}
-      <div className="border-t border-gray-700 p-4 bg-gray-900 rounded-b-2xl">
+      {/* Input Area với Input bình thường */}
+      <div className="border-t border-gray-200 p-4 bg-white rounded-b-2xl">
         <div className="flex items-center space-x-3">
           <div className="flex-1 relative">
-            <div
-              ref={editableRef}
-              contentEditable={!isLoading}
-              onInput={handleEditableInput}
-              onKeyDown={handleEditableKeyDown}
-              onPaste={handleEditablePaste}
-              onClick={focusEditable}
-              className="px-4 py-3 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 disabled:bg-gray-800 disabled:cursor-not-allowed transition-all bg-gray-800 text-white min-h-[48px] max-h-32 overflow-y-auto whitespace-pre-wrap break-words"
-              spellCheck={false}
-              data-gramm="false"
-              data-gramm_editor="false"
-              data-enable-grammarly="false"
-              style={{
-                caretColor: '#10b981'
+            <input
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage();
+                }
               }}
+              placeholder={placeholder}
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all bg-white text-gray-900"
+              disabled={isLoading}
             />
-            {!inputValue && (
-              <div 
-                className="absolute top-3 left-4 text-gray-400 pointer-events-none select-none"
-                onClick={focusEditable}
-              >
-                {placeholder}
-              </div>
-            )}
           </div>
           <button
             onClick={handleSendMessage}
             disabled={!inputValue.trim() || isLoading}
-            className="bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700 disabled:from-gray-600 disabled:to-gray-700 text-white p-3 rounded-xl transition-all duration-200 disabled:cursor-not-allowed transform active:scale-95 shadow-lg hover:shadow-emerald-500/25 flex-shrink-0"
+            className="bg-gradient-to-r from-gray-800 to-gray-800 hover:from-emerald-600 hover:to-emerald-600 disabled:from-gray-300 disabled:to-gray-400 text-white p-3 rounded-xl transition-all duration-200 disabled:cursor-not-allowed transform active:scale-95 shadow-lg hover:shadow-emerald-500/25 flex-shrink-0"
           >
             <Send className="w-5 h-5" />
           </button>

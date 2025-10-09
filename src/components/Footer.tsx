@@ -27,10 +27,10 @@ export const Footer: React.FC = () => {
             
             {/* Social Links */}
             <div className="flex space-x-4">
-              <a href="#" className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center hover:bg-green-500 transition-colors duration-200">
+              <a href="#" className="w-10 h-10 rounded-full bg-green-400 flex items-center justify-center hover:bg-green-500 transition-colors duration-200">
                 <Facebook className="w-5 h-5 text-white" />
               </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center hover:bg-green-500 transition-colors duration-200">
+              <a href="#" className="w-10 h-10 rounded-full bg-green-400 flex items-center justify-center hover:bg-green-500 transition-colors duration-200">
                 <Instagram className="w-5 h-5 text-white" />
               </a>
             </div>

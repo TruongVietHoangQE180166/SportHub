@@ -159,13 +159,13 @@ export default function VerifyOTPPage() {
   const isFormValid = otpValues.every(value => value !== '') && countdown > 0;
 
   return (
-    <div className="h-screen overflow-hidden flex items-center justify-center p-4 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
+    <div className="h-screen overflow-hidden flex items-center justify-center p-4 bg-gradient-to-br from-gray-900 via-black to-gray-800">
       <div className="w-full max-w-sm">
-        <div className="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-6 max-h-[95vh] overflow-y-auto">
+        <div className="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-6">
           {/* Logo - Compact */}
           <div className="text-center mb-6">
             <Link href="/" className="inline-flex items-center justify-center group">
-              <div className="w-36 h-14 relative mx-auto">
+              <div className="w-50 h-14 relative mx-auto">
                 <Image 
                   src="/SportHub-Logo.png" 
                   alt="SportHub Logo" 
@@ -278,7 +278,7 @@ export default function VerifyOTPPage() {
           </form>
 
           {/* Footer Links */}
-          <div className="mt-4 pt-4 border-t border-gray-100 space-y-2 text-center">
+          <div className="mt-4 pt-4 space-y-2 text-center">
             <p className="text-xs text-gray-600">
               Đã có tài khoản?{' '}
               <Link href="/login" className="text-green-600 hover:text-green-700 font-semibold transition-colors">

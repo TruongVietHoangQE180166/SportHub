@@ -37,6 +37,7 @@ export const HomePage: React.FC = () => {
     popularFields,
     serverFields,
     loading,
+    error,
     fetchPopularFields,
     fetchServerFields,
     mainSports,
@@ -290,10 +291,22 @@ export const HomePage: React.FC = () => {
   // Auto-advance testimonial carousel
   useEffect(() => {
     const timer = setInterval(() => {
-      setTestimonialSlide((prev) => (prev + 1) % testimonials.length);
+      setTestimonialSlide((prev) => (prev + 1) % getTotalTestimonialSlides());
     }, 5000);
     return () => clearInterval(timer);
-  }, [testimonials.length]);
+  }, [testimonials.length, windowWidth, testimonialSlide]); // Add testimonialSlide dependency
+
+  // Auto-advance popular fields carousel
+  useEffect(() => {
+    // Only auto-advance if there are multiple slides
+    if (getTotalFieldSlides() <= 1) return;
+
+    const timer = setInterval(() => {
+      setFieldSlide((prev) => (prev + 1) % getTotalFieldSlides());
+    }, 5000);
+
+    return () => clearInterval(timer);
+  }, [serverFields.length, windowWidth, fieldSlide]); // Dependencies
 
   // Get visible fields based on current slide and screen size
   const getVisibleFields = () => {
@@ -336,9 +349,16 @@ export const HomePage: React.FC = () => {
       }));
   };
 
-  // Calculate items per slide based on screen width
+  // Calculate items per slide based on screen width for fields
   const getItemsPerSlide = () => {
     if (windowWidth >= 1024) return 4; // lg
+    if (windowWidth >= 768) return 2; // md
+    return 1; // sm
+  };
+
+  // Calculate items per slide based on screen width for testimonials
+  const getTestimonialItemsPerSlide = () => {
+    if (windowWidth >= 1024) return 3; // lg - show 3 testimonials on desktop
     if (windowWidth >= 768) return 2; // md
     return 1; // sm
   };
@@ -358,14 +378,21 @@ export const HomePage: React.FC = () => {
     return Math.ceil(allFields.length / itemsPerSlide);
   };
 
-  // Get visible testimonials (always show 3, cycling through)
+  // Get visible testimonials based on current slide and screen size
   const getVisibleTestimonials = () => {
+    const itemsPerSlide = getTestimonialItemsPerSlide(); // Use separate logic for testimonials
     const visibleTestimonials = [];
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < itemsPerSlide; i++) {
       const index = (testimonialSlide + i) % testimonials.length;
       visibleTestimonials.push(testimonials[index]);
     }
     return visibleTestimonials;
+  };
+
+  // Calculate total testimonial slides needed
+  const getTotalTestimonialSlides = () => {
+    const itemsPerSlide = getTestimonialItemsPerSlide(); // Use separate logic for testimonials
+    return Math.ceil(testimonials.length / itemsPerSlide);
   };
 
   const handleBookNow = () => {
@@ -378,10 +405,10 @@ export const HomePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white overflow-hidden">
       {/* Hero Section with Background Carousel */}
       <section
-        className="relative min-h-screen bg-gradient-to-br from-slate-900 via-green-900 to-emerald-900 text-white overflow-hidden"
+        className="relative min-h-[300px] sm:min-h-[500px] md:min-h-screen bg-gradient-to-br from-slate-900 via-green-900 to-emerald-900 text-white overflow-hidden"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onTouchStart={handleTouchStart}
@@ -451,31 +478,31 @@ export const HomePage: React.FC = () => {
         </div>
 
         {/* Enhanced Navigation Controls */}
-        <div className="absolute left-8 top-1/2 -translate-y-1/2 z-20">
+        <div className="absolute left-2 sm:left-4 md:left-8 top-1/2 -translate-y-1/2 z-20">
           <button
             onClick={prevSlide}
-            className="group relative bg-black/20 backdrop-blur-xl hover:bg-white/20 rounded-full p-4 transition-all duration-500 border border-white/30 shadow-2xl hover:shadow-green-500/20 hover:scale-110 active:scale-95"
+            className="group relative bg-black/20 backdrop-blur-xl hover:bg-white/20 rounded-full p-2 sm:p-3 md:p-4 transition-all duration-500 border border-white/30 shadow-2xl hover:shadow-green-500/20 hover:scale-110 active:scale-95"
           >
-            <ChevronLeft className="w-7 h-7 group-hover:scale-110 transition-all duration-300 text-white drop-shadow-lg group-hover:-translate-x-0.5" />
+            <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 group-hover:scale-110 transition-all duration-300 text-white drop-shadow-lg group-hover:-translate-x-0.5" />
             <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-emerald-400/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </button>
         </div>
 
-        <div className="absolute right-8 top-1/2 -translate-y-1/2 z-20">
+        <div className="absolute right-2 sm:right-4 md:right-8 top-1/2 -translate-y-1/2 z-20">
           <button
             onClick={nextSlide}
-            className="group relative bg-black/20 backdrop-blur-xl hover:bg-white/20 rounded-full p-4 transition-all duration-500 border border-white/30 shadow-2xl hover:shadow-green-500/20 hover:scale-110 active:scale-95"
+            className="group relative bg-black/20 backdrop-blur-xl hover:bg-white/20 rounded-full p-2 sm:p-3 md:p-4 transition-all duration-500 border border-white/30 shadow-2xl hover:shadow-green-500/20 hover:scale-110 active:scale-95"
           >
-            <ChevronRight className="w-7 h-7 group-hover:scale-110 transition-all duration-300 text-white drop-shadow-lg group-hover:translate-x-0.5" />
+            <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 group-hover:scale-110 transition-all duration-300 text-white drop-shadow-lg group-hover:translate-x-0.5" />
             <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-emerald-400/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </button>
         </div>
 
         {/* Enhanced Progress Indicators */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20">
-          <div className="flex items-center gap-4 bg-black/20 backdrop-blur-xl rounded-full px-6 py-3 border border-white/20">
+        <div className="absolute bottom-4 sm:bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 z-20">
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-4 bg-black/20 backdrop-blur-xl rounded-full px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 border border-white/20">
             {/* Slide indicators */}
-            <div className="flex gap-2">
+            <div className="flex gap-1.5 sm:gap-2">
               {sportsImages.map((_, index) => (
                 <button
                   key={index}
@@ -484,7 +511,9 @@ export const HomePage: React.FC = () => {
                     setHeroSlide(index);
                   }}
                   className={`relative group transition-all duration-500 ${
-                    index === heroSlide ? "w-12 h-3" : "w-3 h-3 hover:scale-110"
+                    index === heroSlide
+                      ? "w-8 sm:w-10 md:w-12 h-2.5 sm:h-2.5 md:h-3"
+                      : "w-2.5 sm:w-2.5 md:w-3 h-2.5 sm:h-2.5 md:h-3 hover:scale-110"
                   }`}
                 >
                   <div
@@ -508,7 +537,7 @@ export const HomePage: React.FC = () => {
             </div>
 
             {/* Slide counter */}
-            <div className="text-white/80 text-xs font-medium">
+            <div className="text-white/80 text-xs font-medium hidden sm:block">
               {heroSlide + 1} / {sportsImages.length}
             </div>
           </div>
@@ -516,10 +545,10 @@ export const HomePage: React.FC = () => {
 
         {/* Enhanced Animated background elements */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-20 left-10 w-32 h-32 bg-green-400/10 rounded-full animate-float"></div>
-          <div className="absolute bottom-32 right-16 w-40 h-40 bg-emerald-400/10 rounded-full animate-float-delayed"></div>
-          <div className="absolute top-1/3 right-1/4 w-24 h-24 bg-white/5 rounded-full animate-float-slow"></div>
-          <div className="absolute bottom-1/4 left-1/4 w-28 h-28 bg-green-300/10 rounded-full animate-float-reverse"></div>
+          <div className="absolute top-20 left-10 w-16 sm:w-24 md:w-32 h-16 sm:h-24 md:h-32 bg-green-400/10 rounded-full animate-float"></div>
+          <div className="absolute bottom-32 right-16 w-20 sm:w-32 md:w-40 h-20 sm:h-32 md:h-40 bg-emerald-400/10 rounded-full animate-float-delayed"></div>
+          <div className="absolute top-1/3 right-1/4 w-12 sm:w-20 md:w-24 h-12 sm:h-20 md:h-24 bg-white/5 rounded-full animate-float-slow"></div>
+          <div className="absolute bottom-1/4 left-1/4 w-14 sm:w-24 md:w-28 h-14 sm:h-24 md:h-28 bg-green-300/10 rounded-full animate-float-reverse"></div>
 
           {/* Dynamic grid overlay */}
           <div className="absolute inset-0 opacity-10">
@@ -535,21 +564,28 @@ export const HomePage: React.FC = () => {
         </div>
 
         {/* Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 flex items-center min-h-screen">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-24 flex items-center min-h-[300px] sm:min-h-[500px] md:min-h-screen">
           <div className="text-center w-full">
             {/* Enhanced Badge */}
-            <div className="flex justify-center mb-8">
-              <div className="group bg-gradient-to-r from-green-500/30 to-emerald-500/30 backdrop-blur-xl rounded-full px-8 py-3 border border-green-400/40 shadow-2xl hover:shadow-green-500/30 transition-all duration-500 hover:scale-105">
-                <span className="text-green-100 font-semibold text-lg tracking-wide flex items-center gap-2 drop-shadow-lg">
-                  <span className="animate-bounce">🏆</span>
-                  Hệ thống đặt sân tại Quy Nhơn
-                  <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+            <div className="flex justify-center mb-4 sm:mb-6 md:mb-8">
+              <div className="group bg-white rounded-full px-2 sm:px-6 md:px-8 py-1 sm:py-2.5 md:py-3 border border-gray-200 shadow-2xl hover:shadow-gray-300 transition-all duration-500 hover:scale-105">
+                <span className="text-gray-900 font-semibold text-[10px] sm:text-base md:text-lg tracking-wide flex items-center gap-1 sm:gap-2">
+                  <span className="animate-bounce text-xs sm:text-lg md:text-xl">
+                    🏆
+                  </span>
+                  <span className="hidden xs:inline">
+                    Hệ thống đặt sân tại Quy Nhơn
+                  </span>
+                  <span className="xs:hidden">
+                    Hệ thống đặt sân tại Quy Nhơn
+                  </span>
+                  <span className="w-0.5 h-0.5 sm:w-2 sm:h-2 bg-gray-900 rounded-full animate-pulse"></span>
                 </span>
               </div>
             </div>
 
             {/* Enhanced Main Heading */}
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-8 leading-tight tracking-tight">
+            <h1 className="text-2xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-3 sm:mb-7 md:mb-8 leading-tight tracking-tight px-2">
               <span className="block bg-gradient-to-r from-white via-green-100 to-emerald-200 bg-clip-text text-transparent animate-gradient-shift drop-shadow-2xl">
                 Đặt sân
               </span>
@@ -557,7 +593,7 @@ export const HomePage: React.FC = () => {
                 thể thao
               </span>
               <span
-                className="block text-3xl md:text-4xl lg:text-5xl mt-6 text-white font-bold leading-relaxed drop-shadow-2xl"
+                className="block text-lg sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl mt-2 sm:mt-5 md:mt-6 text-white font-bold leading-relaxed drop-shadow-2xl"
                 style={{
                   textShadow:
                     "0 4px 20px rgba(0,0,0,0.7), 0 0 40px rgba(255,255,255,0.3)",
@@ -568,63 +604,63 @@ export const HomePage: React.FC = () => {
             </h1>
 
             {/* Enhanced Subtitle with typing effect */}
-            <div className="max-w-6xl mx-auto mb-12">
+            <div className="max-w-6xl mx-auto mb-6 sm:mb-8 md:mb-12 px-4 hidden xs:hidden sm:block">
               <div
-                className="text-lg md:text-xl lg:text-2xl font-light text-white leading-relaxed tracking-wide"
+                className="text-xs sm:text-base md:text-lg lg:text-xl xl:text-2xl font-light text-white leading-relaxed tracking-wide flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-3 md:gap-4"
                 style={{
                   textShadow:
                     "0 2px 10px rgba(0,0,0,0.8), 0 0 20px rgba(255,255,255,0.2)",
                 }}
               >
-                <span className="inline-block animate-fade-in-up bg-white/10 backdrop-blur-sm px-3 py-1 rounded-lg mx-1">
+                <span className="inline-block animate-fade-in-up bg-white/10 backdrop-blur-sm px-2 sm:px-3 py-1 rounded-lg">
                   Kết nối cộng đồng thể thao
                 </span>
-                <span className="mx-4 text-green-300 animate-pulse text-2xl">
+                <span className="hidden sm:inline text-green-300 animate-pulse text-lg sm:text-xl md:text-2xl">
                   •
                 </span>
-                <span className="inline-block animate-fade-in-up delay-500 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-lg mx-1">
+                <span className="inline-block animate-fade-in-up delay-500 bg-white/10 backdrop-blur-sm px-2 sm:px-3 py-1 rounded-lg">
                   Đặt sân trong 30 giây
                 </span>
-                <span className="mx-4 text-green-300 animate-pulse delay-1000 text-2xl">
+                <span className="hidden sm:inline text-green-300 animate-pulse delay-1000 text-lg sm:text-xl md:text-2xl">
                   •
                 </span>
-                <span className="inline-block animate-fade-in-up delay-1000 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-lg mx-1">
+                <span className="inline-block animate-fade-in-up delay-1000 bg-white/10 backdrop-blur-sm px-2 sm:px-3 py-1 rounded-lg">
                   Tìm đội chơi dễ dàng
                 </span>
               </div>
             </div>
 
             {/* Enhanced CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-5 md:gap-6 justify-center px-4 hidden xs:hidden sm:flex">
               <button
                 onClick={handleBookNow}
-                className="group relative bg-gradient-to-r from-white to-green-50 text-green-800 px-12 py-5 rounded-2xl font-bold text-xl transition-all duration-500 shadow-2xl hover:shadow-green-500/25 transform hover:-translate-y-3 hover:scale-105 active:scale-95 overflow-hidden"
+                className="group relative bg-gradient-to-r from-white to-green-50 text-green-800 px-6 sm:px-10 md:px-12 py-3 sm:py-4.5 md:py-5 rounded-lg sm:rounded-xl md:rounded-2xl font-bold text-sm sm:text-lg md:text-xl transition-all duration-500 shadow-2xl hover:shadow-green-500/25 transform hover:-translate-y-2 hover:scale-105 active:scale-95 overflow-hidden"
               >
-                <span className="flex items-center justify-center gap-3 relative z-10">
+                <span className="flex items-center justify-center gap-2 sm:gap-2.5 md:gap-3 relative z-10">
                   <span>Đặt sân ngay</span>
-                  <Navigation className="w-6 h-6 group-hover:translate-x-2 group-hover:rotate-12 transition-all duration-300" />
+                  <Navigation className="w-4 h-4 sm:w-5.5 sm:h-5.5 md:w-6 md:h-6 group-hover:translate-x-2 group-hover:rotate-12 transition-all duration-300" />
                 </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-400 rounded-2xl opacity-0 group-hover:opacity-20 transition-all duration-500 transform group-hover:scale-110"></div>
-                <div className="absolute -top-2 -left-2 w-4 h-4 bg-green-400/30 rounded-full group-hover:animate-ping"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-400 rounded-lg sm:rounded-xl md:rounded-2xl opacity-0 group-hover:opacity-20 transition-all duration-500 transform group-hover:scale-110"></div>
+                <div className="absolute -top-1.5 -left-1.5 w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 bg-green-400/30 rounded-full group-hover:animate-ping"></div>
               </button>
 
               <button
                 onClick={handleFindTeam}
-                className="group relative border-2 border-white/80 bg-white/5 backdrop-blur-sm text-white px-12 py-5 rounded-2xl font-bold text-xl hover:bg-white hover:text-green-800 transition-all duration-500 shadow-2xl hover:shadow-white/25 transform hover:-translate-y-3 hover:scale-105 active:scale-95 overflow-hidden"
+                className="group relative border-2 border-white/80 bg-white/5 backdrop-blur-sm text-white px-6 sm:px-10 md:px-12 py-3 sm:py-4.5 md:py-5 rounded-lg sm:rounded-xl md:rounded-2xl font-bold text-sm sm:text-lg md:text-xl hover:bg-white hover:text-green-800 transition-all duration-500 shadow-2xl hover:shadow-white/25 transform hover:-translate-y-2 hover:scale-105 active:scale-95 overflow-hidden"
               >
-                <span className="flex items-center justify-center gap-3 relative z-10">
+                <span className="flex items-center justify-center gap-2 sm:gap-2.5 md:gap-3 relative z-10">
                   <span>Tìm đội chơi</span>
-                  <Search className="w-6 h-6 group-hover:translate-x-2 group-hover:rotate-12 transition-all duration-300" />
+                  <Search className="w-4 h-4 sm:w-5.5 sm:h-5.5 md:w-6 md:h-6 group-hover:translate-x-2 group-hover:rotate-12 transition-all duration-300" />
                 </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-green-400 rounded-2xl opacity-0 group-hover:opacity-20 transition-all duration-500 transform group-hover:scale-110"></div>
-                <div className="absolute -top-2 -right-2 w-4 h-4 bg-white/30 rounded-full group-hover:animate-ping"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-green-400 rounded-lg sm:rounded-xl md:rounded-2xl opacity-0 group-hover:opacity-20 transition-all duration-500 transform group-hover:scale-110"></div>
+                <div className="absolute -top-1.5 -right-1.5 w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 bg-white/30 rounded-full group-hover:animate-ping"></div>
               </button>
             </div>
           </div>
         </div>
 
         {/* Custom CSS cho animations */}
-        <style jsx>{`
+        <style>{`
           @keyframes gradient-shift {
             0%,
             100% {
@@ -841,28 +877,28 @@ export const HomePage: React.FC = () => {
           </div>
 
           {/* Features Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-6xl mx-auto">
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="group relative bg-white rounded-3xl p-8 border-2 border-gray-100 hover:border-green-500/30 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 overflow-hidden"
+                className="group relative bg-white rounded-2xl p-5 sm:p-6 border-2 border-gray-100 hover:border-green-500/30 hover:shadow-xl hover:-translate-y-1 transition-all duration-500 overflow-hidden"
               >
                 {/* Gradient Background on Hover */}
-                <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"></div>
 
                 {/* Content */}
                 <div className="relative z-10">
                   {/* Header Row */}
-                  <div className="flex items-start justify-between mb-6">
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center shadow-lg group-hover:bg-green-500 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+                  <div className="flex items-start justify-between mb-3 sm:mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-black rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg group-hover:bg-green-500 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
                         {feature.icon}
                       </div>
                       <div>
-                        <div className="text-xs font-bold text-green-500 bg-green-50 px-3 py-1 rounded-full inline-block mb-1">
+                        <div className="text-xs font-bold text-green-500 bg-green-50 px-2 py-1 rounded-full inline-block mb-1">
                           {feature.highlight}
                         </div>
-                        <h3 className="text-2xl font-bold text-black group-hover:text-green-600 transition-colors duration-300">
+                        <h3 className="text-base sm:text-lg font-bold text-black group-hover:text-green-600 transition-colors duration-300">
                           {feature.title}
                         </h3>
                       </div>
@@ -870,26 +906,26 @@ export const HomePage: React.FC = () => {
                   </div>
 
                   {/* Stats Badge */}
-                  <div className="mb-4">
-                    <span className="inline-block px-4 py-2 bg-gray-100 text-black font-bold text-sm rounded-full">
+                  <div className="mb-3">
+                    <span className="inline-block px-2.5 py-1 bg-gray-100 text-black font-bold text-xs rounded-full">
                       {feature.stats}
                     </span>
                   </div>
 
                   {/* Description */}
-                  <p className="text-gray-700 leading-relaxed text-lg mb-6 group-hover:text-gray-800 transition-colors duration-300">
+                  <p className="text-gray-700 leading-relaxed text-sm mb-3 group-hover:text-gray-800 transition-colors duration-300">
                     {feature.description}
                   </p>
 
                   {/* Action Link */}
-                  <div className="flex items-center text-green-600 font-semibold opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
-                    <span className="mr-2">Tìm hiểu thêm</span>
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" />
+                  <div className="flex items-center text-green-600 font-semibold opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                    <span className="mr-1 text-sm">Tìm hiểu thêm</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
                   </div>
                 </div>
 
                 {/* Decorative Corner */}
-                <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-green-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="absolute top-0 right-0 w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-bl from-green-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-bl-2xl"></div>
               </div>
             ))}
           </div>
@@ -948,7 +984,7 @@ export const HomePage: React.FC = () => {
             <div className="w-24 h-1 bg-green-500 mx-auto rounded-full"></div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-10">
             {loading ? (
               // Enhanced Loading skeleton
               Array(3)
@@ -972,7 +1008,7 @@ export const HomePage: React.FC = () => {
               mainSports.map((sport, index) => (
                 <div
                   key={index}
-                  className="group relative bg-white rounded-3xl p-8 shadow-lg border-2 border-gray-100 hover:border-green-500/30 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 overflow-hidden min-h-[520px] cursor-pointer"
+                  className="group relative bg-white rounded-3xl p-6 sm:p-8 shadow-lg border-2 border-gray-100 hover:border-green-500/30 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 overflow-hidden min-h-[400px] sm:min-h-[520px] cursor-pointer"
                   onClick={() => router.push(`/fields?sport=${sport.name}`)}
                 >
                   {/* Gradient Background on Hover */}
@@ -981,29 +1017,31 @@ export const HomePage: React.FC = () => {
                   {/* Card Content */}
                   <div className="relative z-10 flex flex-col h-full">
                     {/* Icon Container */}
-                    <div className="flex items-center justify-center mb-8">
-                      <div className="w-24 h-24 bg-gray-200 rounded-3xl flex items-center justify-center shadow-xl group-hover:bg-green-500 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
-                        <span className="text-4xl text-gray-600 group-hover:text-white group-hover:scale-110 transition-all duration-300">
+                    <div className="flex items-center justify-center mb-6 sm:mb-8">
+                      <div className="w-24 h-24 sm:w-24 sm:h-24 bg-gray-200 rounded-3xl flex items-center justify-center shadow-xl group-hover:bg-green-500 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+                        <span className="text-4xl sm:text-4xl text-gray-600 group-hover:text-white group-hover:scale-110 transition-all duration-300">
                           {sport.icon}
                         </span>
                       </div>
                     </div>
 
                     {/* Title */}
-                    <h3 className="text-3xl font-bold text-black mb-4 text-center group-hover:text-green-600 transition-colors duration-300">
+                    <h3 className="text-3xl sm:text-3xl md:text-4xl font-bold text-black mb-4 text-center group-hover:text-green-600 transition-colors duration-300">
                       {sport.name}
                     </h3>
 
                     {/* Description */}
-                    <p className="text-gray-600 text-center mb-8 leading-relaxed group-hover:text-gray-700 transition-colors duration-300 text-lg flex-grow">
+                    <p className="text-gray-600 text-center mb-6 sm:mb-8 leading-relaxed group-hover:text-gray-700 transition-colors duration-300 text-base sm:text-lg flex-grow">
                       {sport.description}
                     </p>
 
                     {/* Enhanced CTA Button */}
                     <div className="text-center mt-auto">
-                      <div className="group/btn inline-flex items-center gap-3 bg-gray-100 hover:bg-black text-gray-700 hover:text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 border-2 border-gray-100 hover:border-black group-hover:shadow-lg">
-                        <span className="text-base">Khám phá ngay</span>
-                        <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform duration-300" />
+                      <div className="group/btn inline-flex items-center gap-2 sm:gap-3 bg-gray-100 hover:bg-black text-gray-700 hover:text-white px-6 py-3 sm:px-8 sm:py-4 rounded-2xl font-semibold transition-all duration-300 border-2 border-gray-100 hover:border-black group-hover:shadow-lg">
+                        <span className="text-sm sm:text-base">
+                          Khám phá ngay
+                        </span>
+                        <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover/btn:translate-x-1 transition-transform duration-300" />
                       </div>
                     </div>
                   </div>
@@ -1131,74 +1169,107 @@ export const HomePage: React.FC = () => {
             {/* Right Image Section */}
             <div className="flex flex-col justify-center">
               {/* Image Carousel Container */}
-              <div className="relative h-[600px]">
-                {/* Background Shapes */}
-                <div className="absolute -inset-4 bg-gradient-to-br from-green-500 to-emerald-600 rounded-3xl transform rotate-2 opacity-10"></div>
-                <div className="absolute -inset-2 bg-gradient-to-bl from-black to-gray-800 rounded-3xl transform -rotate-1 opacity-5"></div>
+              <div className="relative h-[500px] md:h-[600px]">
+                {/* Animated Background Shapes - Gray Tones */}
+                <div className="absolute -inset-4 bg-gradient-to-br from-gray-400 via-gray-500 to-gray-600 rounded-[2rem] md:rounded-[3rem] transform rotate-3 opacity-15 blur-xl animate-pulse"></div>
+                <div className="absolute -inset-3 bg-gradient-to-tr from-gray-500 to-gray-400 rounded-[2rem] md:rounded-[3rem] transform -rotate-2 opacity-10"></div>
+                <div className="absolute -inset-2 bg-gradient-to-bl from-gray-900 via-gray-800 to-black rounded-[2rem] md:rounded-[3rem] transform rotate-1 opacity-5"></div>
 
-                {/* Image Container */}
-                <div className="relative bg-white p-2 rounded-3xl shadow-2xl h-full">
-                  <div className="relative h-full overflow-hidden rounded-2xl">
+                {/* Main Image Container with Glass Effect */}
+                <div className="relative bg-white/95 backdrop-blur-sm p-1.5 md:p-2 rounded-[2rem] md:rounded-[3rem] shadow-2xl h-full border border-white/20">
+                  <div className="relative h-full overflow-hidden rounded-[1.75rem] md:rounded-[2.5rem] bg-gradient-to-br from-gray-50 to-gray-100">
+                    {/* Images */}
                     {images.map((image, index) => (
-                      <img
+                      <div
                         key={index}
-                        src={image.src}
-                        alt={image.alt}
-                        className={`absolute inset-0 w-full h-full object-cover transition-all duration-1000 ease-in-out ${
+                        className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
                           index === currentImageIndex
                             ? "opacity-100 scale-100"
-                            : "opacity-0 scale-105"
+                            : "opacity-0 scale-110"
                         }`}
-                      />
+                      >
+                        <img
+                          src={image.src}
+                          alt={image.alt}
+                          className="w-full h-full object-cover"
+                        />
+                        {/* Overlay Gradient for Better Text Visibility */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
+                      </div>
                     ))}
+
+                    {/* Navigation Arrows - Hidden on Mobile */}
+                    <button
+                      onClick={() =>
+                        setCurrentImageIndex((prev) =>
+                          prev === 0 ? images.length - 1 : prev - 1
+                        )
+                      }
+                      className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 items-center justify-center bg-white/90 hover:bg-white rounded-full shadow-lg transition-all duration-300 hover:scale-110 group"
+                    >
+                      <svg
+                        className="w-6 h-6 text-gray-800 group-hover:text-gray-600 transition-colors"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2.5}
+                          d="M15 19l-7-7 7-7"
+                        />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() =>
+                        setCurrentImageIndex((prev) =>
+                          prev === images.length - 1 ? 0 : prev + 1
+                        )
+                      }
+                      className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 items-center justify-center bg-white/90 hover:bg-white rounded-full shadow-lg transition-all duration-300 hover:scale-110 group"
+                    >
+                      <svg
+                        className="w-6 h-6 text-gray-800 group-hover:text-gray-600 transition-colors"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2.5}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </button>
                   </div>
 
-                  {/* Image Indicators */}
-                  <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                  {/* Enhanced Image Indicators */}
+                  <div className="absolute bottom-4 md:bottom-6 left-1/2 transform -translate-x-1/2 flex items-center gap-2 bg-black/40 backdrop-blur-md px-4 py-2.5 rounded-full">
                     {images.map((_, index) => (
                       <button
                         key={index}
                         onClick={() => setCurrentImageIndex(index)}
-                        className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                        className={`transition-all duration-300 rounded-full ${
                           index === currentImageIndex
-                            ? "bg-white shadow-lg scale-125"
-                            : "bg-white/50 hover:bg-white/75"
+                            ? "w-8 md:w-10 h-2.5 bg-white shadow-lg"
+                            : "w-2.5 h-2.5 bg-white/50 hover:bg-white/75 hover:scale-110"
                         }`}
+                        aria-label={`Go to image ${index + 1}`}
                       />
                     ))}
                   </div>
-                </div>
 
-                {/* Floating Info Cards */}
-                <div className="absolute -top-4 -left-4 bg-white p-4 rounded-2xl shadow-xl border border-gray-100 z-10">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                      <Zap className="w-5 h-5 text-green-600" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-bold text-black">
-                        Đặt sân siêu tốc
-                      </div>
-                      <div className="text-xs text-gray-500">Chỉ 30 giây</div>
-                    </div>
+                  {/* Image Counter - Mobile Only */}
+                  <div className="md:hidden absolute top-4 right-4 bg-black/60 backdrop-blur-md text-white text-sm font-medium px-3 py-1.5 rounded-full">
+                    {currentImageIndex + 1} / {images.length}
                   </div>
                 </div>
 
-                <div className="absolute -bottom-4 -right-4 bg-white p-4 rounded-2xl shadow-xl border border-gray-100 z-10">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                      <Star className="w-5 h-5 text-green-600" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-bold text-black">
-                        Đánh giá cao
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        4.9/5 ⭐⭐⭐⭐⭐
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                {/* Decorative Floating Elements - Gray */}
+                <div className="hidden lg:block absolute -right-8 top-20 w-20 h-20 bg-gray-400/20 rounded-full blur-2xl animate-pulse"></div>
+                <div className="hidden lg:block absolute -left-8 bottom-20 w-32 h-32 bg-gray-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
               </div>
             </div>
           </div>
@@ -1523,17 +1594,17 @@ export const HomePage: React.FC = () => {
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-6 justify-center mb-12">
-                  <button className="group relative overflow-hidden bg-gradient-to-r from-green-500 to-green-600 text-white px-10 py-5 rounded-2xl font-bold text-lg shadow-2xl hover:shadow-green-500/25 transform hover:-translate-y-1 transition-all duration-300">
-                    <span className="relative flex items-center justify-center gap-3 z-10">
+                  <button className="group relative overflow-hidden bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 sm:px-10 sm:py-5 rounded-2xl font-bold text-base sm:text-lg shadow-2xl hover:shadow-green-500/25 transform hover:-translate-y-1 transition-all duration-300">
+                    <span className="relative flex items-center justify-center gap-2 sm:gap-3 z-10">
                       <span>Đăng ký làm đối tác</span>
-                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                      <ArrowRight className="w-4 h-4 sm:w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
                     </span>
                     <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-green-500 translate-x-full group-hover:translate-x-0 transition-transform duration-500"></div>
                   </button>
 
-                  <button className="group border-2 border-green-500/50 bg-transparent backdrop-blur-sm text-white px-10 py-5 rounded-2xl font-bold text-lg hover:bg-green-500 hover:border-green-500 transition-all duration-300 shadow-xl transform hover:-translate-y-1">
-                    <span className="flex items-center justify-center gap-3">
-                      <MessageCircle className="w-5 h-5" />
+                  <button className="group border-2 border-green-500/50 bg-transparent backdrop-blur-sm text-white px-6 py-3 sm:px-10 sm:py-5 rounded-2xl font-bold text-base sm:text-lg hover:bg-green-500 hover:border-green-500 transition-all duration-300 shadow-xl transform hover:-translate-y-1">
+                    <span className="flex items-center justify-center gap-2 sm:gap-3">
+                      <MessageCircle className="w-4 h-4 sm:w-5 h-5" />
                       <span>Tư vấn miễn phí</span>
                     </span>
                   </button>
@@ -1567,8 +1638,7 @@ export const HomePage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
             <h2 className="text-5xl md:text-6xl font-black text-black mb-6 leading-tight tracking-tight">
-              Sân thể thao{" "}
-              <span className="text-green-500">Phổ biến</span>
+              Sân thể thao <span className="text-green-500">Phổ biến</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               Những sân thể thao được đánh giá cao nhất và được đặt nhiều nhất
@@ -1590,6 +1660,24 @@ export const HomePage: React.FC = () => {
                 ></div>
               </div>
               <p className="mt-4 text-gray-500">Đang tải sân thể thao...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Search className="w-8 h-8 text-gray-400" />
+              </div>
+              <p className="text-gray-500 text-lg">
+                Không thể tải dữ liệu sân thể thao
+              </p>
+              <button
+                onClick={() => {
+                  fetchPopularFields();
+                  fetchServerFields();
+                }}
+                className="mt-4 text-green-600 hover:text-green-700 font-semibold"
+              >
+                Thử lại →
+              </button>
             </div>
           ) : getVisibleFields().length > 0 ? (
             <div className="relative group">
@@ -1653,13 +1741,13 @@ export const HomePage: React.FC = () => {
                         height={200}
                         className="w-full h-full object-cover"
                       />
-                      <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 flex items-center space-x-1 border border-green-100 shadow">
-                        <Star className="w-4 h-4 text-green-500 fill-current" />
-                        <span className="text-xs font-bold text-green-700">
+                      <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 flex items-center space-x-1 border border-green-400 shadow">
+                        <Star className="w-4 h-4 text-green-400 fill-current" />
+                        <span className="text-xs font-bold text-green-400">
                           {field.rating}
                         </span>
                       </div>
-                      <div className="absolute top-3 left-3 bg-white text-green-700 w-9 h-9 flex items-center justify-center rounded-full text-xl shadow">
+                      <div className="absolute top-3 left-3 bg-white text-green-400 w-9 h-9 flex items-center justify-center rounded-full text-xl shadow">
                         {field.sport === "football"
                           ? "⚽"
                           : field.sport === "badminton"
@@ -1675,22 +1763,22 @@ export const HomePage: React.FC = () => {
                       </h3>
                       <div className="space-y-2 mb-3">
                         <div className="flex items-center space-x-2 text-gray-600">
-                          <MapPin className="w-3 h-3 text-green-600" />
+                          <MapPin className="w-3 h-3 text-green-400" />
                           <span className="text-xs line-clamp-1">
                             {field.location}
                           </span>
                         </div>
-                        <div className="flex items-center space-x-2 text-gray-600">
-                          <Clock className="w-3 h-3 text-green-600" />
+                        <div className="flex items-center space-x-2 text-gray-400">
+                          <Clock className="w-3 h-3 text-green-400" />
                           <span className="text-xs">{field.openingHours}</span>
                         </div>
                       </div>
                       <div className="flex items-center justify-between mb-3 p-2 rounded-xl">
-                        <div className="text-base font-bold text-green-700">
+                        <div className="text-base font-bold text-green-400">
                           {field.price}
                         </div>
                         <div className="text-right">
-                          <div className="text-xs text-green-700">
+                          <div className="text-xs text-green-400">
                             {field.reviews} lượt đặt
                           </div>
                         </div>
@@ -1699,18 +1787,22 @@ export const HomePage: React.FC = () => {
                         <button
                           onClick={() => {
                             router.push(
-                              `/booking?fieldId=${field.id}&sport=${field.sport}`
+                              `/booking?fieldId=${encodeURIComponent(
+                                field.id
+                              )}&sport=${encodeURIComponent(field.sport)}`
                             );
                           }}
-                          className="flex-1 bg-green-600 text-white py-2 px-3 rounded-xl hover:bg-green-700 transition-colors font-semibold text-xs"
+                          className="flex-1 bg-green-400 text-white py-2 px-3 rounded-xl hover:bg-green-700 transition-colors font-semibold text-xs"
                         >
                           Đặt ngay
                         </button>
                         <button
                           onClick={() =>
-                            router.push(`/field-detail/${field.id}`)
+                            router.push(
+                              `/field-detail/${encodeURIComponent(field.id)}`
+                            )
                           }
-                          className="px-3 py-2 border-2 border-green-600 text-green-600 rounded-xl hover:bg-green-50 transition-colors text-xs font-semibold"
+                          className="px-3 py-2 border-2 border-green-400 text-green-400 rounded-xl hover:bg-green-50 transition-colors text-xs font-semibold"
                         >
                           Chi tiết
                         </button>
@@ -1722,25 +1814,40 @@ export const HomePage: React.FC = () => {
 
               {/* Slide Indicators */}
               {getTotalFieldSlides() > 1 && (
-                <div className="flex justify-center items-center mt-16 space-x-4">
-                  <div className="flex space-x-3 bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg">
-                    {Array.from({ length: getTotalFieldSlides() }).map(
-                      (_, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setFieldSlide(index)}
-                          className={`relative overflow-hidden rounded-full transition-all duration-500 ${
-                            fieldSlide === index
-                              ? "w-12 h-4 bg-gradient-to-r from-green-500 to-green-600"
-                              : "w-4 h-4 bg-gray-300 hover:bg-gray-400 hover:scale-125"
-                          }`}
-                        >
-                          {fieldSlide === index && (
-                            <div className="absolute inset-0 bg-white/30 rounded-full animate-pulse"></div>
-                          )}
-                        </button>
-                      )
-                    )}
+                <div className="flex justify-center items-center mt-16">
+                  <div className="flex items-center gap-4 bg-white rounded-2xl px-8 py-4 shadow-lg border-2 border-gray-100">
+                    <span className="text-sm text-gray-500 font-medium">
+                      {fieldSlide + 1} / {getTotalFieldSlides()}
+                    </span>
+                    <div className="flex space-x-2">
+                      {Array.from({ length: getTotalFieldSlides() }).map(
+                        (_, index) => (
+                          <button
+                            key={index}
+                            onClick={() => setFieldSlide(index)}
+                            className={`relative overflow-hidden rounded-full transition-all duration-500 ${
+                              fieldSlide === index
+                                ? "w-8 h-3 bg-black"
+                                : "w-3 h-3 bg-gray-300 hover:bg-gray-400 hover:scale-125"
+                            }`}
+                          >
+                            {fieldSlide === index && (
+                              <div className="absolute inset-0 bg-green-500 rounded-full animate-pulse"></div>
+                            )}
+                          </button>
+                        )
+                      )}
+                    </div>
+                    <button
+                      onClick={() =>
+                        setFieldSlide(
+                          (prev) => (prev + 1) % getTotalFieldSlides()
+                        )
+                      }
+                      className="text-sm text-green-600 font-semibold hover:text-green-700 transition-colors duration-200"
+                    >
+                      Tiếp theo →
+                    </button>
                   </div>
                 </div>
               )}
@@ -1825,30 +1932,8 @@ export const HomePage: React.FC = () => {
 
           {/* Testimonials Carousel */}
           <div className="relative group">
-            {/* Enhanced Navigation Arrows */}
-            <button
-              onClick={() =>
-                setTestimonialSlide(
-                  (prev) =>
-                    (prev - 1 + testimonials.length) % testimonials.length
-                )
-              }
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-black text-black hover:text-white rounded-2xl p-4 shadow-xl transition-all duration-300 -translate-x-6 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 hover:scale-110 border-2 border-gray-100 hover:border-black"
-            >
-              <ChevronLeft className="w-6 h-6" />
-            </button>
-
-            <button
-              onClick={() =>
-                setTestimonialSlide((prev) => (prev + 1) % testimonials.length)
-              }
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-black text-black hover:text-white rounded-2xl p-4 shadow-xl transition-all duration-300 translate-x-6 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 hover:scale-110 border-2 border-gray-100 hover:border-black"
-            >
-              <ChevronRight className="w-6 h-6" />
-            </button>
-
             {/* Enhanced Testimonials Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-auto max-w-6xl">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mx-auto max-w-6xl">
               {getVisibleTestimonials().map((testimonial, index) => (
                 <div
                   key={`${testimonial.name}-${testimonialSlide}-${index}`}
@@ -1937,29 +2022,31 @@ export const HomePage: React.FC = () => {
             <div className="flex justify-center items-center mt-16">
               <div className="flex items-center gap-4 bg-white rounded-2xl px-8 py-4 shadow-lg border-2 border-gray-100">
                 <span className="text-sm text-gray-500 font-medium">
-                  {testimonialSlide + 1} / {testimonials.length}
+                  {testimonialSlide + 1} / {getTotalTestimonialSlides()}
                 </span>
                 <div className="flex space-x-2">
-                  {testimonials.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setTestimonialSlide(index)}
-                      className={`relative overflow-hidden rounded-full transition-all duration-500 ${
-                        testimonialSlide === index
-                          ? "w-8 h-3 bg-black"
-                          : "w-3 h-3 bg-gray-300 hover:bg-gray-400 hover:scale-125"
-                      }`}
-                    >
-                      {testimonialSlide === index && (
-                        <div className="absolute inset-0 bg-green-500 rounded-full animate-pulse"></div>
-                      )}
-                    </button>
-                  ))}
+                  {Array.from({ length: getTotalTestimonialSlides() }).map(
+                    (_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setTestimonialSlide(index)}
+                        className={`relative overflow-hidden rounded-full transition-all duration-500 ${
+                          testimonialSlide === index
+                            ? "w-8 h-3 bg-black"
+                            : "w-3 h-3 bg-gray-300 hover:bg-gray-400 hover:scale-125"
+                        }`}
+                      >
+                        {testimonialSlide === index && (
+                          <div className="absolute inset-0 bg-green-500 rounded-full animate-pulse"></div>
+                        )}
+                      </button>
+                    )
+                  )}
                 </div>
                 <button
                   onClick={() =>
                     setTestimonialSlide(
-                      (prev) => (prev + 1) % testimonials.length
+                      (prev) => (prev + 1) % getTotalTestimonialSlides()
                     )
                   }
                   className="text-sm text-green-600 font-semibold hover:text-green-700 transition-colors duration-200"

@@ -1,11 +1,38 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Search, Users, ChevronDown, Target, Zap, Shield, Plus, Calendar, Clock, MapPin } from 'lucide-react';
-import { useAuthStore } from '@/stores/authStore';
-import { useMatchStore } from '@/stores/matchStore';
+import { Search, Users, ChevronDown, Target, Zap, Shield, Plus, Calendar, Clock, MapPin, Loader2 } from 'lucide-react';
 import { MatchNavigation } from './shared/MatchNavigation';
 import { getSportIcon, getSportGradient } from './shared/matchUtils';
 import { useRouter } from 'next/navigation';
+import { getAllMatch, joinMatch, getTeamRequests } from '@/services/matchService';
+import { useAuthStore } from '@/stores/authStore';
+import { MatchDataResponse } from '@/services/matchService';
+
+// Define types directly in the file
+type SkillLevel = 'Thấp' | 'Trung bình' | 'Cao' | 'Chuyên nghiệp';
+type MatchStatus = 'open' | 'full' | 'finished' | 'cancelled';
+
+interface Match {
+  id: number;
+  title: string;
+  sport: string;
+  organizer: string;
+  organizerAvatar: string;
+  date: string;
+  time: string;
+  location: string;
+  address: string;
+  maxParticipants: number;
+  skillLevel: SkillLevel;
+  description: string;
+  status: MatchStatus;
+  phone: string;
+  facebook: string;
+  role: 'organizer' | 'participant';
+  isJoined: boolean; // Add this to track if current user has joined
+  members: Array<{ userId: string; username: string; email: string }>; // Add members array
+  hasPendingRequest: boolean; // Add this to track if user has a pending request
+}
 
 export const DiscoverMatchesPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -15,15 +42,98 @@ export const DiscoverMatchesPage = () => {
     date: '',
   });
   const [chipDropdown, setChipDropdown] = useState<string | null>(null);
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const { user, isAuthenticated, fetchAllUsers } = useAuthStore();
-  const { matches, fetchAllMatches, joinMatch } = useMatchStore();
+  const { user, isAuthenticated } = useAuthStore();
   const router = useRouter();
 
+  // Fetch all matches from the API
   useEffect(() => {
-    fetchAllUsers();
-    fetchAllMatches();
-  }, [fetchAllUsers, fetchAllMatches]);
+    const fetchMatchesAndRequests = async () => {
+      if (!isAuthenticated || !user) {
+        setLoading(false);
+        return;
+      }
+      
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch matches and team requests in parallel
+        const [matchesResponse, requestsResponse] = await Promise.all([
+          getAllMatch(),
+          getTeamRequests(user.id)
+        ]);
+        
+        // Convert API response to Match format
+        const convertedMatches: Match[] = matchesResponse.data.content.map((match: MatchDataResponse) => {
+          // Check if current user has joined this match
+          const isJoined = match.members.some(member => member.userId === user?.id);
+          
+          // Check if there's a pending request for this match
+          const hasPendingRequest = requestsResponse.data.content.some(
+            request => request.teamId === match.id.toString() && request.status?.toUpperCase() === 'PENDING'
+          );
+          
+          return {
+            id: parseInt(match.id, 10),
+            title: match.nameMatch,
+            sport: match.nameSport,
+            organizer: match.ownerName,
+            organizerAvatar: '', // Would need to fetch this separately
+            date: match.timeMatch.split('T')[0],
+            time: match.timeMatch.split('T')[1].substring(0, 5),
+            location: match.location,
+            address: match.location,
+            maxParticipants: match.maxPlayers,
+            skillLevel: match.level === 'LOW' ? 'Thấp' : 
+                        match.level === 'MEDIUM' ? 'Trung bình' : 
+                        match.level === 'HIGH' ? 'Cao' : 'Chuyên nghiệp',
+            description: match.descriptionMatch,
+            status: 'open', // Default status, would need to be determined from API data
+            phone: match.numberPhone,
+            facebook: match.linkFacebook,
+            role: match.ownerId === user?.id ? 'organizer' : 'participant',
+            isJoined, // Add the isJoined property
+            members: match.members, // Add the members array
+            hasPendingRequest, // Set the pending request status
+          };
+        });
+        
+        setMatches(convertedMatches);
+      } catch (err) {
+        console.error('Error fetching matches:', err);
+        setError('Có lỗi xảy ra khi tải danh sách trận đấu');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMatchesAndRequests();
+  }, [isAuthenticated, user]);
+
+  // Handle join match
+  const handleJoinMatch = async (teamId: string) => {
+    if (!user) return;
+    
+    try {
+      await joinMatch(teamId);
+      
+      // Update the match to show pending request status
+      setMatches(prevMatches => 
+        prevMatches.map(match => 
+          match.id.toString() === teamId 
+            ? { ...match, hasPendingRequest: true } 
+            : match
+        )
+      );
+    } catch (err) {
+      console.error('Error joining match:', err);
+      // Handle error (e.g., show notification)
+    }
+  };
 
   // Cập nhật logic lọc trận đấu
   const filteredMatches = matches.filter(match => {
@@ -36,11 +146,6 @@ export const DiscoverMatchesPage = () => {
     const matchesStatus = match.status === 'open' || match.status === 'full';
     return matchesSearch && matchesSport && matchesLevel && matchesDate && matchesStatus;
   });
-
-  const handleJoinMatch = async (matchId: number) => {
-    if (!user) return;
-    await joinMatch(matchId, user.name);
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -77,245 +182,262 @@ export const DiscoverMatchesPage = () => {
             </div>
           ) : (
             <>
-              <div className="bg-white rounded-3xl shadow-sm p-8 border border-gray-100 mb-8">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                  {/* Sport Dropdown */}
-                  <div className="relative">
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Môn thể thao</label>
-                    <button
-                      className="w-full px-3 py-2.5 text-left bg-white border border-gray-300 rounded-lg hover:border-green-500 focus:border-green-500 focus:outline-none transition-all flex items-center justify-between text-sm"
-                      onClick={() => setChipDropdown(chipDropdown === 'sport' ? null : 'sport')}
-                      type="button"
-                    >
-                      <span className="text-gray-700 truncate">
-                        {filters.sport ? filters.sport : 'Chọn môn thể thao'}
-                      </span>
-                      <ChevronDown className="w-3 h-3 text-gray-500 flex-shrink-0 ml-1" />
-                    </button>
-                    {chipDropdown === 'sport' && (
-                      <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-green-500 rounded-lg shadow-xl">
-                        {[ '', 'Bóng đá', 'Cầu lông', 'Pickle Ball' ].map(option => (
-                          <button
-                            key={option}
-                            className={`w-full text-left px-3 py-2 hover:bg-green-50 transition-all text-sm first:rounded-t-lg last:rounded-b-lg ${
-                              filters.sport === option ? 'bg-green-100 text-green-700 font-medium' : 'text-gray-700'
-                            }`}
-                            onClick={() => {
-                              setFilters(f => ({ ...f, sport: option }));
-                              setChipDropdown(null);
-                            }}
-                          >
-                            {option || 'Tất cả môn thể thao'}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  {/* Level Dropdown */}
-                  <div className="relative">
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Trình độ</label>
-                    <button
-                      className="w-full px-3 py-2.5 text-left bg-white border border-gray-300 rounded-lg hover:border-green-500 focus:border-green-500 focus:outline-none transition-all flex items-center justify-between text-sm"
-                      onClick={() => setChipDropdown(chipDropdown === 'level' ? null : 'level')}
-                      type="button"
-                    >
-                      <span className="text-gray-700 truncate">
-                        {filters.skillLevel ? filters.skillLevel : 'Chọn trình độ'}
-                      </span>
-                      <ChevronDown className="w-3 h-3 text-gray-500 flex-shrink-0 ml-1" />
-                    </button>
-                    {chipDropdown === 'level' && (
-                      <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-green-500 rounded-lg shadow-xl">
-                        {[ '', 'Thấp', 'Trung bình', 'Cao', 'Chuyên nghiệp' ].map(option => (
-                          <button
-                            key={option}
-                            className={`w-full text-left px-3 py-2 hover:bg-green-50 transition-all text-sm first:rounded-t-lg last:rounded-b-lg ${
-                              filters.skillLevel === option ? 'bg-green-100 text-green-700 font-medium' : 'text-gray-700'
-                            }`}
-                            onClick={() => {
-                              setFilters(f => ({ ...f, skillLevel: option }));
-                              setChipDropdown(null);
-                            }}
-                          >
-                            {option || 'Tất cả trình độ'}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  {/* Date Picker */}
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Ngày</label>
-                    <input
-                      type="date"
-                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:border-green-500 focus:outline-none transition-all text-sm"
-                      value={filters.date}
-                      onChange={e => setFilters(f => ({ ...f, date: e.target.value }))}
-                    />
-                  </div>
-                  {/* Search Input */}
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Tìm kiếm</label>
-                    <div className="flex gap-2">
-                      <div className="relative flex-1">
-                        <input
-                          type="text"
-                          placeholder="Nhập tên trận đấu, môn thể thao, địa điểm..."
-                          value={searchQuery}
-                          onChange={e => setSearchQuery(e.target.value)}
-                          className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:border-green-500 focus:outline-none transition-all text-sm"
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        className="px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-xl flex items-center gap-1.5"
-                      >
-                        <Search className="w-3 h-3" />
-                      </button>
-                    </div>
-                  </div>
+              {loading ? (
+                <div className="flex justify-center items-center py-20">
+                  <Loader2 className="w-8 h-8 text-green-600 animate-spin" />
+                  <span className="ml-3 text-gray-700 font-medium">Đang tải danh sách trận đấu...</span>
                 </div>
-                {/* Clear Filters */}
-                {(filters.sport || filters.skillLevel || filters.date || searchQuery) && (
-                  <div className="mt-3 text-center">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setFilters({ sport: '', skillLevel: '', date: '' });
-                        setSearchQuery('');
-                      }}
-                      className="px-3 py-1.5 text-green-600 hover:text-green-700 font-medium transition-all text-sm"
-                    >
-                      Xóa tất cả bộ lọc
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex justify-between items-center">
-                <div className="bg-white rounded-2xl px-6 py-4 shadow-sm border border-gray-100">
-                  <p className="text-gray-700 font-semibold flex items-center space-x-2">
-                    <Target className="w-4 h-4 text-green-600" />
-                    <span>Tìm thấy <span className="text-green-600 font-bold text-lg">{filteredMatches.length}</span> trận đấu</span>
-                  </p>
-                </div>
-                <button
-                  onClick={() => router.push('/matches/create')}
-                  className="bg-green-600 text-white px-6 py-3 rounded-2xl hover:bg-green-700 font-semibold shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200 flex items-center space-x-2"
-                >
-                  <Plus className="w-5 h-5" />
-                  <span>Tạo trận đấu</span>
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredMatches.map((match) => {
-                  const SportIcon = getSportIcon(match.sport);
-                  const isJoined = match.joinRequests.some(r => r.user === user?.name && r.status === 'approved');
-                  const isPending = match.joinRequests.some(r => r.user === user?.name && r.status === 'pending');
-                  const isOrganizer = match.organizer === user?.name;
-                  
-                  return (
-                    <div key={match.id} className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 p-6 border border-gray-100 group">
-                      {/* Header with sport icon and title */}
-                      <div className="flex items-center space-x-3 mb-4">
-                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${getSportGradient()} flex items-center justify-center text-white shadow-sm`}>
-                          {React.createElement(SportIcon)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-lg font-bold text-gray-900 group-hover:text-green-600 transition-colors truncate">
-                            {match.title}
-                          </h3>
-                          <p className="text-sm text-gray-500">{match.sport}</p>
-                        </div>
-                      </div>
-                      
-                      {/* Match details */}
-                      <div className="space-y-3 mb-6">
-                        <div className="flex items-center space-x-2 text-gray-600">
-                          <Calendar className="w-4 h-4" />
-                          <span className="text-sm font-medium">{match.date}</span>
-                          <Clock className="w-4 h-4 ml-2" />
-                          <span className="text-sm font-medium">{match.time}</span>
-                        </div>
-                        <div className="flex items-center space-x-2 text-gray-600">
-                          <MapPin className="w-4 h-4" />
-                          <span className="text-sm font-medium truncate">{match.location}</span>
-                        </div>
-                        <div className="flex items-center space-x-2 text-gray-600">
-                          <Users className="w-4 h-4" />
-                          <span className="text-sm font-medium">
-                            {1 + match.joinRequests.filter(r => r.status === 'approved').length}/{match.maxParticipants} người
-                          </span>
-                        </div>
-                      </div>
-                      
-                      {/* Status and skill level */}
-                      <div className="flex items-center justify-between mb-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          match.status === 'open' ? 'bg-green-100 text-green-700' :
-                          match.status === 'full' ? 'bg-gray-100 text-gray-700' :
-                          'bg-blue-100 text-blue-700'
-                        }`}>
-                          {match.status === 'open' ? 'Đang tuyển' : match.status === 'full' ? 'Đã đầy' : 'Đã kết thúc'}
-                        </span>
-                        <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700">
-                          {match.skillLevel}
-                        </span>
-                      </div>
-                      
-                      {/* Description */}
-                      <p className="text-gray-600 text-sm mb-6 line-clamp-2">{match.description}</p>
-                      
-                      {/* Action button */}
-                      <div className="mt-auto">
-                        {isOrganizer ? (
-                          <button className="w-full px-4 py-3 rounded-xl text-sm font-semibold bg-orange-100 text-orange-700 cursor-not-allowed">
-                            Trận đấu của bạn
-                          </button>
-                        ) : isJoined ? (
-                          <button className="w-full px-4 py-3 rounded-xl text-sm font-semibold bg-gray-100 text-gray-600 cursor-not-allowed">
-                            Đã tham gia
-                          </button>
-                        ) : isPending ? (
-                          <button className="w-full px-4 py-3 rounded-xl text-sm font-semibold bg-yellow-100 text-yellow-700 cursor-not-allowed">
-                            Chờ duyệt
-                          </button>
-                        ) : (
-                          <button
-                            className="w-full px-4 py-3 rounded-xl text-sm font-semibold bg-green-600 text-white hover:bg-green-700 transform hover:scale-105 transition-all duration-200"
-                            onClick={() => handleJoinMatch(match.id)}
-                            disabled={match.status !== 'open'}
-                          >
-                            Tham gia ngay
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {filteredMatches.length === 0 && (
-                <div className="text-center py-20">
-                  <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Users className="w-12 h-12 text-green-600" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-3 flex items-center justify-center space-x-2">
-                    <Search className="w-6 h-6 text-gray-600" />
-                    <span>Không tìm thấy trận đấu nào</span>
-                  </h3>
-                  <p className="text-gray-600 mb-8 max-w-md mx-auto">
-                    Có vẻ như chưa có trận đấu nào phù hợp với tiêu chí tìm kiếm của bạn. Hãy thử thay đổi từ khóa hoặc tạo trận đấu mới!
-                  </p>
+              ) : error ? (
+                <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-center">
+                  <p className="text-red-700 font-medium">{error}</p>
                   <button
-                    onClick={() => router.push('/matches/create')}
-                    className="bg-green-600 text-white px-8 py-4 rounded-2xl hover:bg-green-700 font-semibold text-lg shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200 flex items-center space-x-2 mx-auto"
+                    onClick={() => window.location.reload()}
+                    className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                   >
-                    <Zap className="w-5 h-5" />
-                    <span>Tạo trận đấu mới</span>
+                    Thử lại
                   </button>
                 </div>
+              ) : (
+                <>
+                  <div className="bg-white rounded-3xl shadow-sm p-8 border border-gray-100 mb-8">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                      {/* Sport Dropdown */}
+                      <div className="relative">
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Môn thể thao</label>
+                        <button
+                          className="w-full px-3 py-2.5 text-left bg-white border border-gray-300 rounded-lg hover:border-green-500 focus:border-green-500 focus:outline-none transition-all flex items-center justify-between text-sm"
+                          onClick={() => setChipDropdown(chipDropdown === 'sport' ? null : 'sport')}
+                          type="button"
+                        >
+                          <span className="text-gray-700 truncate">
+                            {filters.sport ? filters.sport : 'Chọn môn thể thao'}
+                          </span>
+                          <ChevronDown className="w-3 h-3 text-gray-500 flex-shrink-0 ml-1" />
+                        </button>
+                        {chipDropdown === 'sport' && (
+                          <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-green-500 rounded-lg shadow-xl">
+                            {[ '', 'Bóng đá', 'Cầu lông', 'Pickle Ball' ].map(option => (
+                              <button
+                                key={option}
+                                className={`w-full text-left px-3 py-2 hover:bg-green-50 transition-all text-sm first:rounded-t-lg last:rounded-b-lg ${
+                                  filters.sport === option ? 'bg-green-100 text-green-700 font-medium' : 'text-gray-700'
+                                }`}
+                                onClick={() => {
+                                  setFilters(f => ({ ...f, sport: option }));
+                                  setChipDropdown(null);
+                                }}
+                              >
+                                {option || 'Tất cả môn thể thao'}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      {/* Level Dropdown */}
+                      <div className="relative">
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Trình độ</label>
+                        <button
+                          className="w-full px-3 py-2.5 text-left bg-white border border-gray-300 rounded-lg hover:border-green-500 focus:border-green-500 focus:outline-none transition-all flex items-center justify-between text-sm"
+                          onClick={() => setChipDropdown(chipDropdown === 'level' ? null : 'level')}
+                          type="button"
+                        >
+                          <span className="text-gray-700 truncate">
+                            {filters.skillLevel ? filters.skillLevel : 'Chọn trình độ'}
+                          </span>
+                          <ChevronDown className="w-3 h-3 text-gray-500 flex-shrink-0 ml-1" />
+                        </button>
+                        {chipDropdown === 'level' && (
+                          <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-green-500 rounded-lg shadow-xl">
+                            {[ '', 'Thấp', 'Trung bình', 'Cao', 'Chuyên nghiệp' ].map(option => (
+                              <button
+                                key={option}
+                                className={`w-full text-left px-3 py-2 hover:bg-green-50 transition-all text-sm first:rounded-t-lg last:rounded-b-lg ${
+                                  filters.skillLevel === option ? 'bg-green-100 text-green-700 font-medium' : 'text-gray-700'
+                                }`}
+                                onClick={() => {
+                                  setFilters(f => ({ ...f, skillLevel: option }));
+                                  setChipDropdown(null);
+                                }}
+                              >
+                                {option || 'Tất cả trình độ'}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      {/* Date Picker */}
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Ngày</label>
+                        <input
+                          type="date"
+                          className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:border-green-500 focus:outline-none transition-all text-sm"
+                          value={filters.date}
+                          onChange={e => setFilters(f => ({ ...f, date: e.target.value }))}
+                        />
+                      </div>
+                      {/* Search Input */}
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Tìm kiếm</label>
+                        <div className="flex gap-2">
+                          <div className="relative flex-1">
+                            <input
+                              type="text"
+                              placeholder="Nhập tên trận đấu, môn thể thao, địa điểm..."
+                              value={searchQuery}
+                              onChange={e => setSearchQuery(e.target.value)}
+                              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:border-green-500 focus:outline-none transition-all text-sm"
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            className="px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all shadow-lg hover:shadow-xl flex items-center gap-1.5"
+                          >
+                            <Search className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Clear Filters */}
+                    {(filters.sport || filters.skillLevel || filters.date || searchQuery) && (
+                      <div className="mt-3 text-center">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFilters({ sport: '', skillLevel: '', date: '' });
+                            setSearchQuery('');
+                          }}
+                          className="px-3 py-1.5 text-green-600 hover:text-green-700 font-medium transition-all text-sm"
+                        >
+                          Xóa tất cả bộ lọc
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <div className="bg-white rounded-2xl px-6 py-4 shadow-sm border border-gray-100">
+                      <p className="text-gray-700 font-semibold flex items-center space-x-2">
+                        <Target className="w-4 h-4 text-green-600" />
+                        <span>Tìm thấy <span className="text-green-600 font-bold text-lg">{filteredMatches.length}</span> trận đấu</span>
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => router.push('/matches/create')}
+                      className="bg-green-600 text-white px-6 py-3 rounded-2xl hover:bg-green-700 font-semibold shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200 flex items-center space-x-2"
+                    >
+                      <Plus className="w-5 h-5" />
+                      <span>Tạo trận đấu</span>
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {filteredMatches.map((match) => {
+                      const SportIcon = getSportIcon(match.sport);
+                      const isOrganizer = match.organizer === user?.name;
+                      
+                      return (
+                        <div key={match.id} className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 p-6 border border-gray-100 group">
+                          {/* Header with sport icon and title */}
+                          <div className="flex items-center space-x-3 mb-4">
+                            <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${getSportGradient()} flex items-center justify-center text-white shadow-sm`}>
+                              {React.createElement(SportIcon)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-lg font-bold text-gray-900 group-hover:text-green-600 transition-colors truncate">
+                                {match.title}
+                              </h3>
+                              <p className="text-sm text-gray-500">{match.sport}</p>
+                            </div>
+                          </div>
+                          
+                          {/* Match details */}
+                          <div className="space-y-3 mb-6">
+                            <div className="flex items-center space-x-2 text-gray-600">
+                              <Calendar className="w-4 h-4" />
+                              <span className="text-sm font-medium">{match.date}</span>
+                              <Clock className="w-4 h-4 ml-2" />
+                              <span className="text-sm font-medium">{match.time}</span>
+                            </div>
+                            <div className="flex items-center space-x-2 text-gray-600">
+                              <MapPin className="w-4 h-4" />
+                              <span className="text-sm font-medium truncate">{match.location}</span>
+                            </div>
+                            <div className="flex items-center space-x-2 text-gray-600">
+                              <Users className="w-4 h-4" />
+                              <span className="text-sm font-medium">
+                                {1 + match.members.length}/{match.maxParticipants} người
+                              </span>
+                            </div>
+                          </div>
+                          
+                          {/* Status and skill level */}
+                          <div className="flex items-center justify-between mb-4">
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                              match.status === 'open' ? 'bg-green-100 text-green-700' :
+                              match.status === 'full' ? 'bg-gray-100 text-gray-700' :
+                              'bg-blue-100 text-blue-700'
+                            }`}>
+                              {match.status === 'open' ? 'Đang tuyển' : match.status === 'full' ? 'Đã đầy' : 'Đã kết thúc'}
+                            </span>
+                            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700">
+                              {match.skillLevel}
+                            </span>
+                          </div>
+                          
+                          {/* Description */}
+                          <p className="text-gray-600 text-sm mb-6 line-clamp-2">{match.description}</p>
+                          
+                          {/* Action button */}
+                          <div className="mt-auto">
+                            {isOrganizer ? (
+                              <button className="w-full px-4 py-3 rounded-xl text-sm font-semibold bg-orange-100 text-orange-700 cursor-not-allowed">
+                                Trận đấu của bạn
+                              </button>
+                            ) : match.isJoined ? (
+                              <button className="w-full px-4 py-3 rounded-xl text-sm font-semibold bg-gray-100 text-gray-600 cursor-not-allowed">
+                                Đã tham gia
+                              </button>
+                            ) : match.hasPendingRequest ? (
+                              <button className="w-full px-4 py-3 rounded-xl text-sm font-semibold bg-yellow-100 text-yellow-700 cursor-not-allowed">
+                                Chờ duyệt
+                              </button>
+                            ) : (
+                              <button
+                                className="w-full px-4 py-3 rounded-xl text-sm font-semibold bg-green-600 text-white hover:bg-green-700 transform hover:scale-105 transition-all duration-200"
+                                onClick={() => handleJoinMatch(match.id.toString())}
+                                disabled={match.status !== 'open'}
+                              >
+                                Tham gia ngay
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {filteredMatches.length === 0 && (
+                    <div className="text-center py-20">
+                      <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <Users className="w-12 h-12 text-green-600" />
+                      </div>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-3 flex items-center justify-center space-x-2">
+                        <Search className="w-6 h-6 text-gray-600" />
+                        <span>Không tìm thấy trận đấu nào</span>
+                      </h3>
+                      <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                        Có vẻ như chưa có trận đấu nào phù hợp với tiêu chí tìm kiếm của bạn. Hãy thử thay đổi từ khóa hoặc tạo trận đấu mới!
+                      </p>
+                      <button
+                        onClick={() => router.push('/matches/create')}
+                        className="bg-green-600 text-white px-8 py-4 rounded-2xl hover:bg-green-700 font-semibold text-lg shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200 flex items-center space-x-2 mx-auto"
+                      >
+                        <Zap className="w-5 h-5" />
+                        <span>Tạo trận đấu mới</span>
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </>
           )}
