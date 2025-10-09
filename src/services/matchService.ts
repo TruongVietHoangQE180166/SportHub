@@ -20,6 +20,16 @@ export interface MatchMember {
   email: string;
 }
 
+export interface Join {
+  id: string;
+  teamId: string;
+  nameMatch: string;
+  nameSport: string;
+  userId: string;
+  username: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+}
+
 // Define the response interface for a single match
 export interface MatchDataResponse {
   id: string;
@@ -35,6 +45,7 @@ export interface MatchDataResponse {
   numberPhone: string;
   linkFacebook: string;
   members: MatchMember[];
+  teamJoinRequest: Join[];
 }
 
 // Define the response interface for creating a match
@@ -120,6 +131,17 @@ export interface GetTeamRequestsResponse {
   success: boolean;
 }
 
+// Define the response interface for team join request approval/rejection
+export interface TeamJoinRequestResponse {
+  message: {
+    messageCode: string;
+    messageDetail: string;
+  };
+  errors: null;
+  data: null;
+  success: boolean;
+}
+
 export const createMatch = async (matchData: CreateMatchRequest): Promise<CreateMatchResponse> => {
   try {
     const response = await api.post<CreateMatchResponse>('/api/team', matchData);
@@ -193,6 +215,50 @@ export const getTeamRequests = async (userId: string): Promise<GetTeamRequestsRe
     return response.data;
   } catch (error) {
     console.error('Error fetching team requests:', error);
+    throw error;
+  }
+};
+
+// Add the new function to remove a member from a team
+export const removeTeamMember = async (
+  teamId: string,
+  userId: string,
+  isKick: boolean
+): Promise<TeamJoinRequestResponse> => {
+  try {
+    const response = await api.delete<TeamJoinRequestResponse>(
+      `/api/team-request/${teamId}/members/${userId}`,
+      {
+        params: {
+          isKick: isKick
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error removing team member:', error);
+    throw error;
+  }
+};
+
+// Add the new function to approve/reject team join requests
+export const updateTeamJoinRequest = async (
+  teamJoinRequestId: string, 
+  status: 'APPROVED' | 'REJECTED'
+): Promise<TeamJoinRequestResponse> => {
+  try {
+    const response = await api.post<TeamJoinRequestResponse>(
+      `/api/team-request/join-requests/${teamJoinRequestId}`,
+      null, // No body required
+      {
+        params: {
+          status: status
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error updating team join request:', error);
     throw error;
   }
 };

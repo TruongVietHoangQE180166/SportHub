@@ -48,17 +48,21 @@ export const ConditionalLayout: React.FC<ConditionalLayoutProps> = ({
     "/verify-otp",
     "/reset-password",
     "/404",
+    "/login/success",
   ];
-  const isAuthRoute = authRoutes.includes(pathname);
+  
+  // Check if current route is an auth route
+  // Use a default value for pathname during SSR to prevent hydration mismatch
+  const normalizedPathname = pathname || '';
+  const isAuthRoute = authRoutes.includes(normalizedPathname);
+
+  // Define background classes to prevent hydration mismatch
+  const backgroundClass = isAuthRoute 
+    ? "min-h-screen bg-gradient-to-br from-gray-50 to-gray-50" 
+    : "min-h-screen bg-gray-50";
 
   return (
-    <div
-      className={
-        isAuthRoute
-          ? "min-h-screen bg-gradient-to-br from-sky-50 to-emerald-50"
-          : "min-h-screen bg-gray-50"
-      }
-    >
+    <div className={backgroundClass}>
       {loading && <GlobalLoading />}
       {!isAuthRoute && <Header />}
       <main>{children}</main>
@@ -66,7 +70,7 @@ export const ConditionalLayout: React.FC<ConditionalLayoutProps> = ({
       {!isAuthRoute && (
         <div>
           <AIChatSideSheet
-            side="left" // hoặc "right"
+            side="left"
             width="450px"
             placeholder="Nhập tin nhắn..."
           />

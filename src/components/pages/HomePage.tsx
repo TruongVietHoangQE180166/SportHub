@@ -1526,7 +1526,7 @@ export const HomePage: React.FC = () => {
                   icon: <BarChart className="w-10 h-10 text-white" />,
                   title: "Tăng doanh thu 45%",
                   description:
-                    "Tối ưu hóa lịch đặt sân và thu hút thêm khách hàng mới thông qua hệ thống marketing thông minh",
+                    "Tối ưu hóa lịch đặt sân và thu hút thêm khách hàng mới thông qua hệ thống thông minh",
                   color: "from-green-500 to-green-600",
                   stats: "Trung bình 3-6 tháng",
                 },

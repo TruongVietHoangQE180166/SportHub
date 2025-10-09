@@ -13,10 +13,11 @@ type SkillLevel = 'Thấp' | 'Trung bình' | 'Cao' | 'Chuyên nghiệp';
 type MatchStatus = 'open' | 'full' | 'finished' | 'cancelled';
 
 interface Match {
-  id: number;
+  id: string;
   title: string;
   sport: string;
   organizer: string;
+  ownerId: string;
   organizerAvatar: string;
   date: string;
   time: string;
@@ -29,9 +30,9 @@ interface Match {
   phone: string;
   facebook: string;
   role: 'organizer' | 'participant';
-  isJoined: boolean; // Add this to track if current user has joined
-  members: Array<{ userId: string; username: string; email: string }>; // Add members array
-  hasPendingRequest: boolean; // Add this to track if user has a pending request
+  isJoined: boolean;
+  members: Array<{ userId: string; username: string; email: string }>;
+  hasPendingRequest: boolean;
 }
 
 export const DiscoverMatchesPage = () => {
@@ -78,11 +79,12 @@ export const DiscoverMatchesPage = () => {
           );
           
           return {
-            id: parseInt(match.id, 10),
+            id: match.id,
             title: match.nameMatch,
             sport: match.nameSport,
             organizer: match.ownerName,
-            organizerAvatar: '', // Would need to fetch this separately
+            ownerId: match.ownerId,
+            organizerAvatar: '',
             date: match.timeMatch.split('T')[0],
             time: match.timeMatch.split('T')[1].substring(0, 5),
             location: match.location,
@@ -92,13 +94,13 @@ export const DiscoverMatchesPage = () => {
                         match.level === 'MEDIUM' ? 'Trung bình' : 
                         match.level === 'HIGH' ? 'Cao' : 'Chuyên nghiệp',
             description: match.descriptionMatch,
-            status: 'open', // Default status, would need to be determined from API data
+            status: 'open',
             phone: match.numberPhone,
             facebook: match.linkFacebook,
             role: match.ownerId === user?.id ? 'organizer' : 'participant',
-            isJoined, // Add the isJoined property
-            members: match.members, // Add the members array
-            hasPendingRequest, // Set the pending request status
+            isJoined,
+            members: match.members,
+            hasPendingRequest,
           };
         });
         
@@ -333,7 +335,7 @@ export const DiscoverMatchesPage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {filteredMatches.map((match) => {
                       const SportIcon = getSportIcon(match.sport);
-                      const isOrganizer = match.organizer === user?.name;
+                      const isOrganizer = match.ownerId === user?.id;
                       
                       return (
                         <div key={match.id} className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 p-6 border border-gray-100 group">
@@ -404,7 +406,7 @@ export const DiscoverMatchesPage = () => {
                             ) : (
                               <button
                                 className="w-full px-4 py-3 rounded-xl text-sm font-semibold bg-green-600 text-white hover:bg-green-700 transform hover:scale-105 transition-all duration-200"
-                                onClick={() => handleJoinMatch(match.id.toString())}
+                                onClick={() => handleJoinMatch(match.id)}
                                 disabled={match.status !== 'open'}
                               >
                                 Tham gia ngay

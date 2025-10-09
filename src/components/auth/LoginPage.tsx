@@ -246,6 +246,7 @@ export default function LoginPage() {
             {/* Social Login */}
             <button
               type="button"
+              onClick={() => window.location.href = 'https://sporthub-gdefgpgtf9h0g6gk.malaysiawest-01.azurewebsites.net/oauth2/authorization/google'}
               className="w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-xl shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200 hover:shadow-md"
             >
               <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">

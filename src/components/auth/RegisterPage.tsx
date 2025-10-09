@@ -151,7 +151,11 @@ export default function RegisterPage() {
 
           {/* Google Button - Compact */}
           <div className="mb-4">
-            <button type="button" className="w-full bg-white border-2 border-gray-200 hover:border-green-300 rounded-xl py-3 px-4 font-semibold text-gray-700 flex items-center justify-center transition-all duration-300 hover:shadow-lg group text-sm">
+            <button 
+              type="button" 
+              onClick={() => window.location.href = 'https://sporthub-gdefgpgtf9h0g6gk.malaysiawest-01.azurewebsites.net/oauth2/authorization/google'}
+              className="w-full bg-white border-2 border-gray-200 hover:border-green-300 rounded-xl py-3 px-4 font-semibold text-gray-700 flex items-center justify-center transition-all duration-300 hover:shadow-lg group text-sm"
+            >
               <div className="bg-white p-1 rounded-full shadow-sm mr-2 group-hover:scale-110 transition-transform">
                 <svg className="w-4 h-4" viewBox="0 0 533.5 544.3">
                   <path d="M533.5 278.4c0-18.5-1.5-37.1-4.7-55.3H272.1v104.8h147c-6.1 33.8-25.7 63.7-54.4 82.7v68h87.7c51.5-47.4 81.1-117.4 81.1-200.2z" fill="#4285f4" />
