@@ -1,7 +1,5 @@
 import { MetadataRoute } from 'next'
 
-const baseUrl = 'https://sport-hub.pro.vn' // Thay bằng domain thật khi deploy
-
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
@@ -11,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/api/', '/admin/', '/private/'],
       },
     ],
-    sitemap: `${baseUrl}/sitemap.xml`,
+    sitemap: 'https://sport-hub.pro.vn/sitemap.xml',
   }
 }

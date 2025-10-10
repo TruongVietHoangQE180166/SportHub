@@ -5,6 +5,7 @@ import { Header } from "./Header";
 import { Footer } from "./Footer";
 import { GlobalLoading } from "./GlobalLoading";
 import { rehydrateAuthState } from "@/stores/authStore";
+import { usePageContext } from "@/contexts/PageContext";
 import AIChatSideSheet from './Chat';
 
 interface ConditionalLayoutProps {
@@ -15,6 +16,7 @@ export const ConditionalLayout: React.FC<ConditionalLayoutProps> = ({
   children,
 }) => {
   const pathname = usePathname();
+  const { isNotFoundPage } = usePageContext();
   const [loading, setLoading] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const firstRender = useRef(true);
@@ -47,7 +49,6 @@ export const ConditionalLayout: React.FC<ConditionalLayoutProps> = ({
     "/send-otp",
     "/verify-otp",
     "/reset-password",
-    "/404",
     "/login/success",
   ];
   
@@ -56,18 +57,27 @@ export const ConditionalLayout: React.FC<ConditionalLayoutProps> = ({
   const normalizedPathname = pathname || '';
   const isAuthRoute = authRoutes.includes(normalizedPathname);
 
+  // Check if we're on the 404 page by looking at the data attribute on the body
+  // This works in both client and server environments
+  const isNotFoundByAttribute = typeof document !== 'undefined' && 
+    document.body.hasAttribute('data-not-found');
+
+  // Hide header and footer if it's an auth route, the not-found page context is set, 
+  // or we detect the not-found attribute
+  const shouldHideNav = isAuthRoute || isNotFoundPage || isNotFoundByAttribute;
+
   // Define background classes to prevent hydration mismatch
-  const backgroundClass = isAuthRoute 
+  const backgroundClass = shouldHideNav 
     ? "min-h-screen bg-gradient-to-br from-gray-50 to-gray-50" 
     : "min-h-screen bg-gray-50";
 
   return (
     <div className={backgroundClass}>
       {loading && <GlobalLoading />}
-      {!isAuthRoute && <Header />}
+      {!shouldHideNav && <Header />}
       <main>{children}</main>
-      {!isAuthRoute && <Footer />}
-      {!isAuthRoute && (
+      {!shouldHideNav && <Footer />}
+      {!shouldHideNav && (
         <div>
           <AIChatSideSheet
             side="left"
