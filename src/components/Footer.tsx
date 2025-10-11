@@ -15,9 +15,9 @@ export const Footer: React.FC = () => {
                 <Image
                   src="/SportHub-Logo.png"
                   alt="SportHub Logo"
-                  width={160}
-                  height={64}
-                  className="w-auto h-16"
+                  width={70}
+                  height={28}
+                  className="w-auto h-7"
                 />
               </div>
               <p className="text-gray-300 text-base leading-relaxed max-w-md">

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Check, AlertCircle, Timer, RefreshCw, Eye, EyeOff, Lock } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import Image from 'next/image';
+import { FloatingPathsBackground } from './background';
 
 export default function ResetPasswordPage() {
   const [otpValues, setOtpValues] = useState<string[]>(['', '', '', '', '', '']);
@@ -225,7 +226,7 @@ export default function ResetPasswordPage() {
   const strengthIndicator = getPasswordStrengthText();
 
   return (
-    <div className="h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-900 via-black to-gray-800">
+    <FloatingPathsBackground className="flex min-h-screen items-center justify-center p-4" position={-1}>
       <div className="w-full max-w-md">
         <div className="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-6">
           {/* Logo - Ultra Compact */}
@@ -462,6 +463,6 @@ export default function ResetPasswordPage() {
           </div>
         </div>
       </div>
-    </div>
+    </FloatingPathsBackground>
   );
 }

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Mail, Check, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
 import { useAuthStore } from '../../stores/authStore';
+import { FloatingPathsBackground } from './background';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState<string>('');
@@ -63,11 +64,11 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="h-screen overflow-hidden flex items-center justify-center p-4 bg-gradient-to-br from-gray-900 via-black to-gray-800">
+    <FloatingPathsBackground className="flex min-h-screen items-center justify-center p-4" position={-1}>
       <div className="w-full max-w-sm">
-        <div className="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-6">
+        <div className="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-10">
           {/* Logo - Compact */}
-          <div className="text-center mb-6">
+          <div className="text-center mb-8">
             <Link href="/" className="inline-flex items-center justify-center group">
               <div className="w-50 h-14 relative mx-auto">
                 <Image src="/SportHub-Logo.png" alt="SportHub Logo" fill style={{ objectFit: 'contain' }} priority />
@@ -76,17 +77,17 @@ export default function ForgotPasswordPage() {
           </div>
           
           {/* Header - Compact */}
-          <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-800 mb-2">Quên mật khẩu</h1>
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold text-gray-800 mb-3">Quên mật khẩu</h1>
             <p className="text-gray-600 text-sm">
               Nhập email để nhận liên kết đặt lại mật khẩu
             </p>
           </div>
           
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3 animate-in slide-in-from-top-2 duration-200">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 animate-in slide-in-from-top-2 duration-200">
                 <div className="flex items-center">
                   <AlertCircle className="h-4 w-4 text-red-500 mr-2 flex-shrink-0" />
                   <p className="text-xs text-red-700 font-medium">{error}</p>
@@ -94,14 +95,14 @@ export default function ForgotPasswordPage() {
               </div>
             )}
             {success && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3 animate-in slide-in-from-top-2 duration-200">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 animate-in slide-in-from-top-2 duration-200">
                 <div className="flex items-center">
                   <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0" />
                   <p className="text-xs text-green-700 font-medium">{success}</p>
                 </div>
               </div>
             )}
-            <div className="space-y-1">
+            <div className="space-y-2">
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
@@ -110,7 +111,7 @@ export default function ForgotPasswordPage() {
                   value={email}
                   onChange={handleInputChange}
                   onBlur={handleBlur}
-                  className={`w-full pl-10 pr-3 py-3 border-2 rounded-xl focus:ring-2 focus:ring-green-200 focus:outline-none transition-all duration-300 bg-white text-sm ${touched && fieldError ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-green-500'}`}
+                  className={`w-full pl-10 pr-3 py-4 border-2 rounded-xl focus:ring-2 focus:ring-green-200 focus:outline-none transition-all duration-300 bg-white text-sm ${touched && fieldError ? 'border-red-400 focus:border-red-500' : 'border-gray-200 focus:border-green-500'}`}
                   placeholder="Email"
                   required
                   aria-describedby="email-error"
@@ -129,7 +130,8 @@ export default function ForgotPasswordPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 hover:from-green-600 hover:to-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02]"
+              // Increased py-3 to py-4 for taller button
+              className="group relative w-full flex justify-center py-4 px-4 border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 hover:from-green-600 hover:to-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02]"
             >
               {isLoading ? (
                 <div className="flex items-center">
@@ -141,7 +143,7 @@ export default function ForgotPasswordPage() {
               )}
             </button>
           </form>
-          <div className="mt-4 pt-4 space-y-2 text-center">
+          <div className="mt-8 pt-6 space-y-3 text-center">
             <p className="text-xs text-gray-600">
               Đã có tài khoản?{' '}
               <Link href="/login" className="text-green-600 hover:text-green-700 font-semibold transition-colors">
@@ -157,6 +159,6 @@ export default function ForgotPasswordPage() {
           </div>
         </div>
       </div>
-    </div>
+    </FloatingPathsBackground>
   );
 }
