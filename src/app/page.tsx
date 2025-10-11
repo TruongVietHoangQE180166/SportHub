@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/og-image.jpg', // Thêm ảnh preview cho social media
+        url: '/SportHup.png',
         width: 1200,
         height: 630,
         alt: 'SportHub - Đặt Sân Thể Thao Quy Nhơn',
