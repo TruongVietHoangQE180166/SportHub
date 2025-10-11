@@ -551,9 +551,9 @@ export default function ProfilePage() {
                 <div className="relative inline-block">
                   <div className="w-36 h-36 overflow-hidden border-4 border-gray-100 rounded-full bg-white flex items-center justify-center shadow-lg">
                     {avatarPreview ? (
-                      <Image src={avatarPreview} alt="avatar" width={144} height={144} className="w-full h-full object-cover aspect-square" />
+                      <Image src={avatarPreview} alt="avatar" width={144} height={144} className="w-full h-full object-cover" />
                     ) : user.avatar ? (
-                      <Image src={user.avatar} alt="avatar" width={144} height={144} className="w-full h-full object-cover aspect-square" />
+                      <Image src={user.avatar} alt="avatar" width={144} height={144} className="w-full h-full object-cover" />
                     ) : (
                       <User className="w-18 h-18 text-gray-400" />
                     )}
