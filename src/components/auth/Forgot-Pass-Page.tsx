@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Mail, Check, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
 import { useAuthStore } from '../../stores/authStore';
-import { FloatingPathsBackground } from './background';
+import MeteorShower from './background2';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState<string>('');
@@ -64,7 +64,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <FloatingPathsBackground className="flex min-h-screen items-center justify-center p-4" position={-1}>
+    <MeteorShower className="p-4">
       <div className="w-full max-w-sm">
         <div className="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-10">
           {/* Logo - Compact */}
@@ -159,6 +159,6 @@ export default function ForgotPasswordPage() {
           </div>
         </div>
       </div>
-    </FloatingPathsBackground>
+    </MeteorShower>
   );
 }

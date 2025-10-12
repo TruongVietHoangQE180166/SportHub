@@ -420,7 +420,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({
                         {/* Kick button for organizers (not for the organizer themselves) */}
                         {isOrganizer && userId && member.username !== validMatch.organizer && (
                           <button
-                            className="px-3 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 text-sm font-semibold flex items-center justify-center disabled:opacity-50 shadow-sm"
+                            className="px-3 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 text-sm font-semibold flex items-center justify-center disabled:opacity-50 shadow-sm md:px-3 md:py-2"
                             onClick={() => openConfirmationModal(
                               'Xác nhận kick thành viên',
                               `Bạn có chắc chắn muốn kick thành viên ${member.username} khỏi trận đấu?`,
@@ -430,16 +430,16 @@ export const MatchCard: React.FC<MatchCardProps> = ({
                             disabled={removingMembers[userId]}
                           >
                             {removingMembers[userId] ? (
-                              <span>Đang xử lý...</span>
+                              <span className="text-xs sm:text-sm">Đang xử lý...</span>
                             ) : (
-                              <span>Kick</span>
+                              <span className="text-xs sm:text-sm">Kick</span>
                             )}
                           </button>
                         )}
                         {/* Leave button for members (not for the organizer) */}
                         {user && userId === user.id && !isOrganizer && (
                           <button
-                            className="px-3 py-2 bg-orange-600 text-white rounded-xl hover:bg-orange-700 text-sm font-semibold flex items-center justify-center disabled:opacity-50 shadow-sm"
+                            className="px-3 py-2 bg-orange-600 text-white rounded-xl hover:bg-orange-700 text-sm font-semibold flex items-center justify-center disabled:opacity-50 shadow-sm md:px-3 md:py-2"
                             onClick={() => openConfirmationModal(
                               'Xác nhận rời khỏi trận đấu',
                               'Bạn có chắc chắn muốn rời khỏi trận đấu này?',
@@ -449,9 +449,9 @@ export const MatchCard: React.FC<MatchCardProps> = ({
                             disabled={leavingMatch}
                           >
                             {leavingMatch ? (
-                              <span>Đang xử lý...</span>
+                              <span className="text-xs sm:text-sm">Đang xử lý...</span>
                             ) : (
-                              <span>Rời khỏi</span>
+                              <span className="text-xs sm:text-sm">Rời khỏi</span>
                             )}
                           </button>
                         )}
@@ -562,8 +562,8 @@ export const MatchCard: React.FC<MatchCardProps> = ({
                 <div className="text-xs text-gray-700">
                   Facebook: 
                   {validMatch.facebook ? (
-                    <a href={validMatch.facebook} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                      {validMatch.facebook}
+                    <a href={validMatch.facebook} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline block truncate max-w-xs" title={validMatch.facebook}>
+                      {validMatch.facebook.length > 30 ? `${validMatch.facebook.substring(0, 30)}...` : validMatch.facebook}
                     </a>
                   ) : (
                     'N/A'

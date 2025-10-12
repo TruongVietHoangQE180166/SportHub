@@ -7,6 +7,7 @@ import { GlobalLoading } from "./GlobalLoading";
 import { rehydrateAuthState, useAuthStore } from "@/stores/authStore";
 import { usePageContext } from "@/contexts/PageContext";
 import AIChatSideSheet from './Chat';
+import { ConfirmationModal } from '@/components/matches/shared/ConfirmationModal';
 import { 
   Home, 
   Calendar, 
@@ -35,6 +36,7 @@ export const ConditionalLayout: React.FC<ConditionalLayoutProps> = ({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const firstRender = useRef(true);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const { user, isAuthenticated, logout, fetchUserProfile } = useAuthStore();
 
   // Rehydrate auth state on mount
@@ -243,10 +245,7 @@ export const ConditionalLayout: React.FC<ConditionalLayoutProps> = ({
             icon: <LogOut size={24} className="text-white" />,
             label: "Đăng xuất",
             description: "Đăng xuất tài khoản",
-            onClick: () => {
-              logout();
-              router.push("/");
-            },
+            onClick: () => setIsLogoutModalOpen(true),
             // Logout doesn't have a dedicated page, so it's never "active"
             isActive: false,
           },
@@ -266,6 +265,12 @@ export const ConditionalLayout: React.FC<ConditionalLayoutProps> = ({
   };
 
   const dockItems = getDockItems();
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+    setIsLogoutModalOpen(false);
+  };
 
   return (
     <div className={backgroundClass}>
@@ -296,6 +301,16 @@ export const ConditionalLayout: React.FC<ConditionalLayoutProps> = ({
           />
         </div>
       )}
+      <ConfirmationModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={handleLogout}
+        title="Xác nhận đăng xuất"
+        message="Bạn có chắc chắn muốn đăng xuất khỏi tài khoản hiện tại không?"
+        confirmText="Đăng xuất"
+        cancelText="Hủy"
+        type="danger"
+      />
     </div>
   );
 };
