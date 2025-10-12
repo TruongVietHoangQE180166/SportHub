@@ -6,7 +6,7 @@ import { Eye, EyeOff, Mail, Lock, User, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { RegisterData } from '@/types/auth';
 import Image from 'next/image';
-import { FloatingPathsBackground } from './background';
+import MeteorShower from './background2';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState<RegisterData & { confirmPassword: string }>({
@@ -130,7 +130,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <FloatingPathsBackground className="flex min-h-screen items-center justify-center p-4" position={-1}>
+    <MeteorShower className="p-4">
       <div className="w-full max-w-sm">
         <div className="bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-6">
           {/* Logo - Compact */}
@@ -362,6 +362,6 @@ export default function RegisterPage() {
           </form>
         </div>
       </div>
-    </FloatingPathsBackground>
+    </MeteorShower>
   );
 }

@@ -31,7 +31,7 @@ export const MatchNavigation = () => {
   return (
     <div className="mb-8">
       <div className="bg-white rounded-3xl shadow-sm p-3 border border-gray-100">
-        <nav className="flex w-full justify-center space-x-3 min-w-0">
+        <nav className="hidden md:flex w-full justify-center space-x-3 min-w-0">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -50,6 +50,28 @@ export const MatchNavigation = () => {
                   <Icon className="w-4 h-4" />
                   <span>{item.name}</span>
                 </div>
+              </Link>
+            );
+          })}
+        </nav>
+        {/* Mobile navigation */}
+        <nav className="flex md:hidden w-full justify-around">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
+            
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl font-medium transition-all duration-300 flex-1 ${
+                  isActive
+                    ? 'bg-green-600 text-white shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                <Icon className="w-5 h-5 mb-1" />
+                <span className="text-[10px] text-center leading-tight px-1">{item.name}</span>
               </Link>
             );
           })}

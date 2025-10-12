@@ -37,13 +37,13 @@ export function findUserByName(users: {name: string, avatar?: string}[], name: s
 export const getStatusBadge = (status: string) => {
   switch (status) {
     case 'open':
-      return <span className="px-4 py-2 rounded-xl text-sm font-semibold bg-green-100 text-green-700 border border-green-200 flex items-center space-x-2"> <Zap className="w-4 h-4" /><span>Đang tuyển</span></span>;
+      return <span className="px-2 py-1 md:px-4 md:py-2 rounded-lg md:rounded-xl text-xs md:text-sm font-semibold bg-green-100 text-green-700 border border-green-200 flex items-center space-x-1 md:space-x-2"> <Zap className="w-3 h-3 md:w-4 md:h-4" /><span>Đang tuyển</span></span>;
     case 'full':
-      return <span className="px-4 py-2 rounded-xl text-sm font-semibold bg-gray-100 text-gray-700 border border-gray-200 flex items-center space-x-2"> <Shield className="w-4 h-4" /><span>Đã đầy</span></span>;
+      return <span className="px-2 py-1 md:px-4 md:py-2 rounded-lg md:rounded-xl text-xs md:text-sm font-semibold bg-gray-100 text-gray-700 border border-gray-200 flex items-center space-x-1 md:space-x-2"> <Shield className="w-3 h-3 md:w-4 md:h-4" /><span>Đã đầy</span></span>;
     case 'finished':
-      return <span className="px-4 py-2 rounded-xl text-sm font-semibold bg-blue-100 text-blue-700 border border-blue-200 flex items-center space-x-2"> <Star className="w-4 h-4" /><span>Đã kết thúc</span></span>;
+      return <span className="px-2 py-1 md:px-4 md:py-2 rounded-lg md:rounded-xl text-xs md:text-sm font-semibold bg-blue-100 text-blue-700 border border-blue-200 flex items-center space-x-1 md:space-x-2"> <Star className="w-3 h-3 md:w-4 md:h-4" /><span>Đã kết thúc</span></span>;
     case 'cancelled':
-      return <span className="px-4 py-2 rounded-xl text-sm font-semibold bg-red-100 text-red-700 border border-red-200 flex items-center space-x-2"> <X className="w-4 h-4" /><span>Đã hủy</span></span>;
+      return <span className="px-2 py-1 md:px-4 md:py-2 rounded-lg md:rounded-xl text-xs md:text-sm font-semibold bg-red-100 text-red-700 border border-red-200 flex items-center space-x-1 md:space-x-2"> <X className="w-3 h-3 md:w-4 md:h-4" /><span>Đã hủy</span></span>;
     default:
       return null;
   }

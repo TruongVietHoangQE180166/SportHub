@@ -132,80 +132,81 @@ const FieldDetailPage: React.FC<{ fieldId: string }> = ({ fieldId }) => {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Hero Section với Carousel */}
-        <div className="relative bg-white rounded-2xl shadow-2xl overflow-hidden mb-10 border border-gray-100 group">
-          <div className="absolute inset-0 bg-gradient-to-r from-green-400/5 to-green-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-          
-          <div className="relative">
-            {/* Image Carousel Container */}
-            <div className="relative overflow-hidden rounded-t-2xl h-64 sm:h-[600px]">
-              <div 
-                className="flex transition-transform duration-500 ease-in-out h-full"
-                style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}
-              >
-                {fieldImages.map((image, index) => (
-                  <div key={index} className="w-full flex-shrink-0 relative">
-                    <Image
-                      src={image}
-                      alt={`${selectedField?.fieldName || 'Sân thể thao'} - Ảnh ${index + 1}`}
-                      width={1200}
-                      height={600}
-                      className="w-full h-64 sm:h-[600px] object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-
-              {/* Navigation Arrows */}
-              {fieldImages.length > 1 && (
-                <>
-                  <button
-                    onClick={prevImage}
-                    className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-12 sm:h-12 bg-black/50 hover:bg-black/70 backdrop-blur-sm text-white rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 z-10"
-                    aria-label="Ảnh trước"
-                  >
-                    <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6" />
-                  </button>
-                  <button
-                    onClick={nextImage}
-                    className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-12 sm:h-12 bg-black/50 hover:bg-black/70 backdrop-blur-sm text-white rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 z-10"
-                    aria-label="Ảnh tiếp theo"
-                  >
-                    <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6" />
-                  </button>
-                </>
-              )}
-
-              {/* Image Counter */}
-              {fieldImages.length > 1 && (
-                <div className="absolute top-2 sm:top-4 right-2 sm:right-4 bg-black/60 backdrop-blur-sm text-white px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm font-bold z-10">
-                  {currentImageIndex + 1} / {fieldImages.length}
+      {/* Hero Section với Carousel - Full Width */}
+      <div className="relative bg-white shadow-2xl overflow-hidden border-b border-gray-100 group">
+        <div className="absolute inset-0 bg-gradient-to-r from-green-400/5 to-green-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+        
+        <div className="relative">
+          {/* Image Carousel Container */}
+          <div className="relative overflow-hidden h-64 sm:h-[600px]">
+            <div 
+              className="flex transition-transform duration-500 ease-in-out h-full"
+              style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}
+            >
+              {fieldImages.map((image, index) => (
+                <div key={index} className="w-full flex-shrink-0 relative">
+                  <Image
+                    src={image}
+                    alt={`${selectedField?.fieldName || 'Sân thể thao'} - Ảnh ${index + 1}`}
+                    width={1200}
+                    height={600}
+                    className="w-full h-64 sm:h-[600px] object-cover"
+                  />
                 </div>
-              )}
+              ))}
             </div>
 
-            {/* Thumbnail dots - chỉ hiển thị dots ở dưới ảnh */}
+            {/* Navigation Arrows */}
             {fieldImages.length > 1 && (
-              <div className="absolute bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2 z-10">
-                <div className="flex items-center gap-1 sm:gap-2 bg-black/30 backdrop-blur-sm px-2 py-1 sm:px-3 sm:py-2 rounded-full">
-                  {fieldImages.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => goToImage(index)}
-                      className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
-                        currentImageIndex === index
-                          ? 'bg-white scale-125 shadow-lg'
-                          : 'bg-white/50 hover:bg-white/75 hover:scale-110'
-                      }`}
-                      aria-label={`Xem ảnh ${index + 1}`}
-                    />
-                  ))}
-                </div>
+              <>
+                <button
+                  onClick={prevImage}
+                  className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-12 sm:h-12 bg-black/50 hover:bg-black/70 backdrop-blur-sm text-white rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 z-10"
+                  aria-label="Ảnh trước"
+                >
+                  <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6" />
+                </button>
+                <button
+                  onClick={nextImage}
+                  className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-12 sm:h-12 bg-black/50 hover:bg-black/70 backdrop-blur-sm text-white rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 z-10"
+                  aria-label="Ảnh tiếp theo"
+                >
+                  <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6" />
+                </button>
+              </>
+            )}
+
+            {/* Image Counter */}
+            {fieldImages.length > 1 && (
+              <div className="absolute top-2 sm:top-4 right-2 sm:right-4 bg-black/60 backdrop-blur-sm text-white px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm font-bold z-10">
+                {currentImageIndex + 1} / {fieldImages.length}
               </div>
             )}
           </div>
+
+          {/* Thumbnail dots - chỉ hiển thị dots ở dưới ảnh */}
+          {fieldImages.length > 1 && (
+            <div className="absolute bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2 z-10">
+              <div className="flex items-center gap-1 sm:gap-2 bg-black/30 backdrop-blur-sm px-2 py-1 sm:px-3 sm:py-2 rounded-full">
+                {fieldImages.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => goToImage(index)}
+                    className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
+                      currentImageIndex === index
+                        ? 'bg-white scale-125 shadow-lg'
+                        : 'bg-white/50 hover:bg-white/75 hover:scale-110'
+                    }`}
+                    aria-label={`Xem ảnh ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 py-8">
 
         {/* Field Name & Rating - đưa ra ngoài ảnh */}
         <div className="mb-8">

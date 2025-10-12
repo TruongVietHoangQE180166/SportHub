@@ -1,11 +1,10 @@
 'use client';
 import React, { useState } from 'react';
-import { Plus, Users, Calendar, Clock, MapPin, MessageCircle, ChevronDown, X, Zap, Shield, Trophy, Target } from 'lucide-react';
+import { Plus, Users, Calendar, Clock, MapPin, MessageCircle, ChevronDown, X, Zap, Shield, Trophy, Target, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { sportOptions, skillLevelOptions, generateTimeOptions } from './shared/matchUtils';
 import { MatchNavigation } from './shared/MatchNavigation';
 import { TimeDropdown } from './shared/TimeDropdown';
-import { SkillLevel } from '@/types/match';
 import { createMatch, CreateMatchRequest } from '@/services/matchService';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -179,22 +178,46 @@ export const CreateMatchPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-12 text-center">
-          <div className="relative">
-            <h1 className="text-5xl sm:text-6xl font-bold text-gray-900 mb-6">
-              <div className="flex items-center justify-center space-x-4">
-                <Plus className="w-16 h-16 text-green-600" />
-                <span>Tạo trận đấu mới</span>
-              </div>
-            </h1>
-            <p className="text-xl text-gray-600 font-medium max-w-2xl mx-auto">
-              Tạo cơ hội kết nối và vận động cùng cộng đồng thể thao
-            </p>
+      <div className="relative h-80 md:h-96 lg:h-[32rem] w-full -mt-12 overflow-hidden">
+      {/* Background Image - Clear and Visible */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-gray-200"
+        style={{ 
+          backgroundImage: "url('https://images.pexels.com/photos/209977/pexels-photo-209977.jpeg?_gl=1*t142ag*_ga*MTM4MjA3NDU0OS4xNzUxMjg5Mzg3*_ga_8JE65Q40S6*czE3NTEyODkzODYkbzEkZzEkdDE3NTEyODk0OTMkajU1JGwwJGgw')",
+        }}
+      />
+      
+      {/* Subtle Bottom Gradient Only - Keeps Image Clear */}
+      <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+
+      {/* Content Container */}
+      <div className="relative z-10 h-full flex flex-col items-center justify-end pb-12 md:pb-16 lg:pb-20 text-center px-4 sm:px-6 lg:px-8">
+        {/* Icon with Clean Design */}
+        <div className="relative mb-6 group">
+          <div className="absolute inset-0 bg-green-400 rounded-2xl blur-xl opacity-50 group-hover:opacity-70 transition-opacity"></div>
+          <div className="relative bg-white p-4 md:p-5 rounded-2xl shadow-2xl transform hover:scale-110 transition-all duration-300 border-2 border-green-400">
+            <Plus className="w-10 h-10 md:w-14 md:h-14 text-green-400" strokeWidth={3} />
           </div>
+          <Sparkles className="absolute -top-2 -right-2 w-6 h-6 md:w-8 md:h-8 text-green-400 animate-pulse" />
         </div>
 
-        <MatchNavigation />
+        {/* Title with Shadow for Readability */}
+        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white mb-4 tracking-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
+          Tạo trận đấu mới
+        </h1>
+
+        {/* Subtitle */}
+        <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white font-semibold max-w-3xl mx-auto leading-relaxed px-4 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+          Tạo cơ hội kết nối và vận động cùng{' '}
+          <span className="text-green-400 font-bold">cộng đồng thể thao</span>
+        </p>
+      </div>
+    </div>
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="mb-12">
+          <MatchNavigation />
+        </div>
 
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 max-w-4xl mx-auto">
           <div className="p-8 sm:p-12">
@@ -216,9 +239,11 @@ export const CreateMatchPage = () => {
                 <div className="text-center mb-12">
                   <h2 className="text-4xl font-bold text-gray-900 mb-4 flex items-center justify-center space-x-3">
                     <Zap className="w-10 h-10 text-green-600" />
-                    <span>Tạo trận đấu mới</span>
+                    <span className="text-2xl sm:text-3xl md:text-4xl">Tạo trận đấu mới</span>
                   </h2>
-                  <p className="text-gray-600 font-medium text-lg">Tạo cơ hội kết nối và vận động cùng cộng đồng thể thao</p>
+                  <p className="text-gray-600 font-medium text-lg text-sm sm:text-base">
+                    Tạo cơ hội kết nối và vận động cùng cộng đồng thể thao
+                  </p>
                 </div>
                 
                 {(apiError || Object.keys(errors).length > 0) && (

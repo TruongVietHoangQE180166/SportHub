@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Users, Search, ChevronDown, Target, Shield, Eye, Calendar, Clock, MapPin, Trophy, Loader2 } from 'lucide-react';
+import { Users, Search, ChevronDown, Target, Shield, Eye, Calendar, Clock, MapPin, Trophy, Loader2, Sparkles } from 'lucide-react';
 import { MatchCard } from './shared/MatchCard';
 import { MatchNavigation } from './shared/MatchNavigation';
 import { getSportIcon, getSportGradient } from './shared/matchUtils';
@@ -147,22 +147,49 @@ export const MyMatchesPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-12 text-center">
-          <div className="relative">
-            <h1 className="text-5xl sm:text-6xl font-bold text-gray-900 mb-6">
-              <div className="flex items-center justify-center space-x-4">
-                <Users className="w-16 h-16 text-green-600" />
-                <span>Trận đấu của tôi</span>
-              </div>
-            </h1>
-            <p className="text-xl text-gray-600 font-medium max-w-2xl mx-auto">
-              Quản lý các trận đấu bạn đã tạo hoặc tham gia
-            </p>
+      <div className="relative h-80 md:h-96 lg:h-[32rem] w-full -mt-12 overflow-hidden">
+      {/* Background Image - Clear and Visible */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-gray-200"
+        style={{ 
+          backgroundImage: "url('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=600&fit=crop&crop=center')",
+        }}
+      />
+      
+      {/* Subtle Bottom Gradient Only - Keeps Image Clear */}
+      <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+
+      {/* Content Container */}
+      <div className="relative z-10 h-full flex flex-col items-center justify-end pb-12 md:pb-16 lg:pb-20 text-center px-4 sm:px-6 lg:px-8">
+        {/* Icon with Clean Design */}
+        <div className="relative mb-6 group">
+          <div className="absolute inset-0 bg-green-400 rounded-2xl blur-xl opacity-50 group-hover:opacity-70 transition-opacity"></div>
+          <div className="relative bg-white p-4 md:p-5 rounded-2xl shadow-2xl transform hover:scale-110 transition-all duration-300 border-2 border-green-400">
+            <Users className="w-10 h-10 md:w-14 md:h-14 text-green-400" strokeWidth={2.5} />
           </div>
+          <Sparkles className="absolute -top-2 -right-2 w-6 h-6 md:w-8 md:h-8 text-green-400 animate-pulse" />
         </div>
 
-        <MatchNavigation />
+        {/* Title with Shadow for Readability */}
+        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white mb-4 tracking-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
+          Trận đấu của tôi
+        </h1>
+
+        {/* Subtitle */}
+        <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white font-semibold max-w-3xl mx-auto leading-relaxed px-4 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+          Quản lý các trận đấu mà mình đã{' '}
+          <span className="text-green-400 font-bold">tham gia</span>
+          {' '}hoặc{' '}
+          <span className="text-green-400 font-bold">tổ chức</span>
+        </p>
+
+      </div>
+    </div>
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="mb-12">
+          <MatchNavigation />
+        </div>
 
         <div className="space-y-6">
           {!isAuthenticated ? (
@@ -348,8 +375,8 @@ export const MyMatchesPage = () => {
                   {/* Danh sách hoặc chi tiết trận đấu */}
                   {selectedMatch === null ? (
                     <>
-                      <div className="flex justify-between items-center">
-                        <div className="bg-white rounded-2xl px-6 py-4 shadow-sm border border-gray-100">
+                      <div className="flex justify-between items-center w-full">
+                        <div className="bg-white rounded-2xl px-6 py-4 shadow-sm border border-gray-100 w-full">
                           <p className="text-gray-700 font-semibold flex items-center space-x-2">
                             <Target className="w-4 h-4 text-green-600" />
                             <span>Tìm thấy <span className="text-green-600 font-bold text-lg">{myFilteredMatches.length}</span> trận đấu</span>
@@ -375,7 +402,7 @@ export const MyMatchesPage = () => {
                           </div>
                         </div>
                       ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                           {myFilteredMatches.map((match) => {
                             // Ensure match has a valid ID
                             const validMatch = {
@@ -459,6 +486,11 @@ export const MyMatchesPage = () => {
                                   </span>
                                 </div>
                                 
+                                {/* Description */}
+                                <p className="text-gray-600 text-sm mb-6 line-clamp-4 h-20">
+                                  {validMatch.description}
+                                </p>
+                                
                                 {/* Action button */}
                                 <div className="mt-auto">
                                   <button 
@@ -494,13 +526,13 @@ export const MyMatchesPage = () => {
                           </div>
                         );
                       })()}
-                      <div className="flex justify-end mt-8">
+                      <div className="flex justify-center sm:justify-end mt-8">
                         <button
                           onClick={() => setSelectedMatch(null)}
-                          className="px-8 py-3 bg-gray-600 text-white rounded-2xl hover:bg-gray-700 font-semibold shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200 flex items-center space-x-2"
+                          className="px-4 py-2 sm:px-8 sm:py-3 bg-black text-white rounded-xl sm:rounded-2xl hover:bg-gray-800 font-semibold shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200 flex items-center space-x-2"
                         >
-                          <ChevronDown className="w-4 h-4 rotate-90" />
-                          <span>Quay lại danh sách</span>
+                          <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 rotate-90" />
+                          <span className="text-sm sm:text-base">Quay lại danh sách</span>
                         </button>
                       </div>
                     </>
