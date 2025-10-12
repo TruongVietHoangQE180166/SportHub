@@ -155,9 +155,13 @@ function App() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900">Vui lòng đăng nhập</h1>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center p-8 bg-white rounded-2xl shadow-lg border border-gray-200">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Activity className="w-8 h-8 text-green-400" />
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">Đăng nhập để xem trang này</h3>
+          <p className="text-gray-600">Bạn cần đăng nhập để xem trang này.</p>
         </div>
       </div>
     );

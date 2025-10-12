@@ -20,7 +20,7 @@ import {
 } from "framer-motion";
 import { ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { Send, Bot, User, Settings, Key, Trash2, X, MessageCircle } from "lucide-react";
+import { Send, Bot, User, Settings, Key, Trash2, X } from "lucide-react";
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Utility function
@@ -545,14 +545,23 @@ interface AIChatSideSheetProps {
   placeholder?: string;
   side?: SheetSide;
   width?: string;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 const AIChatSideSheet = ({ 
   placeholder = 'Nhập tin nhắn của bạn...',
   side = "left",
-  width = "450px"
+  width = "450px",
+  isOpen: controlledIsOpen,
+  onOpenChange: controlledOnOpenChange
 }: AIChatSideSheetProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  
+  const isControlled = controlledIsOpen !== undefined;
+  const isOpen = isControlled ? controlledIsOpen : internalIsOpen;
+  const setIsOpen = isControlled ? controlledOnOpenChange : setInternalIsOpen;
+  
   const envApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
   
   const [messages, setMessages] = useState<Message[]>([]);
@@ -678,15 +687,6 @@ const AIChatSideSheet = ({
 
   return (
     <>
-      {/* Floating Chat Button */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 bg-black text-white rounded-full w-16 h-16 shadow-2xl hover:shadow-gray-500/25 transition-all duration-300 transform hover:scale-110 flex items-center justify-center z-50 border-2 border-green-400"
-        aria-label="Open AI Chat"
-      >
-        <MessageCircle className="w-8 h-8 text-green-400" />
-      </button>
-
       {/* SideSheet with AI Chat */}
       <SideSheetRoot open={isOpen} onOpenChange={setIsOpen} side={side} width={width}>
         <SideSheetContent>

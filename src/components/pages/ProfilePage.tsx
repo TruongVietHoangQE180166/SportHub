@@ -248,6 +248,8 @@ const PasswordStrengthIndicator: React.FC<{ password: string }> = ({ password })
 };
 
 export default function ProfilePage() {
+  const router = useRouter();
+  
   // Edit states
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editingPassword, setEditingPassword] = useState(false);
@@ -490,17 +492,21 @@ export default function ProfilePage() {
   };
 
   if (!isAuthenticated || !user) {
-    return <div className="min-h-screen flex items-center justify-center text-lg font-semibold text-gray-700">Bạn cần đăng nhập để xem trang này.</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center p-8 bg-white rounded-2xl shadow-lg border border-gray-200">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <User className="w-8 h-8 text-green-400" />
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">Đăng nhập để xem trang này</h3>
+          <p className="text-gray-600">Bạn cần đăng nhập để xem trang này.</p>
+        </div>
+      </div>
+    );
   }
-
-  const router = useRouter();
 
   // Add function to navigate to booking page
   // handleUseVoucher function has been moved to RewardsPage
-
-  if (!isAuthenticated || !user) {
-    return <div className="min-h-screen flex items-center justify-center text-lg font-semibold text-gray-700">Bạn cần đăng nhập để xem trang này.</div>;
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
@@ -545,7 +551,7 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Profile Overview */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 sticky top-24">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 sticky top-1">
               {/* Avatar Section */}
               <div className="text-center mb-8">
                 <div className="relative inline-block">

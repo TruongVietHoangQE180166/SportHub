@@ -540,238 +540,222 @@ const NavbarFlow: React.FC<NavbarFlowProps> = ({
           </motion.div>
 
           <motion.svg
-            initial={{ opacity: 0 }}
-            animate={svgMotion}
-            className="absolute inset-0 w-full h-full z-0 pointer-events-none"
-            viewBox="0 0 1400 96"
-            preserveAspectRatio="none"
-          >
-            <defs>
-              <filter id="connectionBlur">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="3" />
-              </filter>
-              <linearGradient
-                id="blueGradient"
-                x1="0%"
-                y1="0%"
-                x2="100%"
-                y2="0%"
-              >
-                <stop offset="0%" stopColor="#00ff00" stopOpacity="0" />
-                <stop offset="50%" stopColor="#00ff00" stopOpacity="1" />
-                <stop offset="100%" stopColor="#00ff00" stopOpacity="0" />
-              </linearGradient>
-              <linearGradient
-                id="cyanGradient"
-                x1="0%"
-                y1="0%"
-                x2="100%"
-                y2="0%"
-              >
-                <stop offset="0%" stopColor="#00ff00" stopOpacity="0" />
-                <stop offset="50%" stopColor="#00ff00" stopOpacity="1" />
-                <stop offset="100%" stopColor="#00ff00" stopOpacity="0" />
-              </linearGradient>
-              <linearGradient
-                id="purpleGradient"
-                x1="0%"
-                y1="0%"
-                x2="100%"
-                y2="0%"
-              >
-                <stop offset="0%" stopColor="#00ff00" stopOpacity="0" />
-                <stop offset="50%" stopColor="#00ff00" stopOpacity="1" />
-                <stop offset="100%" stopColor="#00ff00" stopOpacity="0" />
-              </linearGradient>
-              <linearGradient
-                id="orangeGradient"
-                x1="0%"
-                y1="0%"
-                x2="100%"
-                y2="0%"
-              >
-                <stop offset="0%" stopColor="#00ff00" stopOpacity="0" />
-                <stop offset="50%" stopColor="#00ff00" stopOpacity="1" />
-                <stop offset="100%" stopColor="#00ff00" stopOpacity="0" />
-              </linearGradient>
-              <linearGradient
-                id="redGradient"
-                x1="0%"
-                y1="0%"
-                x2="100%"
-                y2="0%"
-              >
-                <stop offset="0%" stopColor="#00ff00" stopOpacity="0" />
-                <stop offset="50%" stopColor="#00ff00" stopOpacity="1" />
-                <stop offset="100%" stopColor="#00ff00" stopOpacity="0" />
-              </linearGradient>
-              <linearGradient
-                id="greenGradient"
-                x1="0%"
-                y1="0%"
-                x2="100%"
-                y2="0%"
-              >
-                <stop offset="0%" stopColor="#00ff00" stopOpacity="0" />
-                <stop offset="50%" stopColor="#00ff00" stopOpacity="1" />
-                <stop offset="100%" stopColor="#00ff00" stopOpacity="0" />
-              </linearGradient>
-            </defs>
+  initial={{ opacity: 0 }}
+  animate={svgMotion}
+  className="absolute inset-0 w-full h-full z-0 pointer-events-none"
+  viewBox="0 0 1450 96"
+  preserveAspectRatio="none"
+>
+  <defs>
+    <filter id="connectionBlur">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3" />
+    </filter>
+    
+    {/* Gradient xanh lá chính */}
+    <linearGradient id="greenGradient1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stopColor="#22c55e" stopOpacity="0" />
+      <stop offset="50%" stopColor="#22c55e" stopOpacity="1" />
+      <stop offset="100%" stopColor="#22c55e" stopOpacity="0" />
+    </linearGradient>
+    
+    {/* Gradient xanh lá sáng */}
+    <linearGradient id="greenGradient2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stopColor="#4ade80" stopOpacity="0" />
+      <stop offset="50%" stopColor="#4ade80" stopOpacity="1" />
+      <stop offset="100%" stopColor="#4ade80" stopOpacity="0" />
+    </linearGradient>
+    
+    {/* Gradient xanh lá lime */}
+    <linearGradient id="limeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stopColor="#84cc16" stopOpacity="0" />
+      <stop offset="50%" stopColor="#84cc16" stopOpacity="1" />
+      <stop offset="100%" stopColor="#84cc16" stopOpacity="0" />
+    </linearGradient>
+    
+    {/* Gradient xám xanh */}
+    <linearGradient id="grayGreenGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stopColor="#6b7280" stopOpacity="0" />
+      <stop offset="50%" stopColor="#16a34a" stopOpacity="1" />
+      <stop offset="100%" stopColor="#6b7280" stopOpacity="0" />
+    </linearGradient>
+    
+    {/* Gradient xám nhạt với xanh */}
+    <linearGradient id="lightGrayGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stopColor="#9ca3af" stopOpacity="0" />
+      <stop offset="50%" stopColor="#22c55e" stopOpacity="0.8" />
+      <stop offset="100%" stopColor="#9ca3af" stopOpacity="0" />
+    </linearGradient>
+    
+    {/* Gradient xanh đậm */}
+    <linearGradient id="darkGreenGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stopColor="#15803d" stopOpacity="0" />
+      <stop offset="50%" stopColor="#15803d" stopOpacity="1" />
+      <stop offset="100%" stopColor="#15803d" stopOpacity="0" />
+    </linearGradient>
+  </defs>
 
-            <motion.path
-              d="M 700 48 Q 500 30, 300 40 Q 200 35, 120 48"
-              stroke="url(#blueGradient)"
-              strokeWidth="3"
-              fill="none"
-              initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 0.8 }}
-              transition={{ duration: 2, ease: "easeOut", delay: 1.5 }}
-            />
-            <motion.path
-              d="M 700 48 Q 500 30, 300 40 Q 200 35, 120 48"
-              stroke="url(#blueGradient)"
-              strokeWidth="3"
-              fill="none"
-              transform="scale(-1,1) translate(-1400,0)"
-              initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 0.8 }}
-              transition={{ duration: 2, ease: "easeOut", delay: 1.5 }}
-            />
-            <motion.path
-              d="M 700 44 Q 520 60, 320 50 Q 220 55, 130 44"
-              stroke="url(#cyanGradient)"
-              strokeWidth="2.5"
-              fill="none"
-              initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 0.7 }}
-              transition={{ duration: 2.2, ease: "easeOut", delay: 1.7 }}
-            />
-            <motion.path
-              d="M 700 44 Q 520 60, 320 50 Q 220 55, 130 44"
-              stroke="url(#cyanGradient)"
-              strokeWidth="2.5"
-              fill="none"
-              transform="scale(-1,1) translate(-1400,0)"
-              initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 0.7 }}
-              transition={{ duration: 2.2, ease: "easeOut", delay: 1.7 }}
-            />
-            <motion.path
-              d="M 700 52 Q 480 25, 280 45 Q 180 30, 110 52"
-              stroke="url(#purpleGradient)"
-              strokeWidth="2.5"
-              fill="none"
-              initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 0.6 }}
-              transition={{ duration: 1.8, ease: "easeOut", delay: 1.9 }}
-            />
-            <motion.path
-              d="M 700 52 Q 480 25, 280 45 Q 180 30, 110 52"
-              stroke="url(#purpleGradient)"
-              strokeWidth="2.5"
-              fill="none"
-              transform="scale(-1,1) translate(-1400,0)"
-              initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 0.6 }}
-              transition={{ duration: 1.8, ease: "easeOut", delay: 1.9 }}
-            />
-            <motion.path
-              d="M 700 48 Q 900 35, 1100 45 Q 1200 40, 1280 48"
-              stroke="url(#orangeGradient)"
-              strokeWidth="3"
-              fill="none"
-              initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 0.8 }}
-              transition={{ duration: 2, ease: "easeOut", delay: 2.1 }}
-            />
-            <motion.path
-              d="M 700 48 Q 900 35, 1100 45 Q 1200 40, 1280 48"
-              stroke="url(#orangeGradient)"
-              strokeWidth="3"
-              fill="none"
-              transform="scale(-1,1) translate(-1400,0)"
-              initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 0.8 }}
-              transition={{ duration: 2, ease: "easeOut", delay: 2.1 }}
-            />
-            <motion.path
-              d="M 700 44 Q 880 65, 1080 50 Q 1180 60, 1270 44"
-              stroke="url(#redGradient)"
-              strokeWidth="2.5"
-              fill="none"
-              initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 0.7 }}
-              transition={{ duration: 2.2, ease: "easeOut", delay: 2.3 }}
-            />
-            <motion.path
-              d="M 700 44 Q 880 65, 1080 50 Q 1180 60, 1270 44"
-              stroke="url(#redGradient)"
-              strokeWidth="2.5"
-              fill="none"
-              transform="scale(-1,1) translate(-1400,0)"
-              initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 0.7 }}
-              transition={{ duration: 2.2, ease: "easeOut", delay: 2.3 }}
-            />
-            <motion.path
-              d="M 700 52 Q 920 25, 1120 40 Q 1220 30, 1290 52"
-              stroke="url(#greenGradient)"
-              strokeWidth="2.5"
-              fill="none"
-              initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 0.6 }}
-              transition={{ duration: 1.8, ease: "easeOut", delay: 2.5 }}
-            />
-            <motion.path
-              d="M 700 52 Q 920 25, 1120 40 Q 1220 30, 1290 52"
-              stroke="url(#greenGradient)"
-              strokeWidth="2.5"
-              fill="none"
-              transform="scale(-1,1) translate(-1400,0)"
-              initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 0.6 }}
-              transition={{ duration: 1.8, ease: "easeOut", delay: 2.5 }}
-            />
+  {/* Left side paths */}
+  <motion.path
+    d="M 700 48 Q 500 30, 300 40 Q 200 35, 120 48"
+    stroke="url(#greenGradient1)"
+    strokeWidth="3"
+    fill="none"
+    initial={{ pathLength: 0, opacity: 0 }}
+    animate={{ pathLength: 1, opacity: 0.8 }}
+    transition={{ duration: 2, ease: "easeOut", delay: 1.5 }}
+  />
+  <motion.path
+    d="M 700 48 Q 500 30, 300 40 Q 200 35, 120 48"
+    stroke="url(#greenGradient1)"
+    strokeWidth="3"
+    fill="none"
+    transform="scale(-1,1) translate(-1400,0)"
+    initial={{ pathLength: 0, opacity: 0 }}
+    animate={{ pathLength: 1, opacity: 0.8 }}
+    transition={{ duration: 2, ease: "easeOut", delay: 1.5 }}
+  />
+  
+  <motion.path
+    d="M 700 44 Q 520 60, 320 50 Q 220 55, 130 44"
+    stroke="url(#greenGradient2)"
+    strokeWidth="2.5"
+    fill="none"
+    initial={{ pathLength: 0, opacity: 0 }}
+    animate={{ pathLength: 1, opacity: 0.7 }}
+    transition={{ duration: 2.2, ease: "easeOut", delay: 1.7 }}
+  />
+  <motion.path
+    d="M 700 44 Q 520 60, 320 50 Q 220 55, 130 44"
+    stroke="url(#greenGradient2)"
+    strokeWidth="2.5"
+    fill="none"
+    transform="scale(-1,1) translate(-1400,0)"
+    initial={{ pathLength: 0, opacity: 0 }}
+    animate={{ pathLength: 1, opacity: 0.7 }}
+    transition={{ duration: 2.2, ease: "easeOut", delay: 1.7 }}
+  />
+  
+  <motion.path
+    d="M 700 52 Q 480 25, 280 45 Q 180 30, 110 52"
+    stroke="url(#grayGreenGradient)"
+    strokeWidth="2.5"
+    fill="none"
+    initial={{ pathLength: 0, opacity: 0 }}
+    animate={{ pathLength: 1, opacity: 0.6 }}
+    transition={{ duration: 1.8, ease: "easeOut", delay: 1.9 }}
+  />
+  <motion.path
+    d="M 700 52 Q 480 25, 280 45 Q 180 30, 110 52"
+    stroke="url(#grayGreenGradient)"
+    strokeWidth="2.5"
+    fill="none"
+    transform="scale(-1,1) translate(-1400,0)"
+    initial={{ pathLength: 0, opacity: 0 }}
+    animate={{ pathLength: 1, opacity: 0.6 }}
+    transition={{ duration: 1.8, ease: "easeOut", delay: 1.9 }}
+  />
+  
+  {/* Right side paths */}
+  <motion.path
+    d="M 700 48 Q 900 35, 1100 45 Q 1320 40, 1420 48"
+    stroke="url(#limeGradient)"
+    strokeWidth="3"
+    fill="none"
+    initial={{ pathLength: 0, opacity: 0 }}
+    animate={{ pathLength: 1, opacity: 0.8 }}
+    transition={{ duration: 2, ease: "easeOut", delay: 2.1 }}
+  />
+  <motion.path
+    d="M 700 48 Q 900 35, 1100 45 Q 1320 40, 1420 48"
+    stroke="url(#limeGradient)"
+    strokeWidth="3"
+    fill="none"
+    transform="scale(-1,1) translate(-1450,0)"
+    initial={{ pathLength: 0, opacity: 0 }}
+    animate={{ pathLength: 1, opacity: 0.8 }}
+    transition={{ duration: 2, ease: "easeOut", delay: 2.1 }}
+  />
+  
+  <motion.path
+    d="M 700 44 Q 880 65, 1080 50 Q 1300 60, 1410 44"
+    stroke="url(#lightGrayGradient)"
+    strokeWidth="2.5"
+    fill="none"
+    initial={{ pathLength: 0, opacity: 0 }}
+    animate={{ pathLength: 1, opacity: 0.7 }}
+    transition={{ duration: 2.2, ease: "easeOut", delay: 2.3 }}
+  />
+  <motion.path
+    d="M 700 44 Q 880 65, 1080 50 Q 1300 60, 1410 44"
+    stroke="url(#lightGrayGradient)"
+    strokeWidth="2.5"
+    fill="none"
+    transform="scale(-1,1) translate(-1450,0)"
+    initial={{ pathLength: 0, opacity: 0 }}
+    animate={{ pathLength: 1, opacity: 0.7 }}
+    transition={{ duration: 2.2, ease: "easeOut", delay: 2.3 }}
+  />
+  
+  <motion.path
+    d="M 700 52 Q 920 25, 1120 40 Q 1330 30, 1430 52"
+    stroke="url(#darkGreenGradient)"
+    strokeWidth="2.5"
+    fill="none"
+    initial={{ pathLength: 0, opacity: 0 }}
+    animate={{ pathLength: 1, opacity: 0.6 }}
+    transition={{ duration: 1.8, ease: "easeOut", delay: 2.5 }}
+  />
+  <motion.path
+    d="M 700 52 Q 920 25, 1120 40 Q 1330 30, 1430 52"
+    stroke="url(#darkGreenGradient)"
+    strokeWidth="2.5"
+    fill="none"
+    transform="scale(-1,1) translate(-1450,0)"
+    initial={{ pathLength: 0, opacity: 0 }}
+    animate={{ pathLength: 1, opacity: 0.6 }}
+    transition={{ duration: 1.8, ease: "easeOut", delay: 2.5 }}
+  />
 
-            <g filter="url(#connectionBlur)" opacity="0.3">
-              <path
-                d="M 700 48 Q 500 30, 300 40 Q 200 35, 120 48"
-                stroke="#00ff00"
-                strokeWidth="4"
-                fill="none"
-              />
-              <path
-                d="M 700 44 Q 520 60, 320 50 Q 220 55, 130 44"
-                stroke="#00ff00"
-                strokeWidth="4"
-                fill="none"
-              />
-              <path
-                d="M 700 52 Q 480 25, 280 45 Q 180 30, 110 52"
-                stroke="#00ff00"
-                strokeWidth="4"
-                fill="none"
-              />
-              <path
-                d="M 700 48 Q 900 35, 1100 45 Q 1200 40, 1280 48"
-                stroke="#00ff00"
-                strokeWidth="4"
-                fill="none"
-              />
-              <path
-                d="M 700 44 Q 880 65, 1080 50 Q 1180 60, 1270 44"
-                stroke="#00ff00"
-                strokeWidth="4"
-                fill="none"
-              />
-              <path
-                d="M 700 52 Q 920 25, 1120 40 Q 1220 30, 1290 52"
-                stroke="#00ff00"
-                strokeWidth="4"
-                fill="none"
-              />
-            </g>
-          </motion.svg>
+  {/* Blur effect layer */}
+  <g filter="url(#connectionBlur)" opacity="0.25">
+    <path
+      d="M 700 48 Q 500 30, 300 40 Q 200 35, 120 48"
+      stroke="#22c55e"
+      strokeWidth="4"
+      fill="none"
+    />
+    <path
+      d="M 700 44 Q 520 60, 320 50 Q 220 55, 130 44"
+      stroke="#4ade80"
+      strokeWidth="4"
+      fill="none"
+    />
+    <path
+      d="M 700 52 Q 480 25, 280 45 Q 180 30, 110 52"
+      stroke="#6b7280"
+      strokeWidth="4"
+      fill="none"
+    />
+    <path
+      d="M 700 48 Q 900 35, 1100 45 Q 1320 40, 1420 48"
+      stroke="#84cc16"
+      strokeWidth="4"
+      fill="none"
+    />
+    <path
+      d="M 700 44 Q 880 65, 1080 50 Q 1300 60, 1410 44"
+      stroke="#9ca3af"
+      strokeWidth="4"
+      fill="none"
+    />
+    <path
+      d="M 700 52 Q 920 25, 1120 40 Q 1330 30, 1430 52"
+      stroke="#15803d"
+      strokeWidth="4"
+      fill="none"
+    />
+  </g>
+</motion.svg>
         </div>
       </div>
 
