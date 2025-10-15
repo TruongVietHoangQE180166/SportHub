@@ -64,14 +64,18 @@ export const FieldDiscoveryPage: React.FC = () => {
     image:
       serverField.images[0] ||
       "https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    sport:
-      serverField.typeFieldName === "Bóng Đá"
-        ? "football"
-        : serverField.typeFieldName === "Cầu Lông"
-        ? "badminton"
-        : serverField.typeFieldName === "Pickle Ball"
-        ? "pickle"
-        : "football",
+    sport: (() => {
+      // More flexible sport mapping to handle variations in typeFieldName
+      if (serverField.typeFieldName.includes("Bóng") && serverField.typeFieldName.includes("Đá")) {
+        return "football";
+      } else if (serverField.typeFieldName.includes("Cầu") && serverField.typeFieldName.includes("Lông")) {
+        return "badminton";
+      } else if (serverField.typeFieldName.includes("Pickle")) {
+        return "pickle";
+      } else {
+        return "football"; // default fallback
+      }
+    })(),
     isPopular: serverField.totalBookings > 50, // Use actual totalBookings for popularity with a reasonable threshold
     subCourts: [],
     owner: undefined,
@@ -685,7 +689,7 @@ export const FieldDiscoveryPage: React.FC = () => {
                     Đặt ngay
                   </button>
                   <button
-                    className="px-2 py-1.5 sm:px-3 sm:py-2 border-2 border-green-400 text-green-400 rounded-xl hover:bg-green-50 transition-colors text-xs font-semibold"
+                    className="px-2 py-1.5 sm:px-3 sm:py-2 border-2 border-green-400 text-green-400 rounded-xl hover:bg-green-5 transition-colors text-xs font-semibold"
                     onClick={() =>
                       router.push(
                         `/field-detail/${encodeURIComponent(field.id)}`

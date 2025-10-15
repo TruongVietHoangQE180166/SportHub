@@ -647,14 +647,18 @@ export const BookingPage: React.FC = () => {
     image:
       (serverField.images && serverField.images[0]) ||
       "https://images.pexels.com/photos/46798/the-ball-stadion-football-the-pitch-46798.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    sport:
-      serverField.typeFieldName === "Bóng Đá"
-        ? ("football" as const)
-        : serverField.typeFieldName === "Cầu Lông"
-        ? ("badminton" as const)
-        : serverField.typeFieldName === "Pickle Ball"
-        ? ("pickle" as const)
-        : ("football" as const),
+    sport: (() => {
+      // More flexible sport mapping to handle variations in typeFieldName
+      if (serverField.typeFieldName.includes("Bóng") && serverField.typeFieldName.includes("Đá")) {
+        return "football" as const;
+      } else if (serverField.typeFieldName.includes("Cầu") && serverField.typeFieldName.includes("Lông")) {
+        return "badminton" as const;
+      } else if (serverField.typeFieldName.includes("Pickle")) {
+        return "pickle" as const;
+      } else {
+        return "football" as const; // default fallback
+      }
+    })(),
     subCourts: serverField.smallFieldResponses
       ? serverField.smallFieldResponses.map((smallField: any) => ({
           id: smallField.id || "",
@@ -689,14 +693,16 @@ export const BookingPage: React.FC = () => {
       // Filter by selected sport
       if (!selectedSport) return true;
 
-      const fieldSport =
-        serverField.typeFieldName === "Bóng Đá"
-          ? "football"
-          : serverField.typeFieldName === "Cầu Lông"
-          ? "badminton"
-          : serverField.typeFieldName === "Pickle Ball"
-          ? "pickle"
-          : "football";
+      // More flexible sport matching to handle variations in typeFieldName
+      let fieldSport = "football"; // default fallback
+      
+      if (serverField.typeFieldName.includes("Bóng") && serverField.typeFieldName.includes("Đá")) {
+        fieldSport = "football";
+      } else if (serverField.typeFieldName.includes("Cầu") && serverField.typeFieldName.includes("Lông")) {
+        fieldSport = "badminton";
+      } else if (serverField.typeFieldName.includes("Pickle")) {
+        fieldSport = "pickle";
+      }
 
       return fieldSport === selectedSport;
     })
