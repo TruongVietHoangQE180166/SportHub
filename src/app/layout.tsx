@@ -4,6 +4,7 @@ import { ConditionalLayout } from '../components/ConditionalLayout';
 import { PageProvider } from '../contexts/PageContext';
 import './globals.css';
 import type { Metadata } from 'next'
+import { Analytics } from "@vercel/analytics/next"
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -91,6 +92,7 @@ export default function RootLayout({
             {children}
           </ConditionalLayout>
         </PageProvider>
+        <Analytics />
       </body>
     </html>
   );
